@@ -1,3 +1,17 @@
+# Copyright iak (c) 2026 Task Chat Project
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 """
 Release Manager for Task Chat Application
 Handles version management and release preparation
@@ -70,7 +84,7 @@ def tag_release(version):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Release Manager for Medical Chat Application")
+    parser = argparse.ArgumentParser(description="Release Manager for Task Chat Application")
     parser.add_argument("action", choices=["prepare", "release", "version"], 
                         help="Action to perform: prepare a build, create a release, or update version")
     parser.add_argument("--version", help="Version number for the release (e.g., 1.0.0)")

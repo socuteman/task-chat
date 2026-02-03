@@ -1,5 +1,19 @@
+# Copyright iak (c) 2026 Task Chat Project
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 """
-Build configuration for Medical Chat application
+Build configuration for Task Chat application
 Used for managing version builds and releases
 """
 
@@ -12,8 +26,8 @@ class BuildConfig:
         self.project_name = "TaskChat"
         self.version = "1.0.0"
         self.build_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        self.author = "Medical Chat Development Team"
-        self.description = "A Flask-based web application for communication between doctors and physicists in medical settings."
+        self.author = "Task Chat Development Team"
+        self.description = "A Flask-based web application for communication between doctors and physicists in clinical settings."
         
     def get_version_info(self):
         """Return version information as a dictionary"""

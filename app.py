@@ -1,7 +1,21 @@
+# Copyright iak (c) 2026 Task Chat Project
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 import os
 import sys
 import json
-from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, send_from_directory
+from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, send_from_directory, get_flashed_messages
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user, UserMixin
 from models import db, User, Task, ChatMessage
 from datetime import datetime, timedelta
@@ -55,7 +69,7 @@ db.init_app(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
-login_manager.login_message = 'Пожалуйста, войдите для доступа к этой странице'
+login_manager.login_message = ''  # Empty message to prevent automatic flashing
 login_manager.login_message_category = 'info'
 
 @login_manager.user_loader
@@ -85,8 +99,11 @@ init_database()
 
 # Главная страница
 @app.route('/')
-@login_required
 def index():
+    if not current_user.is_authenticated:
+        # When accessing root directly, don't show the login message
+        return redirect(url_for('login'))
+    
     if current_user.role == 'doctor':
         tasks = Task.query.filter_by(doctor_id=current_user.id).order_by(Task.created_at.desc()).all()
     elif current_user.role == 'physicist':
@@ -133,6 +150,18 @@ def login():
     if current_user.is_authenticated:
         return redirect(url_for('index'))
     
+    # Check if this is a redirect from a protected page by looking for 'next' in the URL
+    # Only show the login message if the 'next' parameter is for a page other than the root
+    next_url = request.args.get('next')
+    if next_url:
+        # Compare the next URL with the root URL to see if it's the same
+        root_url = request.url_root.rstrip('/')
+        next_clean = next_url.rstrip('/')
+        
+        # Don't show the message if redirecting from the root path
+        if next_clean != root_url and next_clean != root_url + '/':
+            flash('Пожалуйста, войдите для доступа к этой странице', 'info')
+    
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
@@ -147,6 +176,13 @@ def login():
             flash('Неверное имя пользователя или пароль')
     
     return render_template('login.html')
+
+# Override the default login message behavior
+@login_manager.unauthorized_handler
+def custom_unauthorized_handler():
+    # Always redirect to login with the next parameter
+    # The login route itself will handle whether to show the message
+    return redirect(url_for('login', next=request.url))
 
 # Выход
 @app.route('/logout')
@@ -500,11 +536,10 @@ def admin_update_task(task_id):
         task.completed_at = None
     
     db.session.commit()
-    
-    flash(f'Задача #{task.id} успешно обновлена')
+    flash('Задача успешно обновлена')
     return redirect(url_for('admin_tasks'))
 
-# Удаление задачи администратором
+# Удаление задачи
 @app.route('/admin/tasks/<int:task_id>/delete', methods=['POST'])
 @login_required
 def admin_delete_task(task_id):
@@ -513,217 +548,79 @@ def admin_delete_task(task_id):
         return redirect(url_for('index'))
     
     task = Task.query.get_or_404(task_id)
-    
-    # Удаляем все сообщения в чате этой задачи
-    ChatMessage.query.filter_by(task_id=task_id).delete()
-    
     db.session.delete(task)
     db.session.commit()
     
-    flash(f'Задача #{task.id} успешно удалена')
+    flash('Задача успешно удалена')
     return redirect(url_for('admin_tasks'))
 
-# Массовое обновление задач
-@app.route('/admin/tasks/mass_update', methods=['POST'])
+# API endpoint для получения всех пользователей
+@app.route('/api/users')
 @login_required
-def admin_mass_update():
-    if current_user.role != 'admin':
-        return jsonify({'error': 'Доступ запрещен'}), 403
-    
-    try:
-        data = request.get_json()
-        task_ids = data.get('task_ids', [])
-        action = data.get('action')
-        
-        if not task_ids:
-            return jsonify({'error': 'Не выбрано ни одной задачи'}), 400
-        
-        tasks = Task.query.filter(Task.id.in_(task_ids)).all()
-        
-        if action == 'change_status':
-            new_status = data.get('new_status')
-            for task in tasks:
-                task.status = new_status
-                task.updated_at = datetime.utcnow()
-                if new_status == 'completed':
-                    task.completed_at = datetime.utcnow()
-                elif task.completed_at:
-                    task.completed_at = None
-        
-        elif action == 'change_physicist':
-            new_physicist = data.get('new_physicist')
-            for task in tasks:
-                task.physicist_id = new_physicist
-                task.updated_at = datetime.utcnow()
-        
-        else:
-            return jsonify({'error': 'Неизвестное действие'}), 400
-        
-        db.session.commit()
-        return jsonify({'success': True, 'updated_count': len(tasks)})
-    
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-# Массовое удаление задач
-@app.route('/admin/tasks/mass_delete', methods=['POST'])
-@login_required
-def admin_mass_delete():
-    if current_user.role != 'admin':
-        return jsonify({'error': 'Доступ запрещен'}), 403
-    
-    try:
-        data = request.get_json()
-        task_ids = data.get('task_ids', [])
-        
-        if not task_ids:
-            return jsonify({'error': 'Не выбрано ни одной задачи'}), 400
-        
-        # Удаляем сообщения чатов
-        ChatMessage.query.filter(ChatMessage.task_id.in_(task_ids)).delete(synchronize_session=False)
-        
-        # Удаляем задачи
-        Task.query.filter(Task.id.in_(task_ids)).delete(synchronize_session=False)
-        
-        db.session.commit()
-        return jsonify({'success': True, 'deleted_count': len(task_ids)})
-    
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-# API для получения статистики задач
-@app.route('/admin/api/tasks/stats')
-@login_required
-def admin_tasks_stats():
-    if current_user.role != 'admin':
-        return jsonify({'error': 'Доступ запрещен'}), 403
-    
-    total = Task.query.count()
-    pending = Task.query.filter_by(status='pending').count()
-    in_progress = Task.query.filter_by(status='in_progress').count()
-    completed = Task.query.filter_by(status='completed').count()
-    cancelled = Task.query.filter_by(status='cancelled').count()
-    
-    # Статистика по дням (последние 7 дней)
-    seven_days_ago = datetime.utcnow() - timedelta(days=7)
-    daily_stats = {}
-    
-    for i in range(7):
-        date = (datetime.utcnow() - timedelta(days=i)).date()
-        start_of_day = datetime.combine(date, datetime.min.time())
-        end_of_day = datetime.combine(date, datetime.max.time())
-        
-        created_count = Task.query.filter(
-            Task.created_at >= start_of_day,
-            Task.created_at <= end_of_day
-        ).count()
-        
-        completed_count = Task.query.filter(
-            Task.completed_at >= start_of_day,
-            Task.completed_at <= end_of_day
-        ).count()
-        
-        daily_stats[date.strftime('%Y-%m-%d')] = {
-            'created': created_count,
-            'completed': completed_count
-        }
-    
-    return jsonify({
-        'total': total,
-        'pending': pending,
-        'in_progress': in_progress,
-        'completed': completed,
-        'cancelled': cancelled,
-        'daily_stats': daily_stats
-    })
-
-# Удаление пользователя
-@app.route('/admin/delete_user/<int:user_id>', methods=['POST'])
-@login_required
-def admin_delete_user(user_id):
-    if current_user.role != 'admin':
-        flash('Доступ запрещен')
-        return redirect(url_for('index'))
-    
-    user = User.query.get_or_404(user_id)
-    
-    # Нельзя удалить себя
-    if user.id == current_user.id:
-        flash('Вы не можете удалить свой собственный аккаунт')
-        return redirect(url_for('admin_users'))
-    
-    # Нельзя удалить последнего администратора
-    if user.role == 'admin':
-        admin_count = User.query.filter_by(role='admin').count()
-        if admin_count <= 1:
-            flash('Нельзя удалить последнего администратора')
-            return redirect(url_for('admin_users'))
-    
-    db.session.delete(user)
-    db.session.commit()
-    
-    flash(f'Пользователь {user.username} успешно удален')
-    return redirect(url_for('admin_users'))
-
-# API для получения пользователей
-@app.route('/api/users/<role>')
-@login_required
-def get_users_by_role(role):
-    users = User.query.filter_by(role=role).all()
-    return jsonify([{
-        'id': user.id,
-        'username': user.username,
-        'is_online': user.is_online()
-    } for user in users])
-
-# API для получения задач в реальном времени
-@app.route('/api/tasks')
-@login_required
-def get_tasks():
-    if current_user.role == 'doctor':
-        tasks = Task.query.filter_by(doctor_id=current_user.id).order_by(Task.created_at.desc()).all()
-    elif current_user.role == 'physicist':
-        tasks = Task.query.filter_by(physicist_id=current_user.id).order_by(Task.created_at.desc()).all()
-    else:
-        tasks = Task.query.order_by(Task.created_at.desc()).all()
-    
-    result = []
-    for task in tasks:
-        # Проверяем есть ли непрочитанные сообщения в задаче
-        unread_count = 0
-        if current_user.id in [task.doctor_id, task.physicist_id]:
-            unread_count = ChatMessage.query.filter_by(
-                task_id=task.id,
-                receiver_id=current_user.id,
-                is_read=False
-            ).count()
-        
-        result.append({
-            'id': task.id,
-            'title': task.title,
-            'description': task.description,
-            'status': task.status,
-            'priority': task.priority,
-            'doctor': task.doctor.username,
-            'physicist': task.physicist.username if task.physicist else 'Не назначен',
-            'created_at': moscow_time(task.created_at).strftime('%Y-%m-%d %H:%M') if task.created_at else None,
-            'completed_at': moscow_time(task.completed_at).strftime('%Y-%m-%d %H:%M') if task.completed_at else None,
-            'has_unread': unread_count > 0,
-            'unread_count': unread_count
+def api_get_users():
+    users = User.query.all()
+    users_data = []
+    for user in users:
+        users_data.append({
+            'id': user.id,
+            'username': user.username,
+            'role': user.role,
+            'is_online': user.is_online(),
+            'last_seen': user.last_seen.isoformat() if user.last_seen else None
         })
     
-    return jsonify(result)
+    return jsonify(users_data)
 
-# Страница 404
-@app.errorhandler(404)
-def page_not_found(e):
-    return render_template('404.html'), 404
+# API endpoint для обновления профиля пользователя
+@app.route('/api/profile', methods=['PUT'])
+@login_required
+def api_update_profile():
+    data = request.get_json()
+    current_user.username = data.get('username', current_user.username)
+    
+    # Проверяем, что новый пароль задан и соответствует требованиям
+    new_password = data.get('password')
+    if new_password:
+        if len(new_password) < 6:
+            return jsonify({'error': 'Пароль должен содержать минимум 6 символов'}), 400
+        current_user.set_password(new_password)
+    
+    db.session.commit()
+    return jsonify({'success': True, 'message': 'Профиль успешно обновлен'})
 
-# Страница 500
-@app.errorhandler(500)
-def internal_server_error(e):
-    return render_template('500.html'), 500
+# API endpoint для сброса пароля (только для администратора)
+@app.route('/api/users/<int:user_id>/reset_password', methods=['POST'])
+@login_required
+def api_reset_password(user_id):
+    if current_user.role != 'admin':
+        return jsonify({'error': 'Доступ запрещен'}), 403
+    
+    user = User.query.get_or_404(user_id)
+    data = request.get_json()
+    new_password = data.get('new_password', '')
+    
+    if len(new_password) < 6:
+        return jsonify({'error': 'Пароль должен содержать минимум 6 символов'}), 400
+    
+    user.set_password(new_password)
+    db.session.commit()
+    
+    return jsonify({'success': True, 'message': f'Пароль для {user.username} успешно изменен'})
+
+# API endpoint для получения статистики
+@app.route('/api/stats')
+@login_required
+def api_get_stats():
+    stats = {
+        'total_users': User.query.count(),
+        'total_tasks': Task.query.count(),
+        'total_messages': ChatMessage.query.count(),
+        'active_users_today': User.query.filter(
+            User.last_seen >= datetime.utcnow().date()
+        ).count()
+    }
+    
+    return jsonify(stats)
 
 if __name__ == '__main__':
-    print("Запуск приложения...")
-    app.run(host='0.0.0.0', port=5000, debug=False, threaded=True)
+    app.run(debug=True)

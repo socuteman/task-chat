@@ -57,7 +57,7 @@ instance/
 .webassets-cache
 
 # Project specific
-medical_chat.db
+task_chat.db
 *.db
 .env
 venv/
@@ -87,4 +87,4 @@ Thumbs.db
 
 # Quick build artifacts
 dist/
-MedicalChat.spec
+TaskChat.spec

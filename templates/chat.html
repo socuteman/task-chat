@@ -189,9 +189,9 @@ function checkUnreadMessages() {
         .then(data => {
             // Обновляем бейдж в заголовке
             if (data.total_unread > 0) {
-                document.title = `(${data.total_unread}) Чат - Медицинский Чат`;
+                document.title = `(${data.total_unread}) Чат - Task Chat`;
             } else {
-                document.title = 'Чат - Медицинский Чат';
+                document.title = 'Чат - Task Chat';
             }
         });
 }

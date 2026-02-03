@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Медицинский Чат{% endblock %}</title>
+    <title>{% block title %}Task Chat{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
@@ -11,8 +11,8 @@
     <nav>
         <div class="nav-container">
             <div class="nav-brand">
-                <i class="fas fa-comments-medical"></i>
-                <h1>Медицинский Чат</h1>
+                <i class="fas fa-comments"></i>
+                <h1>Task Chat</h1>
             </div>
             <div class="nav-links">
                 {% if current_user.is_authenticated %}
@@ -93,10 +93,10 @@
                 if (data.total_unread > 0) {
                     badge.textContent = data.total_unread;
                     badge.style.display = 'inline-flex';
-                    document.title = `(${data.total_unread}) Медицинский Чат`;
+                    document.title = `(${data.total_unread}) Task Chat`;
                 } else {
                     badge.style.display = 'none';
-                    document.title = 'Медицинский Чат';
+                    document.title = 'Task Chat';
                 }
                 
                 // Сохраняем данные для модального окна
