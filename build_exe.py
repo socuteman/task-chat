@@ -19,7 +19,7 @@ PyInstaller.__main__.run([
     'main.py',
     '--onefile',
     '--console',
-    '--name=MedicalChat',
+    '--name=TaskChat',
     '--add-data=templates;templates',
     '--add-data=static;static',
     '--hidden-import=flask',

@@ -1,6 +1,6 @@
 @echo off
 chcp 65001 > nul
-title Быстрая сборка MedicalChat
+title Быстрая сборка TaskChat
 
 echo ========================================
 echo     БЫСТРАЯ СБОРКА В EXE
@@ -113,20 +113,20 @@ echo     target_arch=None,
 echo     codesign_identity=None,
 echo     entitlements_file=None,
 echo )
-) > MedicalChat.spec
+) > TaskChat.spec
 
 echo.
 echo 5. Сборка EXE...
-pyinstaller MedicalChat.spec
+pyinstaller TaskChat.spec
 
 echo.
-if exist "dist\MedicalChat.exe" (
-    echo ✓ УСПЕХ! EXE создан: dist\MedicalChat.exe
+if exist "dist\TaskChat.exe" (
+    echo ✓ УСПЕХ! EXE создан: dist\TaskChat.exe
     echo.
     echo Нажмите Enter для запуска...
     pause
     cd dist
-    MedicalChat.exe
+    TaskChat.exe
     cd..
 ) else (
     echo ✗ ОШИБКА сборки!

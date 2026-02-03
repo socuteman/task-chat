@@ -22,7 +22,7 @@ try:
     
     if __name__ == '__main__':
         print("=" * 50)
-        print("Запуск Медицинского Чата")
+        print("Запуск Task Chat")
         print("=" * 50)
         print(f"Статические файлы: {static_path}")
         print(f"Шаблоны: {templates_path}")

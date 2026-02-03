@@ -16,10 +16,10 @@ def run_command(cmd, cwd=None):
     """Run a shell command and return the result"""
     try:
         result = subprocess.run(
-            cmd, 
-            shell=True, 
-            capture_output=True, 
-            text=True, 
+            cmd,
+            shell=True,
+            capture_output=True,
+            text=True,
             cwd=cwd
         )
         return result.returncode == 0, result.stdout, result.stderr
@@ -105,7 +105,7 @@ def commit_and_push(version):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Publish Medical Chat builds to GitHub version branches")
+    parser = argparse.ArgumentParser(description="Publish Task Chat builds to GitHub version branches")
     parser.add_argument("version", help="Version number to publish (e.g., 1.0.0)")
     parser.add_argument("--skip-build", action="store_true", help="Skip the build step, only create branch and commit")
     

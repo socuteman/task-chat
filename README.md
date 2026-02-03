@@ -1,4 +1,4 @@
-# Medical Chat Application
+# Task Chat Application
 
 A Flask-based web application designed for communication between doctors and physicists in medical settings. The application facilitates task management and real-time chat for collaborative work on medical cases.
 

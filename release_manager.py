@@ -1,5 +1,5 @@
 """
-Release Manager for Medical Chat Application
+Release Manager for Task Chat Application
 Handles version management and release preparation
 """
 

@@ -34,16 +34,16 @@ def utility_processor():
     return dict(moscow_time=moscow_time)
 
 # Настройка конфигурации
-app.config['SECRET_KEY'] = 'medical-chat-secret-key-2024-change-this'
+app.config['SECRET_KEY'] = 'task-chat-secret-key-2024-change-this'
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=24)
 
 # Определяем путь к базе данных
 if getattr(sys, 'frozen', False):
     # Если запущено как EXE, база рядом с EXE файлом
-    database_path = os.path.join(os.path.dirname(sys.executable), 'medical_chat.db')
+    database_path = os.path.join(os.path.dirname(sys.executable), 'task_chat.db')
 else:
     # Если запущено как скрипт, база в текущей папке
-    database_path = 'medical_chat.db'
+    database_path = 'task_chat.db'
 
 app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{database_path}'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False

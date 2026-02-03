@@ -9,7 +9,7 @@ from datetime import datetime
 
 class BuildConfig:
     def __init__(self):
-        self.project_name = "MedicalChat"
+        self.project_name = "TaskChat"
         self.version = "1.0.0"
         self.build_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         self.author = "Medical Chat Development Team"
