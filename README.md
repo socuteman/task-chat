@@ -205,19 +205,8 @@ This will:
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## Authors
-
-- iak Development Team (updated 2026)
-
-## Acknowledgments
-
-- Built with Flask, SQLAlchemy, and Bootstrap-inspired styling
-- Inspired by the need for better communication in medical physics environments
-- Enhanced with modern web development practices for security and usability
-
-## AI Usage Notice
-
-This project was created with the assistance of artificial intelligence for code generation, refactoring, and documentation. The AI helped optimize the codebase and improve documentation quality.
+- **iak** - Основной разработчик
 
 ## License
 
-This project is licensed under the GNU General Public License v3.0 (GPL-3.0) - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
