@@ -200,12 +200,18 @@ This will:
 - Create a Git tag for the release
 - Push everything to GitHub
 
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
 ## Authors
-- **iak** - Основной разработчик
+- **iak** - focus developer
+
+## Acknowledgments
+
+- Built with Flask, SQLAlchemy, and Bootstrap-inspired styling
+- Inspired by the need for better communication in medical physics environments
+- Enhanced with modern web development practices for security and usability
+
+## AI Usage Notice
+
+This project was created with the assistance of artificial intelligence for code generation, refactoring, and documentation. The AI helped optimize the codebase and improve documentation quality.
 
 ## License
 
