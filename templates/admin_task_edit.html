@@ -1,0 +1,416 @@
+{% extends "base.html" %}
+
+{% block title %}Редактирование задачи #{{ task.id }} - Админ-панель{% endblock %}
+
+{% block content %}
+<div class="admin-edit-task-container">
+    <div class="admin-header">
+        <h2><i class="fas fa-edit"></i> Редактирование задачи #{{ task.id }}</h2>
+        <div class="admin-header-actions">
+            <a href="{{ url_for('admin_tasks') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Назад к списку
+            </a>
+            <a href="{{ url_for('task_chat', task_id=task.id) }}" class="btn btn-info">
+                <i class="fas fa-comments"></i> Перейти в чат
+            </a>
+        </div>
+    </div>
+
+    <div class="edit-task-layout">
+        <!-- Основная информация -->
+        <div class="main-info-section">
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fas fa-info-circle"></i> Основная информация</h3>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('admin_update_task', task_id=task.id) }}">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="title">Заголовок:</label>
+                                <input type="text" 
+                                       id="title" 
+                                       name="title" 
+                                       value="{{ task.title }}" 
+                                       required 
+                                       class="form-control">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="status">Статус:</label>
+                                <select id="status" name="status" class="form-control">
+                                    <option value="pending" {% if task.status == 'pending' %}selected{% endif %}>
+                                        Ожидает
+                                    </option>
+                                    <option value="in_progress" {% if task.status == 'in_progress' %}selected{% endif %}>
+                                        В работе
+                                    </option>
+                                    <option value="completed" {% if task.status == 'completed' %}selected{% endif %}>
+                                        Выполнена
+                                    </option>
+                                    <option value="cancelled" {% if task.status == 'cancelled' %}selected{% endif %}>
+                                        Отменена
+                                    </option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="priority">Приоритет:</label>
+                                <select id="priority" name="priority" class="form-control">
+                                    <option value="low" {% if task.priority == 'low' %}selected{% endif %}>
+                                        Низкий
+                                    </option>
+                                    <option value="medium" {% if task.priority == 'medium' %}selected{% endif %}>
+                                        Средний
+                                    </option>
+                                    <option value="high" {% if task.priority == 'high' %}selected{% endif %}>
+                                        Высокий
+                                    </option>
+                                    <option value="urgent" {% if task.priority == 'urgent' %}selected{% endif %}>
+                                        Срочный
+                                    </option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="doctor_id">Врач:</label>
+                                <select id="doctor_id" name="doctor_id" class="form-control" required>
+                                    <option value="">Выберите врача</option>
+                                    {% for user in doctors %}
+                                    <option value="{{ user.id }}" 
+                                            {% if task.doctor_id == user.id %}selected{% endif %}>
+                                        {{ user.username }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="physicist_id">Физик:</label>
+                                <select id="physicist_id" name="physicist_id" class="form-control" required>
+                                    <option value="">Выберите физика</option>
+                                    {% for user in physicists %}
+                                    <option value="{{ user.id }}" 
+                                            {% if task.physicist_id == user.id %}selected{% endif %}>
+                                        {{ user.username }}
+                                        {% if user.is_online() %}
+                                        <span class="online-indicator">(В сети)</span>
+                                        {% endif %}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="description">Описание:</label>
+                            <textarea id="description" 
+                                      name="description" 
+                                      rows="6" 
+                                      class="form-control" 
+                                      required>{{ task.description }}</textarea>
+                        </div>
+                        
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Сохранить изменения
+                            </button>
+                            <a href="{{ url_for('admin_tasks') }}" class="btn btn-secondary">Отмена</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Информация о задаче -->
+        <div class="info-section">
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fas fa-history"></i> История задачи</h3>
+                </div>
+                <div class="card-body">
+                    <div class="info-item">
+                        <span class="info-label">ID задачи:</span>
+                        <span class="info-value">#{{ task.id }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Создана:</span>
+                        <span class="info-value">{{ task.created_at.strftime('%d.%m.%Y %H:%M:%S') }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Обновлена:</span>
+                        <span class="info-value">{{ task.updated_at.strftime('%d.%m.%Y %H:%M:%S') }}</span>
+                    </div>
+                    {% if task.completed_at %}
+                    <div class="info-item">
+                        <span class="info-label">Завершена:</span>
+                        <span class="info-value">{{ task.completed_at.strftime('%d.%m.%Y %H:%M:%S') }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fas fa-chart-bar"></i> Статистика чата</h3>
+                </div>
+                <div class="card-body">
+                    <div class="info-item">
+                        <span class="info-label">Сообщений:</span>
+                        <span class="info-value">{{ chat_stats.total_messages }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">От врача:</span>
+                        <span class="info-value">{{ chat_stats.doctor_messages }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">От физика:</span>
+                        <span class="info-value">{{ chat_stats.physicist_messages }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Последнее:</span>
+                        <span class="info-value">
+                            {% if chat_stats.last_message %}
+                            {{ chat_stats.last_message.strftime('%d.%m.%Y %H:%M') }}
+                            {% else %}
+                            Нет сообщений
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card danger-zone">
+                <div class="card-header">
+                    <h3><i class="fas fa-exclamation-triangle"></i> Опасная зона</h3>
+                </div>
+                <div class="card-body">
+                    <p class="danger-text">Удаление задачи приведет к удалению всех связанных сообщений в чате.</p>
+                    <form action="{{ url_for('admin_delete_task', task_id=task.id) }}" 
+                          method="POST" 
+                          onsubmit="return confirmDelete()">
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-trash"></i> Удалить задачу
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function confirmDelete() {
+    return confirm('ВНИМАНИЕ! Вы собираетесь удалить задачу #{{ task.id }} и все связанные сообщения.\n\nЭто действие нельзя отменить.\n\nПродолжить?');
+}
+
+// Подсветка измененных полей
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('form');
+    const initialValues = {};
+    
+    // Сохраняем начальные значения
+    ['title', 'description', 'status', 'priority', 'doctor_id', 'physicist_id'].forEach(field => {
+        const element = document.getElementById(field);
+        if (element) {
+            initialValues[field] = element.value;
+            element.addEventListener('change', function() {
+                if (this.value !== initialValues[field]) {
+                    this.style.borderColor = '#3498db';
+                    this.style.boxShadow = '0 0 0 2px rgba(52, 152, 219, 0.2)';
+                } else {
+                    this.style.borderColor = '';
+                    this.style.boxShadow = '';
+                }
+            });
+        }
+    });
+});
+</script>
+
+<style>
+.admin-edit-task-container {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    padding: 30px;
+    margin-bottom: 30px;
+}
+
+.admin-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.admin-header h2 {
+    color: #2c3e50;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.admin-header-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.edit-task-layout {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 25px;
+}
+
+@media (max-width: 992px) {
+    .edit-task-layout {
+        grid-template-columns: 1fr;
+    }
+}
+
+.card {
+    background: white;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+    margin-bottom: 25px;
+    overflow: hidden;
+}
+
+.card-header {
+    background: #f8f9fa;
+    padding: 15px 20px;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.card-header h3 {
+    margin: 0;
+    color: #2c3e50;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.card-body {
+    padding: 20px;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #2c3e50;
+    font-size: 14px;
+}
+
+.form-control {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.form-control:focus {
+    border-color: #3498db;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+}
+
+textarea.form-control {
+    resize: vertical;
+    min-height: 120px;
+}
+
+.form-actions {
+    display: flex;
+    gap: 15px;
+    margin-top: 25px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+}
+
+.info-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.info-item:last-child {
+    border-bottom: none;
+}
+
+.info-label {
+    font-weight: 600;
+    color: #7f8c8d;
+    font-size: 14px;
+}
+
+.info-value {
+    color: #2c3e50;
+    font-weight: 500;
+    text-align: right;
+}
+
+.danger-zone {
+    border-color: #e74c3c;
+}
+
+.danger-zone .card-header {
+    background: #ffeaea;
+    border-bottom-color: #e74c3c;
+}
+
+.danger-zone .card-header h3 {
+    color: #e74c3c;
+}
+
+.danger-text {
+    color: #e74c3c;
+    margin-bottom: 15px;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.online-indicator {
+    color: #2ecc71;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.btn-danger {
+    background: #e74c3c;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: background 0.3s;
+}
+
+.btn-danger:hover {
+    background: #c0392b;
+}
+</style>
+{% endblock %}

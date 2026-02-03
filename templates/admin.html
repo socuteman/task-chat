@@ -1,0 +1,229 @@
+{% extends "base.html" %}
+
+{% block title %}Панель администратора{% endblock %}
+
+{% block content %}
+<div class="admin-panel">
+    <h2>Панель администратора</h2>
+    
+    <div class="admin-menu">
+        <a href="{{ url_for('admin_users') }}" class="btn btn-primary">
+            <i class="fas fa-users"></i> Управление пользователями
+        </a>
+        <a href="{{ url_for('admin_tasks') }}" class="btn btn-success">
+            <i class="fas fa-tasks"></i> Управление задачами
+        </a>
+        <a href="{{ url_for('register') }}" class="btn btn-warning">
+            <i class="fas fa-user-plus"></i> Создать нового пользователя
+        </a>
+    </div>
+    
+    <!-- Добавить статистику -->
+    <div class="admin-stats">
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-users"></i>
+            </div>
+            <div class="stat-info">
+                <h3>Пользователей</h3>
+                <span class="stat-number">{{ users|length }}</span>
+            </div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-tasks"></i>
+            </div>
+            <div class="stat-info">
+                <h3>Задач</h3>
+                <span class="stat-number">{{ tasks|length }}</span>
+            </div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-comments"></i>
+            </div>
+            <div class="stat-info">
+                <h3>Сообщений</h3>
+                <span class="stat-number">{{ total_messages }}</span>
+            </div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-comment-medical"></i>
+            </div>
+            <div class="stat-info">
+                <h3>Активных чатов</h3>
+                <span class="stat-number">{{ active_chats }}</span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="admin-section">
+        <h3>Последние задачи</h3>
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Заголовок</th>
+                    <th>Статус</th>
+                    <th>Приоритет</th>
+                    <th>Врач</th>
+                    <th>Физик</th>
+                    <th>Создана</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for task in tasks[:10] %}
+                <tr>
+                    <td>{{ task.id }}</td>
+                    <td>
+                        <a href="{{ url_for('admin_edit_task', task_id=task.id) }}">
+                            {{ task.title|truncate(30) }}
+                        </a>
+                    </td>
+                    <td class="status-{{ task.status }}">
+                        {% if task.status == 'pending' %}Ожидает{% endif %}
+                        {% if task.status == 'in_progress' %}В работе{% endif %}
+                        {% if task.status == 'completed' %}Выполнена{% endif %}
+                        {% if task.status == 'cancelled' %}Отменена{% endif %}
+                    </td>
+                    <td>{{ task.priority }}</td>
+                    <td>{{ task.doctor.username }}</td>
+                    <td>{{ task.physicist.username }}</td>
+                    <td>{{ task.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% if tasks|length > 10 %}
+        <div class="view-all">
+            <a href="{{ url_for('admin_tasks') }}">Посмотреть все задачи →</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+.admin-panel {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    padding: 30px;
+}
+
+.admin-menu {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+}
+
+.admin-menu .btn {
+    padding: 12px 24px;
+    font-size: 16px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.admin-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.stat-card {
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+    border: 1px solid #eee;
+    transition: transform 0.3s;
+}
+
+.stat-card:hover {
+    transform: translateY(-3px);
+}
+
+.stat-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #3498db, #2980b9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 20px;
+}
+
+.stat-icon:nth-child(2) { background: linear-gradient(135deg, #2ecc71, #27ae60); }
+.stat-icon:nth-child(3) { background: linear-gradient(135deg, #9b59b6, #8e44ad); }
+.stat-icon:nth-child(4) { background: linear-gradient(135deg, #f39c12, #e67e22); }
+
+.stat-info h3 {
+    margin: 0 0 5px 0;
+    font-size: 14px;
+    color: #7f8c8d;
+    font-weight: 600;
+}
+
+.stat-number {
+    font-size: 24px;
+    font-weight: 700;
+    color: #2c3e50;
+}
+
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.admin-table th,
+.admin-table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+}
+
+.admin-table th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.admin-table tr:hover {
+    background-color: #f8f9fa;
+}
+
+.status-pending { color: #f39c12; font-weight: 600; }
+.status-in_progress { color: #3498db; font-weight: 600; }
+.status-completed { color: #2ecc71; font-weight: 600; }
+.status-cancelled { color: #e74c3c; font-weight: 600; }
+
+.view-all {
+    text-align: center;
+    margin-top: 20px;
+    padding: 15px;
+    border-top: 1px solid #eee;
+}
+
+.view-all a {
+    color: #3498db;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.view-all a:hover {
+    text-decoration: underline;
+}
+</style>
+{% endblock %}

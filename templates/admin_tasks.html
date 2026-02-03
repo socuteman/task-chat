@@ -1,0 +1,965 @@
+{% extends "base.html" %}
+
+{% block title %}Управление задачами - Админ-панель{% endblock %}
+
+{% block content %}
+<div class="admin-tasks-container">
+    <div class="admin-header">
+        <h2><i class="fas fa-tasks"></i> Управление задачами</h2>
+        <div class="admin-header-actions">
+            <a href="{{ url_for('admin_panel') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Назад к панели
+            </a>
+            <button class="btn btn-info" onclick="toggleFilters()">
+                <i class="fas fa-filter"></i> Фильтры
+            </button>
+        </div>
+    </div>
+
+    <!-- Фильтры (скрыты по умолчанию) -->
+    <div id="filtersPanel" class="filters-panel" style="display: none;">
+        <div class="filters-grid">
+            <div class="filter-group">
+                <label>Статус:</label>
+                <select id="filterStatus" class="filter-select">
+                    <option value="">Все статусы</option>
+                    <option value="pending">Ожидает</option>
+                    <option value="in_progress">В работе</option>
+                    <option value="completed">Выполнена</option>
+                    <option value="cancelled">Отменена</option>
+                </select>
+            </div>
+            
+            <div class="filter-group">
+                <label>Приоритет:</label>
+                <select id="filterPriority" class="filter-select">
+                    <option value="">Все приоритеты</option>
+                    <option value="low">Низкий</option>
+                    <option value="medium">Средний</option>
+                    <option value="high">Высокий</option>
+                    <option value="urgent">Срочный</option>
+                </select>
+            </div>
+            
+            <div class="filter-group">
+                <label>Врач:</label>
+                <select id="filterDoctor" class="filter-select">
+                    <option value="">Все врачи</option>
+                    {% for user in users if user.role == 'doctor' %}
+                    <option value="{{ user.id }}">{{ user.username }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="filter-group">
+                <label>Физик:</label>
+                <select id="filterPhysicist" class="filter-select">
+                    <option value="">Все физики</option>
+                    {% for user in users if user.role == 'physicist' %}
+                    <option value="{{ user.id }}">{{ user.username }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="filter-group">
+                <label>Дата с:</label>
+                <input type="date" id="filterDateFrom" class="filter-date">
+            </div>
+            
+            <div class="filter-group">
+                <label>Дата по:</label>
+                <input type="date" id="filterDateTo" class="filter-date">
+            </div>
+            
+            <div class="filter-actions">
+                <button class="btn btn-primary" onclick="applyFilters()">
+                    <i class="fas fa-check"></i> Применить
+                </button>
+                <button class="btn btn-secondary" onclick="resetFilters()">
+                    <i class="fas fa-redo"></i> Сбросить
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Статистика -->
+    <div class="stats-cards">
+        <div class="stat-card">
+            <div class="stat-icon total">
+                <i class="fas fa-tasks"></i>
+            </div>
+            <div class="stat-info">
+                <h3>Всего задач</h3>
+                <span class="stat-number" id="totalTasks">{{ tasks|length }}</span>
+            </div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon pending">
+                <i class="fas fa-clock"></i>
+            </div>
+            <div class="stat-info">
+                <h3>Ожидают</h3>
+                <span class="stat-number" id="pendingTasks">{{ tasks|selectattr('status', 'equalto', 'pending')|list|length }}</span>
+            </div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon in-progress">
+                <i class="fas fa-spinner"></i>
+            </div>
+            <div class="stat-info">
+                <h3>В работе</h3>
+                <span class="stat-number" id="inProgressTasks">{{ tasks|selectattr('status', 'equalto', 'in_progress')|list|length }}</span>
+            </div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon completed">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <div class="stat-info">
+                <h3>Выполнены</h3>
+                <span class="stat-number" id="completedTasks">{{ tasks|selectattr('status', 'equalto', 'completed')|list|length }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Поиск и массовые операции -->
+    <div class="search-mass-actions">
+        <div class="search-box">
+            <input type="text" 
+                   id="searchInput" 
+                   placeholder="Поиск по заголовку, описанию, ID..." 
+                   onkeyup="searchTasks()">
+            <i class="fas fa-search"></i>
+        </div>
+        
+        <div class="mass-actions">
+            <select id="massAction" class="mass-action-select">
+                <option value="">Массовые действия</option>
+                <option value="change_status">Изменить статус</option>
+                <option value="change_physicist">Передать другому физику</option>
+                <option value="delete">Удалить выбранные</option>
+            </select>
+            <button class="btn btn-warning" onclick="applyMassAction()">
+                <i class="fas fa-play"></i> Применить
+            </button>
+        </div>
+    </div>
+
+    <!-- Таблица задач -->
+    <div class="table-container">
+        <table class="tasks-table">
+            <thead>
+                <tr>
+                    <th width="30">
+                        <input type="checkbox" id="selectAll" onclick="toggleSelectAll(this)">
+                    </th>
+                    <th width="60">ID</th>
+                    <th>Заголовок</th>
+                    <th width="120">Статус</th>
+                    <th width="100">Приоритет</th>
+                    <th>Врач</th>
+                    <th>Физик</th>
+                    <th width="150">Создана</th>
+                    <th width="150">Обновлена</th>
+                    <th width="200">Действия</th>
+                </tr>
+            </thead>
+            <tbody id="tasksTableBody">
+                {% for task in tasks %}
+                <tr class="task-row" 
+                    data-id="{{ task.id }}"
+                    data-status="{{ task.status }}"
+                    data-priority="{{ task.priority }}"
+                    data-doctor="{{ task.doctor_id }}"
+                    data-physicist="{{ task.physicist_id }}"
+                    data-created="{{ task.created_at.strftime('%Y-%m-%d') }}"
+                    data-title="{{ task.title|lower }}"
+                    data-description="{{ task.description|lower }}">
+                    <td>
+                        <input type="checkbox" class="task-checkbox" value="{{ task.id }}">
+                    </td>
+                    <td>{{ task.id }}</td>
+                    <td>
+                        <div class="task-title-cell">
+                            <strong>{{ task.title }}</strong>
+                            <small>{{ task.description|truncate(50) }}</small>
+                        </div>
+                    </td>
+                    <td>
+                        <span class="status-badge status-{{ task.status }}">
+                            {% if task.status == 'pending' %}Ожидает{% endif %}
+                            {% if task.status == 'in_progress' %}В работе{% endif %}
+                            {% if task.status == 'completed' %}Выполнена{% endif %}
+                            {% if task.status == 'cancelled' %}Отменена{% endif %}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="priority-badge priority-{{ task.priority }}">
+                            {% if task.priority == 'urgent' %}Срочный{% endif %}
+                            {% if task.priority == 'high' %}Высокий{% endif %}
+                            {% if task.priority == 'medium' %}Средний{% endif %}
+                            {% if task.priority == 'low' %}Низкий{% endif %}
+                        </span>
+                    </td>
+                    <td>{{ task.doctor.username }}</td>
+                    <td>{{ task.physicist.username }}</td>
+                    <td>{{ task.created_at.strftime('%d.%m.%Y %H:%M') }}</td>
+                    <td>{{ task.updated_at.strftime('%d.%m.%Y %H:%M') }}</td>
+                    <td>
+                        <div class="action-buttons">
+                            <a href="{{ url_for('admin_edit_task', task_id=task.id) }}" 
+                               class="btn btn-small btn-primary">
+                                <i class="fas fa-edit"></i> Редактировать
+                            </a>
+                            <a href="{{ url_for('task_chat', task_id=task.id) }}" 
+                               class="btn btn-small btn-info">
+                                <i class="fas fa-comments"></i> Чат
+                            </a>
+                            <form action="{{ url_for('admin_delete_task', task_id=task.id) }}" 
+                                  method="POST" 
+                                  class="delete-form"
+                                  onsubmit="return confirm('Удалить задачу #{{ task.id }}?');">
+                                <button type="submit" class="btn btn-small btn-danger">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        
+        {% if not tasks %}
+        <div class="no-tasks">
+            <i class="fas fa-clipboard-list fa-3x"></i>
+            <h4>Задачи не найдены</h4>
+            <p>Нет задач, соответствующих выбранным фильтрам</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Пагинация -->
+    <div class="pagination">
+        <button class="pagination-btn" onclick="prevPage()" disabled id="prevBtn">
+            <i class="fas fa-chevron-left"></i> Назад
+        </button>
+        <span class="page-info">Страница <span id="currentPage">1</span></span>
+        <button class="pagination-btn" onclick="nextPage()" id="nextBtn">
+            Вперед <i class="fas fa-chevron-right"></i>
+        </button>
+    </div>
+</div>
+
+<!-- Модальное окно для массового изменения статуса -->
+<div id="massStatusModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3><i class="fas fa-exchange-alt"></i> Изменение статуса задач</h3>
+            <span class="close-modal" onclick="closeModal('massStatusModal')">&times;</span>
+        </div>
+        <div class="modal-body">
+            <p>Выбрано задач: <span id="selectedCount">0</span></p>
+            <div class="form-group">
+                <label>Новый статус:</label>
+                <select id="newStatus" class="form-control">
+                    <option value="pending">Ожидает</option>
+                    <option value="in_progress">В работе</option>
+                    <option value="completed">Выполнена</option>
+                    <option value="cancelled">Отменена</option>
+                </select>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="closeModal('massStatusModal')">Отмена</button>
+            <button class="btn btn-primary" onclick="submitMassStatus()">Применить</button>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно для массового изменения физика -->
+<div id="massPhysicistModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3><i class="fas fa-user-friends"></i> Назначение другого физика</h3>
+            <span class="close-modal" onclick="closeModal('massPhysicistModal')">&times;</span>
+        </div>
+        <div class="modal-body">
+            <p>Выбрано задач: <span id="selectedCount2">0</span></p>
+            <div class="form-group">
+                <label>Новый физик:</label>
+                <select id="newPhysicist" class="form-control">
+                    <option value="">Выберите физика</option>
+                    {% for user in users if user.role == 'physicist' %}
+                    <option value="{{ user.id }}">{{ user.username }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="closeModal('massPhysicistModal')">Отмена</button>
+            <button class="btn btn-primary" onclick="submitMassPhysicist()">Назначить</button>
+        </div>
+    </div>
+</div>
+
+<script>
+// Переменные для пагинации
+let currentPage = 1;
+const tasksPerPage = 10;
+let filteredTasks = [];
+
+// Инициализация при загрузке
+document.addEventListener('DOMContentLoaded', function() {
+    filteredTasks = Array.from(document.querySelectorAll('.task-row'));
+    updateTable();
+    updateStats();
+});
+
+// Фильтрация
+function toggleFilters() {
+    const panel = document.getElementById('filtersPanel');
+    panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+}
+
+function applyFilters() {
+    const status = document.getElementById('filterStatus').value;
+    const priority = document.getElementById('filterPriority').value;
+    const doctor = document.getElementById('filterDoctor').value;
+    const physicist = document.getElementById('filterPhysicist').value;
+    const dateFrom = document.getElementById('filterDateFrom').value;
+    const dateTo = document.getElementById('filterDateTo').value;
+
+    filteredTasks = Array.from(document.querySelectorAll('.task-row')).filter(row => {
+        if (status && row.dataset.status !== status) return false;
+        if (priority && row.dataset.priority !== priority) return false;
+        if (doctor && row.dataset.doctor !== doctor) return false;
+        if (physicist && row.dataset.physicist !== physicist) return false;
+        if (dateFrom && new Date(row.dataset.created) < new Date(dateFrom)) return false;
+        if (dateTo && new Date(row.dataset.created) > new Date(dateTo)) return false;
+        return true;
+    });
+
+    currentPage = 1;
+    updateTable();
+    updateStats();
+}
+
+function resetFilters() {
+    document.getElementById('filterStatus').value = '';
+    document.getElementById('filterPriority').value = '';
+    document.getElementById('filterDoctor').value = '';
+    document.getElementById('filterPhysicist').value = '';
+    document.getElementById('filterDateFrom').value = '';
+    document.getElementById('filterDateTo').value = '';
+    
+    filteredTasks = Array.from(document.querySelectorAll('.task-row'));
+    currentPage = 1;
+    updateTable();
+    updateStats();
+}
+
+// Поиск
+function searchTasks() {
+    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+    
+    if (!searchTerm) {
+        filteredTasks = Array.from(document.querySelectorAll('.task-row'));
+    } else {
+        filteredTasks = Array.from(document.querySelectorAll('.task-row')).filter(row => {
+            return row.dataset.title.includes(searchTerm) || 
+                   row.dataset.description.includes(searchTerm) ||
+                   row.cells[1].textContent.includes(searchTerm);
+        });
+    }
+    
+    currentPage = 1;
+    updateTable();
+    updateStats();
+}
+
+// Массовые операции
+function toggleSelectAll(checkbox) {
+    const checkboxes = document.querySelectorAll('.task-checkbox:not(:disabled)');
+    checkboxes.forEach(cb => cb.checked = checkbox.checked);
+}
+
+function getSelectedTasks() {
+    const checkboxes = document.querySelectorAll('.task-checkbox:checked');
+    return Array.from(checkboxes).map(cb => cb.value);
+}
+
+function applyMassAction() {
+    const action = document.getElementById('massAction').value;
+    const selectedTasks = getSelectedTasks();
+    
+    if (selectedTasks.length === 0) {
+        alert('Выберите хотя бы одну задачу');
+        return;
+    }
+    
+    switch(action) {
+        case 'change_status':
+            document.getElementById('selectedCount').textContent = selectedTasks.length;
+            openModal('massStatusModal');
+            break;
+        case 'change_physicist':
+            document.getElementById('selectedCount2').textContent = selectedTasks.length;
+            openModal('massPhysicistModal');
+            break;
+        case 'delete':
+            if (confirm(`Удалить ${selectedTasks.length} задач?`)) {
+                deleteSelectedTasks(selectedTasks);
+            }
+            break;
+        default:
+            alert('Выберите действие');
+    }
+}
+
+function submitMassStatus() {
+    const selectedTasks = getSelectedTasks();
+    const newStatus = document.getElementById('newStatus').value;
+    
+    fetch('/admin/tasks/mass_update', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            task_ids: selectedTasks,
+            action: 'change_status',
+            new_status: newStatus
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('Ошибка: ' + data.error);
+        }
+    });
+    
+    closeModal('massStatusModal');
+}
+
+function submitMassPhysicist() {
+    const selectedTasks = getSelectedTasks();
+    const newPhysicist = document.getElementById('newPhysicist').value;
+    
+    if (!newPhysicist) {
+        alert('Выберите физика');
+        return;
+    }
+    
+    fetch('/admin/tasks/mass_update', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            task_ids: selectedTasks,
+            action: 'change_physicist',
+            new_physicist: newPhysicist
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('Ошибка: ' + data.error);
+        }
+    });
+    
+    closeModal('massPhysicistModal');
+}
+
+async function deleteSelectedTasks(taskIds) {
+    try {
+        const response = await fetch('/admin/tasks/mass_delete', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ task_ids: taskIds })
+        });
+        
+        const data = await response.json();
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('Ошибка: ' + data.error);
+        }
+    } catch (error) {
+        alert('Ошибка при удалении задач');
+    }
+}
+
+// Пагинация
+function updateTable() {
+    const tbody = document.getElementById('tasksTableBody');
+    const startIndex = (currentPage - 1) * tasksPerPage;
+    const endIndex = startIndex + tasksPerPage;
+    const pageTasks = filteredTasks.slice(startIndex, endIndex);
+    
+    // Скрываем все строки
+    document.querySelectorAll('.task-row').forEach(row => row.style.display = 'none');
+    
+    // Показываем только задачи текущей страницы
+    pageTasks.forEach(row => row.style.display = 'table-row');
+    
+    // Обновляем кнопки пагинации
+    document.getElementById('prevBtn').disabled = currentPage === 1;
+    document.getElementById('nextBtn').disabled = endIndex >= filteredTasks.length;
+    document.getElementById('currentPage').textContent = currentPage;
+}
+
+function prevPage() {
+    if (currentPage > 1) {
+        currentPage--;
+        updateTable();
+    }
+}
+
+function nextPage() {
+    if (currentPage * tasksPerPage < filteredTasks.length) {
+        currentPage++;
+        updateTable();
+    }
+}
+
+// Обновление статистики
+function updateStats() {
+    document.getElementById('totalTasks').textContent = filteredTasks.length;
+    document.getElementById('pendingTasks').textContent = filteredTasks.filter(row => row.dataset.status === 'pending').length;
+    document.getElementById('inProgressTasks').textContent = filteredTasks.filter(row => row.dataset.status === 'in_progress').length;
+    document.getElementById('completedTasks').textContent = filteredTasks.filter(row => row.dataset.status === 'completed').length;
+}
+
+// Модальные окна
+function openModal(modalId) {
+    document.getElementById(modalId).style.display = 'block';
+}
+
+function closeModal(modalId) {
+    document.getElementById(modalId).style.display = 'none';
+}
+
+window.onclick = function(event) {
+    if (event.target.classList.contains('modal')) {
+        event.target.style.display = 'none';
+    }
+}
+</script>
+
+<style>
+.admin-tasks-container {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    padding: 30px;
+    margin-bottom: 30px;
+}
+
+.admin-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.admin-header h2 {
+    color: #2c3e50;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.admin-header-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.filters-panel {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 25px;
+    border: 1px solid #e9ecef;
+}
+
+.filters-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 15px;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.filter-group label {
+    font-weight: 600;
+    color: #2c3e50;
+    font-size: 14px;
+}
+
+.filter-select, .filter-date {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.filter-actions {
+    grid-column: 1 / -1;
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.stats-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-bottom: 25px;
+}
+
+.stat-card {
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+    border: 1px solid #eee;
+    transition: transform 0.3s;
+}
+
+.stat-card:hover {
+    transform: translateY(-3px);
+}
+
+.stat-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 20px;
+}
+
+.stat-icon.total { background: linear-gradient(135deg, #3498db, #2980b9); }
+.stat-icon.pending { background: linear-gradient(135deg, #f39c12, #e67e22); }
+.stat-icon.in-progress { background: linear-gradient(135deg, #9b59b6, #8e44ad); }
+.stat-icon.completed { background: linear-gradient(135deg, #2ecc71, #27ae60); }
+
+.stat-info h3 {
+    margin: 0 0 5px 0;
+    font-size: 14px;
+    color: #7f8c8d;
+    font-weight: 600;
+}
+
+.stat-number {
+    font-size: 24px;
+    font-weight: 700;
+    color: #2c3e50;
+}
+
+.search-mass-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.search-box {
+    position: relative;
+    flex: 1;
+    min-width: 300px;
+}
+
+.search-box input {
+    width: 100%;
+    padding: 10px 15px 10px 40px;
+    border: 1px solid #ddd;
+    border-radius: 25px;
+    font-size: 14px;
+}
+
+.search-box i {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #95a5a6;
+}
+
+.mass-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.mass-action-select {
+    padding: 10px 15px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    min-width: 200px;
+}
+
+.table-container {
+    overflow-x: auto;
+    margin-bottom: 20px;
+}
+
+.tasks-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+.tasks-table th, .tasks-table td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+}
+
+.tasks-table th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+    color: #2c3e50;
+    position: sticky;
+    top: 0;
+}
+
+.tasks-table tr:hover {
+    background-color: #f8f9fa;
+}
+
+.tasks-table tr.selected {
+    background-color: #e3f2fd;
+}
+
+.task-title-cell strong {
+    display: block;
+    margin-bottom: 5px;
+    color: #2c3e50;
+}
+
+.task-title-cell small {
+    color: #7f8c8d;
+    font-size: 12px;
+    line-height: 1.4;
+}
+
+.status-badge, .priority-badge {
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    display: inline-block;
+    text-align: center;
+}
+
+.status-pending { background: #ffd54f; color: #333; }
+.status-in_progress { background: #4fc3f7; color: white; }
+.status-completed { background: #81c784; color: white; }
+.status-cancelled { background: #e57373; color: white; }
+
+.priority-urgent { background: #e74c3c; color: white; }
+.priority-high { background: #e67e22; color: white; }
+.priority-medium { background: #3498db; color: white; }
+.priority-low { background: #2ecc71; color: white; }
+
+.action-buttons {
+    display: flex;
+    gap: 5px;
+    flex-wrap: wrap;
+}
+
+.btn-small {
+    padding: 5px 10px;
+    font-size: 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.delete-form {
+    display: inline;
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.pagination-btn {
+    padding: 8px 16px;
+    border: 1px solid #ddd;
+    background: white;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s;
+}
+
+.pagination-btn:hover:not(:disabled) {
+    background: #3498db;
+    color: white;
+    border-color: #3498db;
+}
+
+.pagination-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.page-info {
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.no-tasks {
+    text-align: center;
+    padding: 40px 20px;
+    color: #7f8c8d;
+}
+
+.no-tasks i {
+    margin-bottom: 15px;
+    color: #bdc3c7;
+}
+
+.no-tasks h4 {
+    margin: 0 0 10px 0;
+    color: #2c3e50;
+}
+
+/* Модальные окна */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+}
+
+.modal-content {
+    background-color: white;
+    margin: 10% auto;
+    padding: 0;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+}
+
+.modal-header {
+    background: #2c3e50;
+    color: white;
+    padding: 20px;
+    border-radius: 8px 8px 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h3 {
+    margin: 0;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.close-modal {
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    color: white;
+    opacity: 0.8;
+    transition: opacity 0.3s;
+}
+
+.close-modal:hover {
+    opacity: 1;
+}
+
+.modal-body {
+    padding: 20px;
+}
+
+.modal-footer {
+    padding: 15px 20px;
+    border-top: 1px solid #eee;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.form-control {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+@media (max-width: 768px) {
+    .admin-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .filters-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .search-mass-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .search-box {
+        min-width: auto;
+    }
+    
+    .mass-actions {
+        width: 100%;
+    }
+    
+    .mass-action-select {
+        min-width: auto;
+        flex: 1;
+    }
+}
+</style>
+{% endblock %}

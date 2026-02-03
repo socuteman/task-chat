@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Медицинский Чат{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <nav>
+        <div class="nav-container">
+            <div class="nav-brand">
+                <i class="fas fa-comments-medical"></i>
+                <h1>Медицинский Чат</h1>
+            </div>
+            <div class="nav-links">
+                {% if current_user.is_authenticated %}
+                    <div class="user-info">
+                        <span class="user-role role-{{ current_user.role }}">
+                            <i class="fas fa-user-md"></i> {{ current_user.username }}
+                        </span>
+                    </div>
+                    <a href="{{ url_for('index') }}" class="nav-link">
+                        <i class="fas fa-home"></i> Главная
+                    </a>
+                    
+                    <!-- Индикатор непрочитанных сообщений -->
+                    <div class="chat-indicator">
+                        <a href="javascript:void(0)" onclick="showUnreadTasks()" class="nav-link">
+                            <i class="fas fa-comments"></i>
+                            <span id="unreadCount" class="chat-badge" style="display: none;">0</span>
+                        </a>
+                    </div>
+
+                    {% if current_user.role == 'admin' %}
+                        <a href="{{ url_for('admin_panel') }}" class="nav-link">
+                            <i class="fas fa-cog"></i> Админ-панель
+                        </a>
+                        <a href="{{ url_for('register') }}" class="nav-link">
+                            <i class="fas fa-user-plus"></i> Регистрация
+                        </a>
+                    {% endif %}
+                    <a href="{{ url_for('logout') }}" class="nav-link logout-btn">
+                        <i class="fas fa-sign-out-alt"></i> Выход
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+    
+    <div class="container">
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for message in messages %}
+                        <div class="flash">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+        
+        {% block content %}{% endblock %}
+    </div>
+
+    <!-- Модальное окно для непрочитанных сообщений -->
+    <div id="unreadModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-envelope"></i> Непрочитанные сообщения</h3>
+                <span class="close-modal" onclick="closeUnreadModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div id="unreadTasksList" class="unread-tasks-list">
+                    <!-- Список задач будет загружен здесь -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    // Глобальная переменная для текущего пользователя
+    window.currentUserId = {{ current_user.id if current_user.is_authenticated else 0 }};
+    
+    // Проверка непрочитанных сообщений
+    function checkUnreadMessages() {
+        if (!window.currentUserId) return;
+        
+        fetch('/unread_messages')
+            .then(response => response.json())
+            .then(data => {
+                const badge = document.getElementById('unreadCount');
+                if (data.total_unread > 0) {
+                    badge.textContent = data.total_unread;
+                    badge.style.display = 'inline-flex';
+                    document.title = `(${data.total_unread}) Медицинский Чат`;
+                } else {
+                    badge.style.display = 'none';
+                    document.title = 'Медицинский Чат';
+                }
+                
+                // Сохраняем данные для модального окна
+                window.unreadData = data;
+            })
+            .catch(error => console.error('Ошибка проверки сообщений:', error));
+    }
+    
+    // Показать задачи с непрочитанными сообщениями
+    function showUnreadTasks() {
+        if (!window.unreadData || window.unreadData.total_unread === 0) {
+            alert('Нет непрочитанных сообщений');
+            return;
+        }
+        
+        const modal = document.getElementById('unreadModal');
+        const list = document.getElementById('unreadTasksList');
+        
+        list.innerHTML = '';
+        
+        if (window.unreadData.tasks_with_unread.length === 0) {
+            list.innerHTML = '<p class="no-messages">Нет непрочитанных сообщений</p>';
+        } else {
+            window.unreadData.tasks_with_unread.forEach(task => {
+                const taskItem = document.createElement('div');
+                taskItem.className = 'unread-task-item';
+                taskItem.innerHTML = `
+                    <div class="unread-task-info">
+                        <h4>${task.task_title}</h4>
+                        <p>
+                            <span class="unread-count">${task.unread_count} непрочитанных</span>
+                            <span class="last-sender">От: ${task.last_sender}</span>
+                        </p>
+                    </div>
+                    <a href="/task/${task.task_id}/chat" class="btn btn-small btn-primary">
+                        <i class="fas fa-comment"></i> Перейти в чат
+                    </a>
+                `;
+                list.appendChild(taskItem);
+            });
+        }
+        
+        modal.style.display = 'block';
+    }
+    
+    // Закрыть модальное окно
+    function closeUnreadModal() {
+        document.getElementById('unreadModal').style.display = 'none';
+    }
+    
+    // Закрыть модальное окно при клике вне его
+    window.onclick = function(event) {
+        const modal = document.getElementById('unreadModal');
+        if (event.target == modal) {
+            modal.style.display = 'none';
+        }
+    }
+    
+    // Проверка каждые 10 секунд
+    if (window.currentUserId) {
+        setInterval(checkUnreadMessages, 10000);
+        checkUnreadMessages(); // Первая проверка сразу
+    }
+    
+    // Автоматически закрывать flash-сообщения через 5 секунд
+    document.addEventListener('DOMContentLoaded', function() {
+        const flashes = document.querySelectorAll('.flash');
+        flashes.forEach(flash => {
+            setTimeout(() => {
+                flash.style.opacity = '0';
+                setTimeout(() => flash.remove(), 300);
+            }, 5000);
+        });
+    });
+    </script>
+
+    <style>
+    .chat-indicator {
+        position: relative;
+        display: inline-block;
+    }
+    
+    .chat-badge {
+        position: absolute;
+        top: -8px;
+        right: -8px;
+        background: #e74c3c;
+        color: white;
+        border-radius: 50%;
+        min-width: 20px;
+        height: 20px;
+        font-size: 12px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        padding: 0 6px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.5);
+    }
+    
+    .modal-content {
+        background-color: white;
+        margin: 5% auto;
+        padding: 0;
+        border-radius: 8px;
+        width: 90%;
+        max-width: 600px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        animation: modalSlideIn 0.3s ease-out;
+    }
+    
+    @keyframes modalSlideIn {
+        from {
+            transform: translateY(-50px);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+    
+    .modal-header {
+        background: #2c3e50;
+        color: white;
+        padding: 20px;
+        border-radius: 8px 8px 0 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .modal-header h3 {
+        margin: 0;
+        font-size: 18px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .close-modal {
+        font-size: 28px;
+        font-weight: bold;
+        cursor: pointer;
+        color: white;
+        opacity: 0.8;
+        transition: opacity 0.3s;
+    }
+    
+    .close-modal:hover {
+        opacity: 1;
+    }
+    
+    .modal-body {
+        padding: 20px;
+        max-height: 400px;
+        overflow-y: auto;
+    }
+    
+    .unread-tasks-list {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .unread-task-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px;
+        background: #f8f9fa;
+        border-radius: 6px;
+        border-left: 4px solid #3498db;
+        transition: transform 0.2s;
+    }
+    
+    .unread-task-item:hover {
+        transform: translateX(5px);
+        background: #eef5ff;
+    }
+    
+    .unread-task-info h4 {
+        margin: 0 0 8px 0;
+        color: #2c3e50;
+        font-size: 16px;
+    }
+    
+    .unread-task-info p {
+        margin: 0;
+        font-size: 14px;
+        color: #666;
+        display: flex;
+        gap: 15px;
+        flex-wrap: wrap;
+    }
+    
+    .unread-count {
+        color: #e74c3c;
+        font-weight: 600;
+    }
+    
+    .last-sender {
+        color: #3498db;
+    }
+    
+    .no-messages {
+        text-align: center;
+        color: #7f8c8d;
+        font-style: italic;
+        padding: 20px;
+    }
+    
+    .nav-brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .nav-brand i {
+        font-size: 24px;
+        color: #3498db;
+    }
+    
+    .user-role {
+        padding: 4px 12px;
+        border-radius: 15px;
+        font-size: 14px;
+        font-weight: 500;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+    }
+    
+    .role-admin { background: #e74c3c; color: white; }
+    .role-doctor { background: #3498db; color: white; }
+    .role-physicist { background: #2ecc71; color: white; }
+    
+    .nav-link {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 15px;
+        border-radius: 5px;
+        transition: background-color 0.3s;
+    }
+    
+    .nav-link:hover {
+        background: rgba(255,255,255,0.1);
+    }
+    
+    .logout-btn:hover {
+        background: rgba(231, 76, 60, 0.2);
+    }
+    
+    .flash {
+        animation: flashSlideIn 0.5s ease-out;
+    }
+    
+    @keyframes flashSlideIn {
+        from {
+            transform: translateY(-20px);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+    </style>
+</body>
+</html>

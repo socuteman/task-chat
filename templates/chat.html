@@ -1,0 +1,440 @@
+{% extends "base.html" %}
+
+{% block title %}Чат - {{ task.title }}{% endblock %}
+
+{% block content %}
+<div class="chat-container">
+    <div class="chat-header">
+        <div class="chat-header-info">
+            <h2>
+                <a href="{{ url_for('index') }}" class="back-btn">←</a>
+                Чат по задаче: {{ task.title }}
+            </h2>
+            <div class="chat-partner-info">
+                <span class="partner-name">{{ chat_partner.username }} ({{ chat_partner.role }})</span>
+                <span id="partnerStatus" class="status-indicator">●</span>
+            </div>
+        </div>
+        <div class="task-info">
+            <span class="task-status status-{{ task.status }}">
+                {% if task.status == 'pending' %}Ожидает{% endif %}
+                {% if task.status == 'in_progress' %}В работе{% endif %}
+                {% if task.status == 'completed' %}Выполнена{% endif %}
+                {% if task.status == 'cancelled' %}Отменена{% endif %}
+            </span>
+            <span class="task-priority priority-{{ task.priority }}">{{ task.priority }}</span>
+        </div>
+    </div>
+    
+    <div class="chat-messages" id="chatMessages">
+    {% for message in messages %}
+    <div class="message {% if message.sender_id == current_user.id %}message-out{% else %}message-in{% endif %}">
+        <div class="message-header">
+            <span class="message-sender">{{ message.sender.username }}</span>
+            <span class="message-time">{{ moscow_time(message.created_at).strftime('%H:%M %d.%m.%Y') }}</span>
+        </div>
+        <div class="message-content">{{ message.content }}</div>
+    </div>
+    {% endfor %}
+</div>
+    
+    <div class="chat-input-container">
+        <div class="typing-indicator" id="typingIndicator" style="display: none;">
+            <span>{{ chat_partner.username }} печатает...</span>
+        </div>
+        <form id="messageForm" class="chat-form">
+            <textarea id="messageInput" placeholder="Введите сообщение..." rows="2" required></textarea>
+            <button type="submit" class="send-btn" title="Отправить">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="22" y1="2" x2="11" y2="13"></line>
+                    <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                </svg>
+            </button>
+        </form>
+    </div>
+</div>
+
+<script>
+// Элементы DOM
+const chatMessages = document.getElementById('chatMessages');
+const messageForm = document.getElementById('messageForm');
+const messageInput = document.getElementById('messageInput');
+const partnerStatus = document.getElementById('partnerStatus');
+const typingIndicator = document.getElementById('typingIndicator');
+
+// ID текущей задачи
+const taskId = {{ task.id }};
+
+// Функция для прокрутки вниз
+function scrollToBottom() {
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+// Функция для добавления сообщения
+function addMessage(message, isOwn) {
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `message ${isOwn ? 'message-out' : 'message-in'}`;
+    
+    const now = new Date();
+    const timeString = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')} ${now.getDate().toString().padStart(2, '0')}.${(now.getMonth()+1).toString().padStart(2, '0')}.${now.getFullYear()}`;
+    
+    messageDiv.innerHTML = `
+        <div class="message-header">
+            <span class="message-sender">${message.sender}</span>
+            <span class="message-time">${message.created_at}</span>
+        </div>
+        <div class="message-content">${message.content}</div>
+    `;
+    
+    chatMessages.appendChild(messageDiv);
+    scrollToBottom();
+}
+
+// Функция для обновления статуса онлайн
+function updateOnlineStatus() {
+    fetch(`/task/${taskId}/get_messages`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.chat_partner.is_online) {
+                partnerStatus.className = 'status-indicator online';
+                partnerStatus.title = 'В сети';
+            } else {
+                partnerStatus.className = 'status-indicator offline';
+                partnerStatus.title = 'Не в сети';
+            }
+        });
+}
+
+// Отправка сообщения
+messageForm.addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const content = messageInput.value.trim();
+    if (!content) return;
+    
+    // Добавляем сообщение сразу (оптимистичное обновление)
+    const tempMessage = {
+        content: content,
+        sender: 'Вы',
+        sender_id: {{ current_user.id }},
+        created_at: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) + ' ' + new Date().toLocaleDateString()
+    };
+    
+    addMessage(tempMessage, true);
+    messageInput.value = '';
+    
+    // Отправляем на сервер
+    fetch(`/task/${taskId}/send_message`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ content: content })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            alert('Ошибка: ' + data.error);
+        }
+    });
+});
+
+// Функция для загрузки сообщений
+function loadMessages() {
+    fetch(`/task/${taskId}/get_messages`)
+        .then(response => response.json())
+        .then(data => {
+            // Обновляем статус онлайн
+            if (data.chat_partner.is_online) {
+                partnerStatus.className = 'status-indicator online';
+                partnerStatus.title = 'В сети';
+            } else {
+                partnerStatus.className = 'status-indicator offline';
+                partnerStatus.title = 'Не в сети';
+            }
+            
+            // Обновляем список сообщений если нужно
+            const currentCount = chatMessages.querySelectorAll('.message').length;
+            if (data.messages.length > currentCount) {
+                // В реальном приложении здесь была бы логика обновления
+                // Для простоты просто обновляем страницу
+                location.reload();
+            }
+        });
+}
+
+// Обновление онлайн статуса каждые 30 секунд
+setInterval(updateOnlineStatus, 30000);
+
+// Загрузка сообщений каждые 5 секунд
+setInterval(loadMessages, 5000);
+
+// Инициализация
+updateOnlineStatus();
+scrollToBottom();
+
+// Фокус на поле ввода
+messageInput.focus();
+
+// Авто-высота текстового поля
+messageInput.addEventListener('input', function() {
+    this.style.height = 'auto';
+    this.style.height = (this.scrollHeight) + 'px';
+});
+
+// Проверка непрочитанных сообщений
+function checkUnreadMessages() {
+    fetch('/unread_messages')
+        .then(response => response.json())
+        .then(data => {
+            // Обновляем бейдж в заголовке
+            if (data.total_unread > 0) {
+                document.title = `(${data.total_unread}) Чат - Медицинский Чат`;
+            } else {
+                document.title = 'Чат - Медицинский Чат';
+            }
+        });
+}
+
+// Проверка каждые 10 секунд
+setInterval(checkUnreadMessages, 10000);
+checkUnreadMessages();
+</script>
+
+<style>
+.chat-container {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 120px);
+    max-width: 1200px;
+    margin: 0 auto;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+    overflow: hidden;
+}
+
+.chat-header {
+    background: #2c3e50;
+    color: white;
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #34495e;
+}
+
+.chat-header-info h2 {
+    margin: 0;
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.back-btn {
+    color: white;
+    text-decoration: none;
+    font-size: 24px;
+    line-height: 1;
+}
+
+.chat-partner-info {
+    margin-top: 5px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.partner-name {
+    font-weight: 500;
+}
+
+.status-indicator {
+    font-size: 20px;
+}
+
+.status-indicator.online {
+    color: #2ecc71;
+}
+
+.status-indicator.offline {
+    color: #e74c3c;
+}
+
+.task-info {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    align-items: flex-end;
+}
+
+.task-status, .task-priority {
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.status-pending { background-color: #ffd54f; color: #333; }
+.status-in_progress { background-color: #4fc3f7; color: white; }
+.status-completed { background-color: #81c784; color: white; }
+.status-cancelled { background-color: #e57373; color: white; }
+
+.priority-low { background-color: #81c784; color: white; }
+.priority-medium { background-color: #4fc3f7; color: white; }
+.priority-high { background-color: #ffb74d; color: white; }
+.priority-urgent { background-color: #e57373; color: white; }
+
+.chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+    background: #f5f5f5;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.message {
+    max-width: 70%;
+    padding: 12px 15px;
+    border-radius: 15px;
+    position: relative;
+    word-wrap: break-word;
+}
+
+.message-in {
+    background: white;
+    align-self: flex-start;
+    border-bottom-left-radius: 5px;
+}
+
+.message-out {
+    background: #3498db;
+    color: white;
+    align-self: flex-end;
+    border-bottom-right-radius: 5px;
+}
+
+.message-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
+    font-size: 12px;
+    opacity: 0.8;
+}
+
+.message-sender {
+    font-weight: 600;
+}
+
+.message-content {
+    line-height: 1.4;
+}
+
+.chat-input-container {
+    border-top: 1px solid #eee;
+    background: white;
+    padding: 15px 20px;
+}
+
+.typing-indicator {
+    color: #7f8c8d;
+    font-size: 14px;
+    margin-bottom: 10px;
+    padding: 5px 10px;
+    background: #f8f9fa;
+    border-radius: 5px;
+    display: inline-block;
+}
+
+.chat-form {
+    display: flex;
+    gap: 10px;
+    align-items: flex-end;
+}
+
+.chat-form textarea {
+    flex: 1;
+    padding: 12px 15px;
+    border: 1px solid #ddd;
+    border-radius: 20px;
+    resize: none;
+    font-family: inherit;
+    font-size: 14px;
+    line-height: 1.4;
+    max-height: 120px;
+    outline: none;
+    transition: border-color 0.3s;
+}
+
+.chat-form textarea:focus {
+    border-color: #3498db;
+}
+
+.send-btn {
+    background: #3498db;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 44px;
+    height: 44px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.3s;
+}
+
+.send-btn:hover {
+    background: #2980b9;
+}
+
+.send-btn:disabled {
+    background: #95a5a6;
+    cursor: not-allowed;
+}
+
+/* Стили для скроллбара */
+.chat-messages::-webkit-scrollbar {
+    width: 6px;
+}
+
+.chat-messages::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+.chat-messages::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 3px;
+}
+
+.chat-messages::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .chat-container {
+        height: calc(100vh - 80px);
+        border-radius: 0;
+    }
+    
+    .chat-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    
+    .task-info {
+        align-items: flex-start;
+    }
+    
+    .message {
+        max-width: 85%;
+    }
+}
+</style>
+{% endblock %}
