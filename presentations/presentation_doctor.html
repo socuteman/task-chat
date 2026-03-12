@@ -9,6 +9,154 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <style>
+        /* Стили для формы создания задачи - точное отражение */
+        .real-form-mockup {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 25px;
+            margin: 20px 0;
+        }
+
+        .form-header-mock {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e9ecef;
+            margin-bottom: 20px;
+        }
+
+        .form-header-mock h3 {
+            color: #2c3e50;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-header-mock i {
+            color: #3498db;
+        }
+
+        .btn-close-mock {
+            background: none;
+            border: none;
+            color: #7f8c8d;
+            font-size: 18px;
+            cursor: pointer;
+            padding: 5px;
+        }
+
+        .form-grid-mock {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .form-group-mock {
+            background: white;
+            padding: 15px;
+            border-radius: 6px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .form-group-mock.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .form-group-mock label {
+            display: block;
+            color: #2c3e50;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .form-group-mock label i {
+            margin-right: 6px;
+            color: #3498db;
+        }
+
+        .form-group-mock .required {
+            color: #e74c3c;
+        }
+
+        .form-group-mock input,
+        .form-group-mock select,
+        .form-group-mock textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .form-group-mock textarea {
+            resize: vertical;
+            font-family: inherit;
+        }
+
+        .form-group-mock .form-hint {
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-top: 5px;
+            font-style: italic;
+        }
+
+        .form-section-mock {
+            background: white;
+            padding: 20px;
+            border-radius: 6px;
+            margin: 15px 0;
+            border: 1px solid #e0e0e0;
+        }
+
+        .form-section-mock h4 {
+            color: #2c3e50;
+            margin: 0 0 15px 0;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-section-mock h4 i {
+            color: #3498db;
+        }
+
+        .form-actions-mock {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .btn-primary-mock,
+        .btn-secondary-mock {
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary-mock {
+            background: #3498db;
+            color: white;
+        }
+
+        .btn-secondary-mock {
+            background: #95a5a6;
+            color: white;
+        }
+
         .import-flow {
             display: flex;
             align-items: center;
@@ -319,30 +467,111 @@
             </div>
         </div>
 
-        <!-- Slide 2: Проблема -->
+        <!-- Slide 2: Форма создания задачи - Реальное отражение -->
         <div class="slide">
             <div class="card">
-                <h2><i class="fas fa-exclamation-triangle"></i> Проблемы в работе врача</h2>
-                <div class="feature-grid">
-                    <div class="feature-card">
-                        <i class="fas fa-file-medical feature-icon"></i>
-                        <h4>Потеря данных</h4>
-                        <p>Пациенты теряются при передаче между этапами обследования и планирования</p>
+                <h2><i class="fas fa-plus-circle"></i> Создание задачи - Форма врача</h2>
+                <p style="text-align: center; margin-bottom: 30px;">
+                    Все поля для передачи информации о пациенте физику для импорта и планирования
+                </p>
+
+                <!-- Точное отражение реальной формы -->
+                <div class="real-form-mockup">
+                    <div class="form-header-mock">
+                        <i class="fas fa-plus-circle"></i>
+                        <h3>Новая задача</h3>
+                        <button class="btn-close-mock"><i class="fas fa-times"></i></button>
                     </div>
-                    <div class="feature-card">
-                        <i class="fas fa-comments feature-icon"></i>
-                        <h4>Хаос в мессенджерах</h4>
-                        <p>Рабочие чаты смешиваются с личными, сложно найти нужную информацию</p>
+
+                    <div class="form-grid-mock">
+                        <div class="form-group-mock">
+                            <label><i class="fas fa-id-card"></i> Номер карты пациента <span class="required">*</span></label>
+                            <input type="text" placeholder="Например: 12345678" value="12345678">
+                            <div class="form-hint">Обязательное поле</div>
+                        </div>
+
+                        <div class="form-group-mock">
+                            <label><i class="fas fa-file-medical"></i> Тип исследования <span class="required">*</span></label>
+                            <select>
+                                <option>Импорт CT</option>
+                                <option>Импорт CT-диагностики</option>
+                                <option>Импорт MR</option>
+                                <option>Импорт PET</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group-mock">
+                            <label><i class="fas fa-user-md"></i> Экспертная группа</label>
+                            <select>
+                                <option>ПГШ</option>
+                                <option>Молочная железа</option>
+                                <option>Лёгкое</option>
+                                <option>Печень / поджелудочная железа</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group-mock">
+                            <label><i class="fas fa-server"></i> Доступность в Aria</label>
+                            <select>
+                                <option>Новый</option>
+                                <option>Уже есть</option>
+                            </select>
+                        </div>
                     </div>
-                    <div class="feature-card">
-                        <i class="fas fa-clock feature-icon"></i>
-                        <h4>Потеря времени</h4>
-                        <p>До 60% времени уходит на согласования и поиск информации</p>
+
+                    <!-- Поля CT -->
+                    <div class="form-section-mock">
+                        <h4><i class="fas fa-microscope"></i> Параметры CT (диагностика)</h4>
+                        <div class="form-grid-mock">
+                            <div class="form-group-mock">
+                                <label><i class="fas fa-building"></i> Корпус для CT</label>
+                                <select>
+                                    <option>Электросигнальная</option>
+                                    <option>Челюскинцев</option>
+                                    <option>Вайцеховского</option>
+                                </select>
+                            </div>
+                            <div class="form-group-mock">
+                                <label><i class="fas fa-microscope"></i> Аппарат CT</label>
+                                <select disabled><option>Сначала выберите корпус</option></select>
+                            </div>
+                        </div>
                     </div>
-                    <div class="feature-card">
-                        <i class="fas fa-shield-alt feature-icon"></i>
-                        <h4>Риск утечки</h4>
-                        <p>Мессенджеры хранят данные в облаке — риск нарушения конфиденциальности</p>
+
+                    <!-- Поля лечения -->
+                    <div class="form-section-mock">
+                        <h4><i class="fas fa-radiation-alt"></i> Параметры лечения (терапия)</h4>
+                        <div class="form-grid-mock">
+                            <div class="form-group-mock">
+                                <label><i class="fas fa-clinic-medical"></i> Корпус для лечения</label>
+                                <select>
+                                    <option>Электросигнальная</option>
+                                    <option>Челюскинцев</option>
+                                </select>
+                            </div>
+                            <div class="form-group-mock">
+                                <label><i class="fas fa-radiation"></i> Аппарат для лечения</label>
+                                <select disabled><option>Сначала выберите корпус</option></select>
+                            </div>
+                            <div class="form-group-mock">
+                                <label><i class="fas fa-lungs"></i> Контроль по дыханию</label>
+                                <select>
+                                    <option>Нет</option>
+                                    <option>На задержке</option>
+                                    <option>Свободное дыхание</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group-mock full-width">
+                        <label><i class="fas fa-align-left"></i> Описание</label>
+                        <textarea rows="4" placeholder="Подробное описание задачи, требования, сроки..."></textarea>
+                    </div>
+
+                    <div class="form-actions-mock">
+                        <button class="btn-primary-mock"><i class="fas fa-paper-plane"></i> Создать задачу</button>
+                        <button class="btn-secondary-mock"><i class="fas fa-times"></i> Отмена</button>
                     </div>
                 </div>
             </div>
