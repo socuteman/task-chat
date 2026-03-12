@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task-Chat для физиков v0.4.9 — Презентация</title>
+    <link rel="stylesheet" href="css/presentations.css">
+    <link rel="stylesheet" href="css/mobile-frames.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        .task-board {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .task-column {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+        }
+
+        .task-column h4 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid;
+        }
+
+        .task-column.new h4 { border-color: #4e54c8; }
+        .task-column.progress h4 { border-color: #f093fb; }
+        .task-column.completed h4 { border-color: #11998e; }
+
+        .task-item {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .task-item:hover {
+            transform: translateX(5px);
+        }
+
+        .task-item h5 {
+            color: #2c3e50;
+            margin-bottom: 8px;
+        }
+
+        .task-item p {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .task-tag {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 15px;
+            font-size: 0.75rem;
+            margin-right: 5px;
+        }
+
+        .tag-ct { background: #e3f2fd; color: #1976d2; }
+        .tag-mrt { background: #f3e5f5; color: #7b1fa2; }
+        .tag-pet { background: #fff3e0; color: #f57c00; }
+
+        .chat-demo {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 30px 0;
+            border: 2px solid #11998e;
+        }
+
+        .chat-demo h4 {
+            color: #11998e;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .chat-messages {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .chat-message {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .chat-message.doctor {
+            flex-direction: row;
+        }
+
+        .chat-message.physicist {
+            flex-direction: row-reverse;
+        }
+
+        .chat-avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #4e54c8, #8f94fb);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        .chat-bubble {
+            max-width: 70%;
+            padding: 12px 18px;
+            border-radius: 18px;
+            position: relative;
+        }
+
+        .chat-message.doctor .chat-bubble {
+            background: #f0f0f0;
+            border-bottom-left-radius: 5px;
+        }
+
+        .chat-message.physicist .chat-bubble {
+            background: linear-gradient(135deg, #11998e, #38ef7d);
+            color: white;
+            border-bottom-right-radius: 5px;
+        }
+
+        .chat-bubble .sender {
+            font-weight: bold;
+            font-size: 0.85rem;
+            margin-bottom: 5px;
+        }
+
+        .chat-bubble .time {
+            font-size: 0.75rem;
+            opacity: 0.7;
+            margin-top: 8px;
+            text-align: right;
+        }
+
+        .file-attachment {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+
+        .file-attachment i {
+            font-size: 1.5rem;
+        }
+
+        .patient-flow {
+            position: relative;
+            padding: 30px 0;
+        }
+
+        .flow-timeline {
+            display: flex;
+            justify-content: space-between;
+            position: relative;
+        }
+
+        .flow-timeline::before {
+            content: '';
+            position: absolute;
+            top: 40px;
+            left: 50px;
+            right: 50px;
+            height: 4px;
+            background: linear-gradient(90deg, #4e54c8, #11998e);
+            z-index: 1;
+        }
+
+        .flow-point {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            flex: 1;
+        }
+
+        .flow-point-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 15px;
+            border-radius: 50%;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+            border: 4px solid;
+        }
+
+        .flow-point:nth-child(1) .flow-point-icon { border-color: #4e54c8; }
+        .flow-point:nth-child(2) .flow-point-icon { border-color: #f093fb; }
+        .flow-point:nth-child(3) .flow-point-icon { border-color: #11998e; }
+        .flow-point:nth-child(4) .flow-point-icon { border-color: #00d2ff; }
+
+        .flow-point-icon i {
+            font-size: 2rem;
+        }
+
+        .flow-point:nth-child(1) .flow-point-icon i { color: #4e54c8; }
+        .flow-point:nth-child(2) .flow-point-icon i { color: #f093fb; }
+        .flow-point:nth-child(3) .flow-point-icon i { color: #11998e; }
+        .flow-point:nth-child(4) .flow-point-icon i { color: #00d2ff; }
+
+        .flow-point h5 {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .flow-point p {
+            font-size: 0.85rem;
+            color: #666;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: bold;
+        }
+
+        .status-wait { background: #ffebee; color: #c62828; }
+        .status-progress { background: #fff3e0; color: #ef6c00; }
+        .status-done { background: #e8f5e9; color: #2e7d32; }
+
+        @media (max-width: 768px) {
+            .flow-timeline {
+                flex-direction: column;
+                gap: 30px;
+            }
+            
+            .flow-timeline::before {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="progress-container">
+        <div class="progress-bar"></div>
+    </div>
+
+    <div class="presentation-container">
+        <!-- Slide 1: Титульный -->
+        <div class="slide active title-slide" style="background: linear-gradient(135deg, #11998e, #38ef7d);">
+            <i class="fas fa-atom logo"></i>
+            <h1>Task-Chat для физиков</h1>
+            <p class="subtitle">Все задачи на планирование, изменение статуса, чат с врачами</p>
+            <div style="margin-top: 40px; font-size: 1.2rem; opacity: 0.9;">
+                <i class="fas fa-tasks"></i> Все задачи &nbsp;•&nbsp;
+                <i class="fas fa-sync-alt"></i> Изменение статуса &nbsp;•&nbsp;
+                <i class="fas fa-comments"></i> Чат с врачом
+            </div>
+            
+            <!-- Visual Mock Interface -->
+            <div style="margin-top: 50px; display: flex; justify-content: center; gap: 30px; flex-wrap: wrap;">
+                <div class="mobile-frame" style="transform: scale(0.9);">
+                    <div class="mobile-screen">
+                        <div class="mock-interface">
+                            <div class="mock-header">
+                                <i class="fas fa-bars"></i>
+                                <h3>Задачи</h3>
+                                <i class="fas fa-bell mock-pulse" style="margin-left: auto;"></i>
+                            </div>
+                            <div class="mock-content">
+                                <div class="mock-task-list">
+                                    <div class="mock-task-item">
+                                        <div class="mock-patient">#156: Пациент 32123</div>
+                                        <div class="mock-details">
+                                            <span class="mock-tag kt">КТ</span>
+                                            <span class="mock-tag status-new">Новая</span>
+                                        </div>
+                                    </div>
+                                    <div class="mock-task-item">
+                                        <div class="mock-patient">#155: Пациент 32120</div>
+                                        <div class="mock-details">
+                                            <span class="mock-tag pet">ПЭТ</span>
+                                            <span class="mock-tag status-progress">В работе</span>
+                                        </div>
+                                    </div>
+                                    <div class="mock-task-item">
+                                        <div class="mock-patient">#154: Пациент 32115</div>
+                                        <div class="mock-details">
+                                            <span class="mock-tag kt">КТ</span>
+                                            <span class="mock-tag status-done">Готово</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 2: Проблема -->
+        <div class="slide">
+            <div class="card">
+                <h2><i class="fas fa-exclamation-triangle"></i> Проблемы в работе физика</h2>
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <i class="fas fa-inbox feature-icon"></i>
+                        <h4>Хаотичное поступление</h4>
+                        <p>Задачи приходят из разных источников — сложно отслеживать приоритеты</p>
+                    </div>
+                    <div class="feature-card">
+                        <i class="fas fa-search feature-icon"></i>
+                        <h4>Поиск данных</h4>
+                        <p>Информация о пациентах разбросана по разным системам</p>
+                    </div>
+                    <div class="feature-card">
+                        <i class="fas fa-phone feature-icon"></i>
+                        <h4>Звонки и сообщения</h4>
+                        <p>Постоянные уточнения по телефону, нет истории обсуждений</p>
+                    </div>
+                    <div class="feature-card">
+                        <i class="fas fa-clock feature-icon"></i>
+                        <h4>Простои</h4>
+                        <p>Время теряется на поиск информации и согласования</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 3: Решение -->
+        <div class="slide">
+            <div class="card">
+                <h2><i class="fas fa-check-circle"></i> Решение Task-Chat</h2>
+                <p style="font-size: 1.2rem; text-align: center; margin-bottom: 30px;">
+                    <strong>Все импортированные пациенты</strong> — сразу видны в списке задач
+                </p>
+
+                <div class="task-board">
+                    <div class="task-column new">
+                        <h4 style="color: #2c3e50; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 3px solid #4e54c8; display: flex; align-items: center; gap: 10px;"><i class="fas fa-plus-circle" style="color: #4e54c8;"></i> Новые</h4>
+                        <div class="task-item">
+                            <h5 style="color: #2c3e50; margin-bottom: 8px;">Пациент #32123</h5>
+                            <p style="font-size: 0.9rem; color: #666; margin-bottom: 5px;"><span class="task-tag tag-ct">КТ</span></p>
+                            <p style="font-size: 0.9rem; color: #666; margin-bottom: 5px;"><i class="fas fa-user-md" style="color: #4e54c8; margin-right: 5px;"></i>Врач: Иванов А.С.</p>
+                            <span class="status-badge status-wait" style="display: inline-block; padding: 5px 15px; border-radius: 20px; font-size: 0.85rem; font-weight: bold; background: #ffebee; color: #c62828;">Ожидает</span>
+                        </div>
+                        <div class="task-item">
+                            <h5 style="color: #2c3e50; margin-bottom: 8px;">Пациент #32124</h5>
+                            <p style="font-size: 0.9rem; color: #666; margin-bottom: 5px;"><span class="task-tag tag-mrt">МРТ</span></p>
+                            <p style="font-size: 0.9rem; color: #666; margin-bottom: 5px;"><i class="fas fa-user-md" style="color: #4e54c8; margin-right: 5px;"></i>Врач: Петров В.К.</p>
+                            <span class="status-badge status-wait" style="display: inline-block; padding: 5px 15px; border-radius: 20px; font-size: 0.85rem; font-weight: bold; background: #ffebee; color: #c62828;">Ожидает</span>
+                        </div>
+                    </div>
+
+                    <div class="task-column progress">
+                        <h4 style="color: #2c3e50; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 3px solid #f093fb; display: flex; align-items: center; gap: 10px;"><i class="fas fa-spinner" style="color: #f093fb;"></i> В работе</h4>
+                        <div class="task-item">
+                            <h5 style="color: #2c3e50; margin-bottom: 8px;">Пациент #32120</h5>
+                            <p style="font-size: 0.9rem; color: #666; margin-bottom: 5px;"><span class="task-tag tag-pet">ПЭТ</span></p>
+                            <p style="font-size: 0.9rem; color: #666; margin-bottom: 5px;"><i class="fas fa-user-md" style="color: #4e54c8; margin-right: 5px;"></i>Врач: Сидорова Е.М.</p>
+                            <span class="status-badge status-progress" style="display: inline-block; padding: 5px 15px; border-radius: 20px; font-size: 0.85rem; font-weight: bold; background: #fff3e0; color: #ef6c00;">Планирование</span>
+                        </div>
+                    </div>
+
+                    <div class="task-column completed">
+                        <h4 style="color: #2c3e50; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 3px solid #11998e; display: flex; align-items: center; gap: 10px;"><i class="fas fa-check-circle" style="color: #11998e;"></i> Выполнено</h4>
+                        <div class="task-item">
+                            <h5 style="color: #2c3e50; margin-bottom: 8px;">Пациент #32115</h5>
+                            <p style="font-size: 0.9rem; color: #666; margin-bottom: 5px;"><span class="task-tag tag-ct">КТ</span></p>
+                            <p style="font-size: 0.9rem; color: #666; margin-bottom: 5px;"><i class="fas fa-user-md" style="color: #4e54c8; margin-right: 5px;"></i>Врач: Иванов А.С.</p>
+                            <span class="status-badge status-done" style="display: inline-block; padding: 5px 15px; border-radius: 20px; font-size: 0.85rem; font-weight: bold; background: #e8f5e9; color: #2e7d32;">Готово ✓</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 4: Мобильная версия -->
+        <div class="slide">
+            <div class="card">
+                <h2><i class="fas fa-mobile-alt"></i> Мобильная версия для физика</h2>
+                <p style="text-align: center; margin-bottom: 30px;">
+                    Проверяйте задачи и общайтесь с врачами с любого устройства
+                </p>
+
+                <div class="comparison-view">
+                    <div class="desktop-frame">
+                        <div class="desktop-header">
+                            <div class="desktop-dot red"></div>
+                            <div class="desktop-dot yellow"></div>
+                            <div class="desktop-dot green"></div>
+                        </div>
+                        <div class="desktop-screen">
+                            <div class="mock-desktop-content">
+                                <div class="mock-patient-grid">
+                                    <div class="mock-patient-card">
+                                        <h5><i class="fas fa-tasks"></i> Задача #156</h5>
+                                        <div class="mock-field">
+                                            <span class="mock-label">Пациент:</span>
+                                            <span class="mock-value">#32123</span>
+                                        </div>
+                                        <div class="mock-field">
+                                            <span class="mock-label">Исследование:</span>
+                                            <span class="mock-value">КТ</span>
+                                        </div>
+                                        <div class="mock-field">
+                                            <span class="mock-label">Статус:</span>
+                                            <span class="mock-tag status-new">Новая</span>
+                                        </div>
+                                    </div>
+                                    <div class="mock-patient-card">
+                                        <h5><i class="fas fa-tasks"></i> Задача #155</h5>
+                                        <div class="mock-field">
+                                            <span class="mock-label">Пациент:</span>
+                                            <span class="mock-value">#32120</span>
+                                        </div>
+                                        <div class="mock-field">
+                                            <span class="mock-label">Исследование:</span>
+                                            <span class="mock-value">ПЭТ</span>
+                                        </div>
+                                        <div class="mock-field">
+                                            <span class="mock-label">Статус:</span>
+                                            <span class="mock-tag status-progress">В работе</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mobile-frame">
+                        <div class="mobile-screen">
+                            <div class="mock-interface">
+                                <div class="mock-header">
+                                    <i class="fas fa-bars"></i>
+                                    <h3>Задачи</h3>
+                                    <i class="fas fa-bell mock-pulse" style="margin-left: auto;"></i>
+                                </div>
+                                <div class="mock-content">
+                                    <div class="mock-task-list">
+                                        <div class="mock-task-item">
+                                            <div class="mock-patient">#156: Пациент 32123</div>
+                                            <div class="mock-details">
+                                                <span class="mock-tag kt">КТ</span>
+                                                <span class="mock-tag status-new">Новая</span>
+                                            </div>
+                                        </div>
+                                        <div class="mock-task-item">
+                                            <div class="mock-patient">#155: Пациент 32120</div>
+                                            <div class="mock-details">
+                                                <span class="mock-tag pet">ПЭТ</span>
+                                                <span class="mock-tag status-progress">В работе</span>
+                                            </div>
+                                        </div>
+                                        <div class="mock-task-item">
+                                            <div class="mock-patient">#154: Пациент 32115</div>
+                                            <div class="mock-details">
+                                                <span class="mock-tag kt">КТ</span>
+                                                <span class="mock-tag status-done">Готово</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <p class="screenshot-caption">Проверка задач с планшета на рабочем месте</p>
+
+                <div class="benefits-list">
+                    <div class="benefit-item">
+                        <i class="fas fa-bell"></i>
+                        <div>
+                            <h4>Уведомления</h4>
+                            <p>Мгновенные уведомления о новых задачах от врачей</p>
+                        </div>
+                    </div>
+                    <div class="benefit-item">
+                        <i class="fas fa-sync-alt"></i>
+                        <div>
+                            <h4>Обновление статуса</h4>
+                            <p>Изменяйте статус задачи прямо с телефона</p>
+                        </div>
+                    </div>
+                    <div class="benefit-item">
+                        <i class="fas fa-file-download"></i>
+                        <div>
+                            <h4>Доступ к файлам</h4>
+                            <p>Просмотр DICOM, изображений и документов</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 5: Чат с врачом -->
+        <div class="slide">
+            <div class="card">
+                <h2><i class="fas fa-comments"></i> Чат с врачом по каждому пациенту</h2>
+                <p style="text-align: center; margin-bottom: 30px;">
+                    Все уточнения в одном месте — не нужно звонить или писать в мессенджеры
+                </p>
+
+                <div class="chat-demo">
+                    <h4><i class="fas fa-comments"></i> Чат по пациенту #32123</h4>
+                    <div class="chat-messages">
+                        <div class="chat-message doctor">
+                            <div class="chat-avatar">И</div>
+                            <div class="chat-bubble">
+                                <div class="sender">Иванов А.С. (Врач)</div>
+                                <div>Добрый день! По пациенту #32123 нужна срочная консультация. КТ показало необычную локализацию.</div>
+                                <div class="time">10:30</div>
+                            </div>
+                        </div>
+
+                        <div class="chat-message physicist">
+                            <div class="chat-bubble">
+                                <div class="sender">Вы (Физик)</div>
+                                <div>Принял. Изучаю снимки. Есть особенности по углу наклона?</div>
+                                <div class="time">10:35</div>
+                            </div>
+                            <div class="chat-avatar" style="background: linear-gradient(135deg, #11998e, #38ef7d);">Ф</div>
+                        </div>
+
+                        <div class="chat-message doctor">
+                            <div class="chat-avatar">И</div>
+                            <div class="chat-bubble">
+                                <div class="sender">Иванов А.С. (Врач)</div>
+                                <div>Да, смещение на 15 градусов. Прикрепляю снимки.</div>
+                                <div class="file-attachment">
+                                    <i class="fas fa-file-image"></i>
+                                    <span>ct_scan_32123.png</span>
+                                </div>
+                                <div class="time">10:38</div>
+                            </div>
+                        </div>
+
+                        <div class="chat-message physicist">
+                            <div class="chat-avatar" style="background: linear-gradient(135deg, #11998e, #38ef7d);">Ф</div>
+                            <div class="chat-bubble">
+                                <div class="sender">Вы (Физик)</div>
+                                <div>Понял. Учту при планировании. Через 30 минут буду готов.</div>
+                                <div class="time">10:42</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card" style="background: #e8f5e9; border: 2px solid #11998e;">
+                    <h4 style="color: #11998e;"><i class="fas fa-check"></i> Преимущества чата в Task-Chat</h4>
+                    <ul style="list-style: none; margin-top: 15px;">
+                        <li style="padding: 8px 0;"><i class="fas fa-check" style="color: #11998e;"></i> История переписки привязана к пациенту</li>
+                        <li style="padding: 8px 0;"><i class="fas fa-check" style="color: #11998e;"></i> Можно прикреплять файлы и изображения</li>
+                        <li style="padding: 8px 0;"><i class="fas fa-check" style="color: #11998e;"></i> Не нужно искать в мессенджерах</li>
+                        <li style="padding: 8px 0;"><i class="fas fa-check" style="color: #11998e;"></i> Все коллеги видят контекст</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 6: Личные чаты -->
+        <div class="slide">
+            <div class="card">
+                <h2><i class="fas fa-user-secret"></i> Личные чаты с коллегами</h2>
+                <p style="text-align: center; margin-bottom: 30px;">
+                    Приватное обсуждение сложных случаев — только вы и собеседник
+                </p>
+
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <i class="fas fa-lock feature-icon"></i>
+                        <h4>Приватность</h4>
+                        <p>Личный чат видят только участники — идеально для обсуждения сложных случаев</p>
+                    </div>
+                    <div class="feature-card">
+                        <i class="fas fa-history feature-icon"></i>
+                        <h4>История</h4>
+                        <p>Вся переписка сохраняется — можно вернуться к обсуждению позже</p>
+                    </div>
+                    <div class="feature-card">
+                        <i class="fas fa-paperclip feature-icon"></i>
+                        <h4>Файлы</h4>
+                        <p>Прикрепляйте снимки, документы, расчёты прямо в чате</p>
+                    </div>
+                    <div class="feature-card">
+                        <i class="fas fa-bell feature-icon"></i>
+                        <h4>Уведомления</h4>
+                        <p>Мгновенные уведомления о новых сообщениях в чате</p>
+                    </div>
+                </div>
+
+                <div class="card" style="background: #fff3cd; border: 2px solid #ffc107; margin-top: 30px;">
+                    <h4 style="color: #856404;"><i class="fas fa-lightbulb"></i> Сценарии использования</h4>
+                    <ul style="margin-top: 15px; line-height: 2;">
+                        <li><i class="fas fa-comment-dots" style="color: #856404;"></i> Обсуждение нестандартного случая с опытным коллегой</li>
+                        <li><i class="fas fa-comment-dots" style="color: #856404;"></i> Консультация по сложному планированию</li>
+                        <li><i class="fas fa-comment-dots" style="color: #856404;"></i> Быстрый вопрос без создания задачи</li>
+                        <li><i class="fas fa-comment-dots" style="color: #856404;"></i> Обмен опытом и методиками</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 7: Процесс работы -->
+        <div class="slide">
+            <div class="card">
+                <h2><i class="fas fa-project-diagram"></i> Процесс работы физика</h2>
+                
+                <div class="patient-flow">
+                    <div class="flow-timeline">
+                        <div class="flow-point">
+                            <div class="flow-point-icon">
+                                <i class="fas fa-inbox"></i>
+                            </div>
+                            <h5>Получение</h5>
+                            <p>Задача от врача</p>
+                        </div>
+                        <div class="flow-point">
+                            <div class="flow-point-icon">
+                                <i class="fas fa-eye"></i>
+                            </div>
+                            <h5>Изучение</h5>
+                            <p>Данные пациента</p>
+                        </div>
+                        <div class="flow-point">
+                            <div class="flow-point-icon">
+                                <i class="fas fa-comments"></i>
+                            </div>
+                            <h5>Уточнение</h5>
+                            <p>Чат с врачом</p>
+                        </div>
+                        <div class="flow-point">
+                            <div class="flow-point-icon">
+                                <i class="fas fa-clipboard-check"></i>
+                            </div>
+                            <h5>Планирование</h5>
+                            <p>Внешняя система</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card" style="background: linear-gradient(135deg, #11998e, #38ef7d);">
+                        <span class="stat-number" data-animate-number="40">0</span>
+                        <span class="stat-label">% быстрее обработка</span>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, #4e54c8, #8f94fb);">
+                        <span class="stat-number" data-animate-number="0">0</span>
+                        <span class="stat-label">% пропущенных задач</span>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, #f093fb, #f5576c);">
+                        <span class="stat-number" data-animate-number="100">0</span>
+                        <span class="stat-label">% прозрачности</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 8: Преимущества -->
+        <div class="slide">
+            <div class="card">
+                <h2><i class="fas fa-star"></i> Преимущества для физика</h2>
+                
+                <div class="benefits-list">
+                    <div class="benefit-item">
+                        <i class="fas fa-inbox"></i>
+                        <div>
+                            <h4>Все задачи в одном месте</h4>
+                            <p>Импортированные пациенты сразу видны в списке — ничего не теряется</p>
+                        </div>
+                    </div>
+                    <div class="benefit-item">
+                        <i class="fas fa-sort-amount-down"></i>
+                        <div>
+                            <h4>Приоритизация</h4>
+                            <p>Чёткое понимание приоритетов задач</p>
+                        </div>
+                    </div>
+                    <div class="benefit-item">
+                        <i class="fas fa-comments"></i>
+                        <div>
+                            <h4>Чат с врачом</h4>
+                            <p>Быстрые уточнения без звонков</p>
+                        </div>
+                    </div>
+                    <div class="benefit-item">
+                        <i class="fas fa-user-secret"></i>
+                        <div>
+                            <h4>Личные чаты</h4>
+                            <p>Приватное обсуждение с коллегами</p>
+                        </div>
+                    </div>
+                    <div class="benefit-item">
+                        <i class="fas fa-mobile-alt"></i>
+                        <div>
+                            <h4>Мобильность</h4>
+                            <p>Работа с любого устройства в сети</p>
+                        </div>
+                    </div>
+                    <div class="benefit-item">
+                        <i class="fas fa-history"></i>
+                        <div>
+                            <h4>История</h4>
+                            <p>Полная история по каждому пациенту</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 9: Как начать -->
+        <div class="slide">
+            <div class="card">
+                <h2><i class="fas fa-rocket"></i> Как начать работу</h2>
+                
+                <div class="flow-steps">
+                    <div class="flow-step-card">
+                        <span class="step-number">1</span>
+                        <h4>Регистрация</h4>
+                        <p>Администратор создаёт вашу учётную запись с ролью "Физик"</p>
+                    </div>
+                    <div class="flow-step-card">
+                        <span class="step-number">2</span>
+                        <h4>Вход в систему</h4>
+                        <p>Откройте http://192.168.x.x:5000 в браузере</p>
+                    </div>
+                    <div class="flow-step-card">
+                        <span class="step-number">3</span>
+                        <h4>Просмотр задач</h4>
+                        <p>Все импортированные пациенты в списке задач</p>
+                    </div>
+                    <div class="flow-step-card">
+                        <span class="step-number">4</span>
+                        <h4>Чат с врачом</h4>
+                        <p>Уточняйте детали в чате по задаче</p>
+                    </div>
+                    <div class="flow-step-card">
+                        <span class="step-number">5</span>
+                        <h4>Обновление статуса</h4>
+                        <p>Меняйте статус по мере выполнения</p>
+                    </div>
+                </div>
+
+                <div class="gradient-info-box" style="background: linear-gradient(135deg, #11998e, #38ef7d);">
+                    <i class="fas fa-headset" style="font-size: 3rem; margin-bottom: 15px;"></i>
+                    <h3 style="margin-bottom: 10px;">Нужна помощь?</h3>
+                    <p>Обратитесь к администратору системы или ознакомьтесь с документацией</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="navigation">
+            <button class="nav-btn prev" onclick="presentation.prevSlide()">← Назад</button>
+            <button class="nav-btn next" onclick="presentation.nextSlide()">Далее →</button>
+        </div>
+
+        <div class="slide-indicators" id="indicators"></div>
+    </div>
+
+    <script src="js/presentations.js"></script>
+    <script>
+        const presentation = new Presentation(9);
+        
+        // Инициализация индикаторов
+        const indicators = document.getElementById('indicators');
+        for (let i = 0; i < 9; i++) {
+            const indicator = document.createElement('div');
+            indicator.className = 'indicator';
+            indicator.onclick = () => presentation.goToSlide(i);
+            indicators.appendChild(indicator);
+        }
+
+        // Инициализация анимации чисел
+        document.addEventListener('DOMContentLoaded', () => {
+            presentation.initNumberAnimations();
+        });
+    </script>
+</body>
+</html>

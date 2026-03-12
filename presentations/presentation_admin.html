@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task-Chat для администраторов — Презентация</title>
+    <link rel="stylesheet" href="css/presentations.css">
+    <link rel="stylesheet" href="css/mobile-frames.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        .admin-dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .admin-widget {
+            background: linear-gradient(135deg, #eb3349, #f5576c);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+        }
+
+        .admin-widget.blue { background: linear-gradient(135deg, #4e54c8, #8f94fb); }
+        .admin-widget.green { background: linear-gradient(135deg, #11998e, #38ef7d); }
+        .admin-widget.orange { background: linear-gradient(135deg, #f093fb, #f5576c); }
+
+        .admin-widget i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            opacity: 0.9;
+        }
+
+        .admin-widget .number {
+            font-size: 3rem;
+            font-weight: bold;
+            display: block;
+        }
+
+        .admin-widget .label {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+
+        .user-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 30px 0;
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .user-table th {
+            background: linear-gradient(135deg, #eb3349, #f5576c);
+            color: white;
+            padding: 15px;
+            text-align: left;
+        }
+
+        .user-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .user-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .role-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .role-admin { background: #ffebee; color: #c62828; }
+        .role-doctor { background: #e3f2fd; color: #1976d2; }
+        .role-physicist { background: #e8f5e9; color: #2e7d32; }
+
+        .status-dot {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .status-online { background: #4caf50; }
+        .status-offline { background: #9e9e9e; }
+
+        .logs-list {
+            background: #1a1a2e;
+            color: #00ff00;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            max-height: 300px;
+            overflow-y: auto;
+            margin: 20px 0;
+        }
+
+        .log-entry {
+            padding: 5px 0;
+            border-bottom: 1px solid #333;
+        }
+
+        .log-entry .timestamp {
+            color: #666;
+            margin-right: 10px;
+        }
+
+        .log-entry .level {
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        .log-entry .level-info { color: #00d2ff; }
+        .log-entry .level-warn { color: #ffc107; }
+        .log-entry .level-error { color: #ff4444; }
+
+        .management-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin: 30px 0;
+        }
+
+        .manage-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border-left: 5px solid #eb3349;
+        }
+
+        .manage-card h4 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .manage-card ul {
+            list-style: none;
+        }
+
+        .manage-card li {
+            padding: 8px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .manage-card li i {
+            color: #11998e;
+        }
+    </style>
+</head>
+<body>
+    <div class="progress-container">
+        <div class="progress-bar"></div>
+    </div>
+
+    <div class="presentation-container">
+        <!-- Slide 1: Титульный -->
+        <div class="slide active title-slide" style="background: linear-gradient(135deg, #eb3349, #f5576c);">
+            <i class="fas fa-user-cog logo"></i>
+            <h1>Task-Chat для администраторов</h1>
+            <p class="subtitle">Полный контроль над системой, пользователями и импортом пациентов</p>
+            <div style="margin-top: 40px; font-size: 1.2rem; opacity: 0.9;">
+                <i class="fas fa-mobile-alt"></i> Мобильная версия &nbsp;•&nbsp;
+                <i class="fas fa-users-cog"></i> Управление &nbsp;•&nbsp;
+                <i class="fas fa-chart-line"></i> Мониторинг
+            </div>
+            
+            <!-- Visual Mock Interface -->
+            <div style="margin-top: 50px; display: flex; justify-content: center; gap: 30px; flex-wrap: wrap;">
+                <div class="mobile-frame" style="transform: scale(0.9);">
+                    <div class="mobile-screen">
+                        <div class="mock-interface">
+                            <div class="mock-header">
+                                <i class="fas fa-cog"></i>
+                                <h3>Админка</h3>
+                                <i class="fas fa-bell mock-pulse" style="margin-left: auto;"></i>
+                            </div>
+                            <div class="mock-content">
+                                <div class="mock-task-list">
+                                    <div class="mock-task-item">
+                                        <div class="mock-patient">admin</div>
+                                        <div class="mock-details">
+                                            <span class="mock-tag kt">Админ</span>
+                                            <span class="mock-tag status-done">✓</span>
+                                        </div>
+                                    </div>
+                                    <div class="mock-task-item">
+                                        <div class="mock-patient">ivanov_as</div>
+                                        <div class="mock-details">
+                                            <span class="mock-tag mrt">Врач</span>
+                                            <span class="mock-tag status-done">✓</span>
+                                        </div>
+                                    </div>
+                                    <div class="mock-task-item">
+                                        <div class="mock-patient">petrov_vk</div>
+                                        <div class="mock-details">
+                                            <span class="mock-tag pet">Физик</span>
+                                            <span class="mock-tag status-progress">○</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 2: Проблема -->
+        <div class="slide">
+            <div class="card">
+                <h2><i class="fas fa-exclamation-triangle"></i> Проблемы администрирования</h2>
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <i class="fas fa-users feature-icon"></i>
+                        <h4>Управление пользователями</h4>
+                        <p>Ручное создание учётных записей, отслеживание доступов</p>
+                    </div>
+                    <div class="feature-card">
+                        <i class="fas fa-search feature-icon"></i>
+                        <h4>Отсутствие мониторинга</h4>
+                        <p>Не видно кто и что делает в системе</p>
+                    </div>
+                    <div class="feature-card">
+                        <i class="fas fa-database feature-icon"></i>
+                        <h4>Контроль импорта</h4>
+                        <p>Сложно отслеживать импорт пациентов</p>
+                    </div>
+                    <div class="feature-card">
+                        <i class="fas fa-shield-alt feature-icon"></i>
+                        <h4>Безопасность</h4>
+                        <p>Нет аудита действий пользователей</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 3: Решение -->
+        <div class="slide">
+            <div class="card">
+                <h2><i class="fas fa-check-circle"></i> Решение Task-Chat</h2>
+                <p style="font-size: 1.2rem; text-align: center; margin-bottom: 30px;">
+                    <strong>Админ-панель</strong> — полный контроль над системой в одном месте
+                </p>
+
+                <div class="admin-dashboard">
+                    <div class="admin-widget">
+                        <i class="fas fa-users"></i>
+                        <span class="number">24</span>
+                        <span class="label">Пользователя</span>
+                    </div>
+                    <div class="admin-widget blue">
+                        <i class="fas fa-procedures"></i>
+                        <span class="number">156</span>
+                        <span class="label">Пациентов</span>
+                    </div>
+                    <div class="admin-widget green">
+                        <i class="fas fa-tasks"></i>
+                        <span class="number">89</span>
+                        <span class="label">Задач</span>
+                    </div>
+                    <div class="admin-widget orange">
+                        <i class="fas fa-comments"></i>
+                        <span class="number">342</span>
+                        <span class="label">Сообщений</span>
+                    </div>
+                </div>
+
+                <table class="user-table">
+                    <thead>
+                        <tr>
+                            <th>Пользователь</th>
+                            <th>Роль</th>
+                            <th>Отделение</th>
+                            <th>Статус</th>
+                            <th>Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><i class="fas fa-user-circle"></i> admin</td>
+                            <td><span class="role-badge role-admin">Администратор</span></td>
+                            <td>ТП</td>
+                            <td><span class="status-dot status-online"></span>Онлайн</td>
+                            <td><i class="fas fa-edit"></i> <i class="fas fa-key"></i></td>
+                        </tr>
+                        <tr>
+                            <td><i class="fas fa-user-md"></i> ivanov_as</td>
+                            <td><span class="role-badge role-doctor">Врач</span></td>
+                            <td>РО1</td>
+                            <td><span class="status-dot status-online"></span>Онлайн</td>
+                            <td><i class="fas fa-edit"></i> <i class="fas fa-key"></i></td>
+                        </tr>
+                        <tr>
+                            <td><i class="fas fa-atom"></i> petrov_vk</td>
+                            <td><span class="role-badge role-physicist">Физик</span></td>
+                            <td>ФРО</td>
+                            <td><span class="status-dot status-offline"></span>Офлайн</td>
+                            <td><i class="fas fa-edit"></i> <i class="fas fa-key"></i></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Slide 4: Мобильная версия -->
+        <div class="slide">
+            <div class="card">
+                <h2><i class="fas fa-mobile-alt"></i> Мобильная версия для администратора</h2>
+                <p style="text-align: center; margin-bottom: 30px;">
+                    Администрирование с любого устройства в сети
+                </p>
+
+                <div class="comparison-view">
+                    <div class="desktop-frame">
+                        <div class="desktop-header">
+                            <div class="desktop-dot red"></div>
+                            <div class="desktop-dot yellow"></div>
+                            <div class="desktop-dot green"></div>
+                        </div>
+                        <div class="desktop-screen">
+                            <div class="mock-desktop-content">
+                                <h4 style="margin-bottom: 15px; color: #2c3e50;"><i class="fas fa-users-cog"></i> Управление пользователями</h4>
+                                <div class="mock-patient-grid">
+                                    <div class="mock-patient-card">
+                                        <h5><i class="fas fa-user-shield"></i> admin</h5>
+                                        <div class="mock-field">
+                                            <span class="mock-label">Роль:</span>
+                                            <span class="mock-value">Админ</span>
+                                        </div>
+                                        <div class="mock-field">
+                                            <span class="mock-label">Отделение:</span>
+                                            <span class="mock-value">ТП</span>
+                                        </div>
+                                        <div class="mock-field">
+                                            <span class="mock-label">Статус:</span>
+                                            <span class="mock-tag status-done">Онлайн</span>
+                                        </div>
+                                    </div>
+                                    <div class="mock-patient-card">
+                                        <h5><i class="fas fa-user-md"></i> ivanov_as</h5>
+                                        <div class="mock-field">
+                                            <span class="mock-label">Роль:</span>
+                                            <span class="mock-value">Врач</span>
+                                        </div>
+                                        <div class="mock-field">
+                                            <span class="mock-label">Отделение:</span>
+                                            <span class="mock-value">РО1</span>
+                                        </div>
+                                        <div class="mock-field">
+                                            <span class="mock-label">Статус:</span>
+                                            <span class="mock-tag status-done">Онлайн</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mobile-frame">
+                        <div class="mobile-screen">
+                            <div class="mock-interface">
+                                <div class="mock-header">
+                                    <i class="fas fa-cog"></i>
+                                    <h3>Админка</h3>
+                                    <i class="fas fa-bell mock-pulse" style="margin-left: auto;"></i>
+                                </div>
+                                <div class="mock-content">
+                                    <div class="mock-task-list">
+                                        <div class="mock-task-item">
+                                            <div class="mock-patient">admin</div>
+                                            <div class="mock-details">
+                                                <span class="mock-tag kt">Админ</span>
+                                                <span class="mock-tag status-done">✓</span>
+                                            </div>
+                                        </div>
+                                        <div class="mock-task-item">
+                                            <div class="mock-patient">ivanov_as</div>
+                                            <div class="mock-details">
+                                                <span class="mock-tag mrt">Врач</span>
+                                                <span class="mock-tag status-done">✓</span>
+                                            </div>
+                                        </div>
+                                        <div class="mock-task-item">
+                                            <div class="mock-patient">petrov_vk</div>
+                                            <div class="mock-details">
+                                                <span class="mock-tag pet">Физик</span>
+                                                <span class="mock-tag status-progress">○</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <p class="screenshot-caption">Мониторинг системы с планшета</p>
+
+                <div class="benefits-list">
+                    <div class="benefit-item">
+                        <i class="fas fa-bell"></i>
+                        <div>
+                            <h4>Уведомления</h4>
+                            <p>Оповещения о критических событиях системы</p>
+                        </div>
+                    </div>
+                    <div class="benefit-item">
+                        <i class="fas fa-user-plus"></i>
+                        <div>
+                            <h4>Быстрое добавление</h4>
+                            <p>Создание пользователей с мобильного</p>
+                        </div>
+                    </div>
+                    <div class="benefit-item">
+                        <i class="fas fa-chart-bar"></i>
+                        <div>
+                            <h4>Мониторинг</h4>
+                            <p>Статистика и метрики в реальном времени</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 5: Управление пользователями -->
+        <div class="slide">
+            <div class="card">
+                <h2><i class="fas fa-users-cog"></i> Управление пользователями</h2>
+                
+                <div class="management-grid">
+                    <div class="manage-card">
+                        <h4><i class="fas fa-user-plus"></i> Создание</h4>
+                        <ul>
+                            <li><i class="fas fa-check"></i> Быстрая регистрация</li>
+                            <li><i class="fas fa-check"></i> Выбор роли (Врач/Физик/Админ)</li>
+                            <li><i class="fas fa-check"></i> Назначение отделения</li>
+                            <li><i class="fas fa-check"></i> Генерация пароля</li>
+                        </ul>
+                    </div>
+
+                    <div class="manage-card">
+                        <h4><i class="fas fa-user-edit"></i> Редактирование</h4>
+                        <ul>
+                            <li><i class="fas fa-check"></i> Изменение данных</li>
+                            <li><i class="fas fa-check"></i> Смена роли</li>
+                            <li><i class="fas fa-check"></i> Перевод в отделение</li>
+                            <li><i class="fas fa-check"></i> Сброс пароля</li>
+                        </ul>
+                    </div>
+
+                    <div class="manage-card">
+                        <h4><i class="fas fa-user-shield"></i> Безопасность</h4>
+                        <ul>
+                            <li><i class="fas fa-check"></i> Блокировка пользователя</li>
+                            <li><i class="fas fa-check"></i> Принудительный выход</li>
+                            <li><i class="fas fa-check"></i> Аудит действий</li>
+                            <li><i class="fas fa-check"></i> История входов</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="card" style="background: #e3f2fd; border: 2px solid #2196f3; margin-top: 30px;">
+                    <h4 style="color: #1976d2;"><i class="fas fa-info-circle"></i> Роли в системе</h4>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 15px;">
+                        <div style="padding: 15px; background: white; border-radius: 10px;">
+                            <strong style="color: #c62828;">Администратор</strong>
+                            <p style="font-size: 0.9rem; margin-top: 5px;">Полный доступ ко всем функциям</p>
+                        </div>
+                        <div style="padding: 15px; background: white; border-radius: 10px;">
+                            <strong style="color: #1976d2;">Врач</strong>
+                            <p style="font-size: 0.9rem; margin-top: 5px;">Создание задач, импорт пациентов</p>
+                        </div>
+                        <div style="padding: 15px; background: white; border-radius: 10px;">
+                            <strong style="color: #2e7d32;">Физик</strong>
+                            <p style="font-size: 0.9rem; margin-top: 5px;">Просмотр задач, планирование</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 6: Мониторинг импорта -->
+        <div class="slide">
+            <div class="card">
+                <h2><i class="fas fa-chart-line"></i> Мониторинг импорта пациентов</h2>
+                <p style="text-align: center; margin-bottom: 30px;">
+                    Отслеживание всех импортированных пациентов в реальном времени
+                </p>
+
+                <div class="stats-grid">
+                    <div class="stat-card" style="background: linear-gradient(135deg, #4e54c8, #8f94fb);">
+                        <span class="stat-number" data-animate-number="156">0</span>
+                        <span class="stat-label">Всего пациентов</span>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, #11998e, #38ef7d);">
+                        <span class="stat-number" data-animate-number="24">0</span>
+                        <span class="stat-label">За неделю</span>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, #f093fb, #f5576c);">
+                        <span class="stat-number" data-animate-number="8">0</span>
+                        <span class="stat-label">За сегодня</span>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, #00d2ff, #3a7bd5);">
+                        <span class="stat-number" data-animate-number="98">0</span>
+                        <span class="stat-label">% учтено</span>
+                    </div>
+                </div>
+
+                <div style="max-width: 700px; margin: 40px auto;">
+                    <canvas id="importChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 7: Логи и аудит -->
+        <div class="slide">
+            <div class="card">
+                <h2><i class="fas fa-clipboard-list"></i> Логи и аудит действий</h2>
+                <p style="text-align: center; margin-bottom: 30px;">
+                    Полная история всех действий в системе
+                </p>
+
+                <div class="logs-list">
+                    <div class="log-entry">
+                        <span class="timestamp">2026-03-08 23:45:12</span>
+                        <span class="level level-info">INFO</span>
+                        <span>User admin logged in from 192.168.1.100</span>
+                    </div>
+                    <div class="log-entry">
+                        <span class="timestamp">2026-03-08 23:42:05</span>
+                        <span class="level level-info">INFO</span>
+                        <span>Task #156 created by ivanov_as</span>
+                    </div>
+                    <div class="log-entry">
+                        <span class="timestamp">2026-03-08 23:38:22</span>
+                        <span class="level level-warn">WARN</span>
+                        <span>Failed login attempt for user petrov_vk</span>
+                    </div>
+                    <div class="log-entry">
+                        <span class="timestamp">2026-03-08 23:35:18</span>
+                        <span class="level level-info">INFO</span>
+                        <span>Patient #32123 imported by ivanov_as</span>
+                    </div>
+                    <div class="log-entry">
+                        <span class="timestamp">2026-03-08 23:30:45</span>
+                        <span class="level level-info">INFO</span>
+                        <span>User sidorova_em registered by admin</span>
+                    </div>
+                    <div class="log-entry">
+                        <span class="timestamp">2026-03-08 23:25:10</span>
+                        <span class="level level-error">ERROR</span>
+                        <span>File upload failed: size exceeds limit</span>
+                    </div>
+                    <div class="log-entry">
+                        <span class="timestamp">2026-03-08 23:20:33</span>
+                        <span class="level level-info">INFO</span>
+                        <span>Task #155 status changed to completed</span>
+                    </div>
+                </div>
+
+                <div class="card" style="background: #fff3cd; border: 2px solid #ffc107;">
+                    <h4 style="color: #856404;"><i class="fas fa-shield-alt"></i> Аудит безопасности</h4>
+                    <ul style="margin-top: 15px; line-height: 2;">
+                        <li><i class="fas fa-check" style="color: #856404;"></i> Все входы в систему логируются</li>
+                        <li><i class="fas fa-check" style="color: #856404;"></i> История действий пользователей</li>
+                        <li><i class="fas fa-check" style="color: #856404;"></i> Отслеживание импорта пациентов</li>
+                        <li><i class="fas fa-check" style="color: #856404;"></i> Журнал ошибок системы</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 8: Преимущества -->
+        <div class="slide">
+            <div class="card">
+                <h2><i class="fas fa-star"></i> Преимущества для администратора</h2>
+                
+                <div class="benefits-list">
+                    <div class="benefit-item">
+                        <i class="fas fa-users-cog"></i>
+                        <div>
+                            <h4>Управление пользователями</h4>
+                            <p>Быстрое создание, редактирование, блокировка</p>
+                        </div>
+                    </div>
+                    <div class="benefit-item">
+                        <i class="fas fa-chart-bar"></i>
+                        <div>
+                            <h4>Мониторинг</h4>
+                            <p>Статистика по пациентам, задачам, пользователям</p>
+                        </div>
+                    </div>
+                    <div class="benefit-item">
+                        <i class="fas fa-clipboard-list"></i>
+                        <div>
+                            <h4>Аудит</h4>
+                            <p>Полная история всех действий</p>
+                        </div>
+                    </div>
+                    <div class="benefit-item">
+                        <i class="fas fa-mobile-alt"></i>
+                        <div>
+                            <h4>Мобильность</h4>
+                            <p>Администрирование с любого устройства</p>
+                        </div>
+                    </div>
+                    <div class="benefit-item">
+                        <i class="fas fa-database"></i>
+                        <div>
+                            <h4>Резервное копирование</h4>
+                            <p>Все данные в папке data/ — легко бэкапить</p>
+                        </div>
+                    </div>
+                    <div class="benefit-item">
+                        <i class="fas fa-shield-alt"></i>
+                        <div>
+                            <h4>Безопасность</h4>
+                            <p>Локальная система, нет доступа извне</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 9: Как начать -->
+        <div class="slide">
+            <div class="card">
+                <h2><i class="fas fa-rocket"></i> Начало работы администратора</h2>
+
+                <div class="flow-steps">
+                    <div class="flow-step-card">
+                        <span class="step-number">1</span>
+                        <h4>Установка</h4>
+                        <p>Запустите Task-Chat-Server.exe или run_server.sh</p>
+                    </div>
+                    <div class="flow-step-card">
+                        <span class="step-number">2</span>
+                        <h4>Первый вход</h4>
+                        <p>admin / admin123 (смените пароль!)</p>
+                    </div>
+                    <div class="flow-step-card">
+                        <span class="step-number">3</span>
+                        <h4>Создание пользователей</h4>
+                        <p>Добавьте врачей и физиков по отделениям</p>
+                    </div>
+                    <div class="flow-step-card">
+                        <span class="step-number">4</span>
+                        <h4>Инструктаж</h4>
+                        <p>Обучите персонал работе с системой</p>
+                    </div>
+                    <div class="flow-step-card">
+                        <span class="step-number">5</span>
+                        <h4>Мониторинг</h4>
+                        <p>Отслеживайте использование и статистику</p>
+                    </div>
+                </div>
+
+                <div class="gradient-info-box" style="background: linear-gradient(135deg, #eb3349, #f5576c);">
+                    <i class="fas fa-book" style="font-size: 3rem; margin-bottom: 15px;"></i>
+                    <h3 style="margin-bottom: 10px;">Документация</h3>
+                    <p>DEPLOYMENT.md — подробное руководство по развёртыванию</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="navigation">
+            <button class="nav-btn prev" onclick="presentation.prevSlide()">← Назад</button>
+            <button class="nav-btn next" onclick="presentation.nextSlide()">Далее →</button>
+        </div>
+
+        <div class="slide-indicators" id="indicators"></div>
+    </div>
+
+    <script src="js/presentations.js"></script>
+    <script>
+        const presentation = new Presentation(9);
+        
+        const indicators = document.getElementById('indicators');
+        for (let i = 0; i < 9; i++) {
+            const indicator = document.createElement('div');
+            indicator.className = 'indicator';
+            indicator.onclick = () => presentation.goToSlide(i);
+            indicators.appendChild(indicator);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            presentation.initNumberAnimations();
+            
+            const ctx = document.getElementById('importChart');
+            if (ctx) {
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'],
+                        datasets: [{
+                            label: 'Импорт пациентов',
+                            data: [12, 18, 15, 22, 28, 14, 10],
+                            borderColor: '#4e54c8',
+                            backgroundColor: 'rgba(78, 84, 200, 0.1)',
+                            fill: true,
+                            tension: 0.4,
+                            borderRadius: 10
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: { display: false },
+                            title: {
+                                display: true,
+                                text: 'Импорт пациентов по дням недели',
+                                font: { size: 16 }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: { display: true, text: 'Количество' }
+                            }
+                        }
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>

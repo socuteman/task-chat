@@ -500,7 +500,18 @@ data/logs/
 
 ---
 
+## Документация
+
+- **[📊 Презентации](presentations/index.html)** — Визуальные презентации для врачей, физиков, администраторов
+- **[📖 TECHNICAL.md](docs/TECHNICAL.md)** — Техническая документация для разработчиков
+- **[👨‍⚕️ USER_GUIDE.md](docs/USER_GUIDE.md)** — Руководство пользователя (врач, физик)
+- **[⚙️ ADMIN_GUIDE.md](docs/ADMIN_GUIDE.md)** — Руководство администратора
+- **[🚀 DEPLOYMENT.md](docs/DEPLOYMENT.md)** — Развёртывание и настройка
+- **[🔌 API.md](docs/API.md)** — API спецификация
+
+---
+
 ## Поддержка
 
-**Разработчик:** iak  
+**Разработчик:** iak
 **Email:** bawel@ya.ru

@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task-Chat — Развёртывание</title>
+    <link rel="stylesheet" href="css/presentations.css">
+    <link rel="stylesheet" href="css/mobile-frames.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+    <div class="progress-container">
+        <div class="progress-bar"></div>
+    </div>
+
+    <div class="presentation-container">
+        <!-- Slide 1: Титульный -->
+        <div class="slide active title-slide" style="background: linear-gradient(135deg, #f093fb, #f5576c);">
+            <i class="fas fa-server logo"></i>
+            <h1>Task-Chat — Развёртывание</h1>
+            <p class="subtitle">Портативная версия с быстрым запуском и локальной безопасностью</p>
+            <div style="margin-top: 40px; font-size: 1.2rem; opacity: 0.9;">
+                <i class="fas fa-bolt"></i> 1 минута на запуск &nbsp;•&nbsp;
+                <i class="fas fa-shield-alt"></i> Локальная безопасность &nbsp;•&nbsp;
+                <i class="fas fa-copy"></i> Переносимость
+            </div>
+            
+            <!-- Visual Mock Interface -->
+            <div style="margin-top: 50px; display: flex; justify-content: center; gap: 30px; flex-wrap: wrap;">
+                <div class="mobile-frame" style="transform: scale(0.9);">
+                    <div class="mobile-screen">
+                        <div class="mock-interface">
+                            <div class="mock-header">
+                                <i class="fas fa-server"></i>
+                                <h3>Сервер</h3>
+                                <i class="fas fa-bell mock-pulse" style="margin-left: auto;"></i>
+                            </div>
+                            <div class="mock-content" style="text-align: center; padding: 30px 15px;">
+                                <i class="fas fa-check-circle" style="font-size: 3rem; color: #11998e; margin-bottom: 15px;"></i>
+                                <p style="color: #2c3e50; font-weight: bold;">Сервер запущен!</p>
+                                <p style="color: #666; font-size: 0.85rem; margin-top: 10px;">http://192.168.x.x:5000</p>
+                                <div style="margin-top: 20px; padding: 10px; background: #e8f5e9; border-radius: 10px;">
+                                    <span style="color: #11998e; font-size: 0.8rem;"><i class="fas fa-shield-alt"></i> Локальная сеть</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 2: Проблема -->
+        <div class="slide">
+            <div class="card">
+                <h2><i class="fas fa-exclamation-triangle"></i> Проблемы развёртывания мед. ПО</h2>
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <i class="fas fa-clock feature-icon"></i>
+                        <h4>Долгая установка</h4>
+                        <p>Часы на установку и настройку зависимостей</p>
+                    </div>
+                    <div class="feature-card">
+                        <i class="fas fa-shield-alt feature-icon"></i>
+                        <h4>Требования безопасности</h4>
+                        <p>Нет доступа извне, только локальная сеть</p>
+                    </div>
+                    <div class="feature-card">
+                        <i class="fas fa-mobile-alt feature-icon"></i>
+                        <h4>Мобильность</h4>
+                        <p>Нужно на разных рабочих местах</p>
+                    </div>
+                    <div class="feature-card">
+                        <i class="fas fa-database feature-icon"></i>
+                        <h4>Данные</h4>
+                        <p>Сложность резервного копирования</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 3: Решение -->
+        <div class="slide">
+            <div class="card">
+                <h2><i class="fas fa-check-circle"></i> Решение Task-Chat</h2>
+                <p style="font-size: 1.2rem; text-align: center; margin-bottom: 30px;">
+                    <strong>Портативная версия</strong> — скопировал и работает
+                </p>
+
+                <style>
+                    @keyframes cardFadeIn {
+                        from { opacity: 0; transform: translateY(30px); }
+                        to { opacity: 1; transform: translateY(0); }
+                    }
+                    @keyframes cardPulse {
+                        0%, 100% { transform: scale(1); }
+                        50% { transform: scale(1.05); }
+                    }
+                    @keyframes iconBounce {
+                        0%, 100% { transform: translateY(0); }
+                        50% { transform: translateY(-8px); }
+                    }
+                    .feature-card {
+                        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+                        animation: cardFadeIn 0.6s ease-out forwards;
+                        opacity: 0;
+                    }
+                    .feature-card:nth-child(1) { animation-delay: 0.1s; }
+                    .feature-card:nth-child(2) { animation-delay: 0.2s; }
+                    .feature-card:nth-child(3) { animation-delay: 0.3s; }
+                    .feature-card:nth-child(4) { animation-delay: 0.4s; }
+                    .feature-card:nth-child(5) { animation-delay: 0.5s; }
+                    .feature-card:nth-child(6) { animation-delay: 0.6s; }
+                    .feature-card:hover {
+                        transform: translateY(-12px) scale(1.03);
+                        box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+                    }
+                    .feature-card:hover .icon-circle {
+                        animation: iconBounce 0.6s ease-in-out;
+                    }
+                    .icon-circle {
+                        transition: all 0.3s ease;
+                    }
+                    .feature-card:hover .icon-circle {
+                        box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+                    }
+                </style>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; margin: 30px 0;">
+                    <!-- Карточка 1 - Быстрый старт (жёлтый/оранжевый) -->
+                    <div class="feature-card" style="background: white; padding: 30px 25px; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.08); text-align: center; border-top: 4px solid #f5af19;">
+                        <div class="icon-circle" style="width: 70px; height: 70px; background: #f5af19; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; box-shadow: 0 4px 15px rgba(245, 175, 25, 0.4);">
+                            <i class="fas fa-bolt" style="font-size: 2rem; color: white;"></i>
+                        </div>
+                        <h4 style="color: #2c3e50; margin-bottom: 12px; font-size: 1.2rem; font-weight: 600;">Быстрый старт</h4>
+                        <p style="color: #666; font-size: 0.95rem; line-height: 1.6; margin: 0;">Запуск за 1 минуту без установки Python</p>
+                    </div>
+
+                    <!-- Карточка 2 - Один EXE файл (зелёный) -->
+                    <div class="feature-card" style="background: white; padding: 30px 25px; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.08); text-align: center; border-top: 4px solid #11998e;">
+                        <div class="icon-circle" style="width: 70px; height: 70px; background: #11998e; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; box-shadow: 0 4px 15px rgba(17, 153, 142, 0.4);">
+                            <i class="fas fa-box" style="font-size: 2rem; color: white;"></i>
+                        </div>
+                        <h4 style="color: #2c3e50; margin-bottom: 12px; font-size: 1.2rem; font-weight: 600;">Один EXE файл</h4>
+                        <p style="color: #666; font-size: 0.95rem; line-height: 1.6; margin: 0;">Всё включено в один исполняемый файл</p>
+                    </div>
+
+                    <!-- Карточка 3 - Переносимость (синий) -->
+                    <div class="feature-card" style="background: white; padding: 30px 25px; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.08); text-align: center; border-top: 4px solid #0984e3;">
+                        <div class="icon-circle" style="width: 70px; height: 70px; background: #0984e3; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; box-shadow: 0 4px 15px rgba(9, 132, 227, 0.4);">
+                            <i class="fas fa-folder" style="font-size: 2rem; color: white;"></i>
+                        </div>
+                        <h4 style="color: #2c3e50; margin-bottom: 12px; font-size: 1.2rem; font-weight: 600;">Переносимость</h4>
+                        <p style="color: #666; font-size: 0.95rem; line-height: 1.6; margin: 0;">Скопируйте каталог и работайте</p>
+                    </div>
+
+                    <!-- Карточка 4 - Данные отдельно (фиолетовый) -->
+                    <div class="feature-card" style="background: white; padding: 30px 25px; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.08); text-align: center; border-top: 4px solid #6c5ce7;">
+                        <div class="icon-circle" style="width: 70px; height: 70px; background: #6c5ce7; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; box-shadow: 0 4px 15px rgba(108, 92, 231, 0.4);">
+                            <i class="fas fa-database" style="font-size: 2rem; color: white;"></i>
+                        </div>
+                        <h4 style="color: #2c3e50; margin-bottom: 12px; font-size: 1.2rem; font-weight: 600;">Данные отдельно</h4>
+                        <p style="color: #666; font-size: 0.95rem; line-height: 1.6; margin: 0;">Все данные в папке data/</p>
+                    </div>
+
+                    <!-- Карточка 5 - Безопасность (красный) -->
+                    <div class="feature-card" style="background: white; padding: 30px 25px; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.08); text-align: center; border-top: 4px solid #d63031;">
+                        <div class="icon-circle" style="width: 70px; height: 70px; background: #d63031; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; box-shadow: 0 4px 15px rgba(214, 48, 49, 0.4);">
+                            <i class="fas fa-shield-alt" style="font-size: 2rem; color: white;"></i>
+                        </div>
+                        <h4 style="color: #2c3e50; margin-bottom: 12px; font-size: 1.2rem; font-weight: 600;">Безопасность</h4>
+                        <p style="color: #666; font-size: 0.95rem; line-height: 1.6; margin: 0;">Нет доступа извне, только локально</p>
+                    </div>
+
+                    <!-- Карточка 6 - Бэкап (бирюзовый) -->
+                    <div class="feature-card" style="background: white; padding: 30px 25px; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.08); text-align: center; border-top: 4px solid #00cec9;">
+                        <div class="icon-circle" style="width: 70px; height: 70px; background: #00cec9; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; box-shadow: 0 4px 15px rgba(0, 206, 201, 0.4);">
+                            <i class="fas fa-copy" style="font-size: 2rem; color: white;"></i>
+                        </div>
+                        <h4 style="color: #2c3e50; margin-bottom: 12px; font-size: 1.2rem; font-weight: 600;">Бэкап</h4>
+                        <p style="color: #666; font-size: 0.95rem; line-height: 1.6; margin: 0;">Просто скопируйте data/</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 4: Архитектура -->
+        <div class="slide">
+            <div class="card">
+                <h2><i class="fas fa-sitemap"></i> Архитектура развёртывания</h2>
+                <p style="text-align: center; margin-bottom: 30px;">
+                    Простая структура — легко понять и обслуживать
+                </p>
+
+                <div class="architecture-diagram" style="background: white; border-radius: 15px; padding: 40px; margin: 30px 0; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
+                    <div class="arch-nodes" style="display: flex; justify-content: space-around; align-items: center; flex-wrap: wrap; gap: 30px;">
+                        <div class="arch-node" style="background: linear-gradient(135deg, #4e54c8, #8f94fb); color: white !important; padding: 25px; border-radius: 15px; min-width: 200px; box-shadow: 0 5px 20px rgba(0,0,0,0.2);">
+                            <i class="fas fa-desktop" style="font-size: 3rem; margin-bottom: 15px; color: white !important;"></i>
+                            <h5 style="font-size: 1.1rem; margin-bottom: 5px; color: white !important; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">Клиенты</h5>
+                            <p style="font-size: 0.85rem; opacity: 0.9; margin: 0; color: white !important; text-shadow: 1px 1px 2px rgba(0,0,0,0.3);">Браузеры врачей и физиков</p>
+                        </div>
+                        <div class="arch-connection" style="flex: 1; height: 3px; background: linear-gradient(90deg, #4e54c8, #11998e); position: relative; min-width: 100px;"></div>
+                        <div class="arch-node" style="background: linear-gradient(135deg, #11998e, #38ef7d); color: white !important; padding: 25px; border-radius: 15px; min-width: 200px; box-shadow: 0 5px 20px rgba(0,0,0,0.2);">
+                            <i class="fas fa-server" style="font-size: 3rem; margin-bottom: 15px; color: white !important;"></i>
+                            <h5 style="font-size: 1.1rem; margin-bottom: 5px; color: white !important; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">Task-Chat Server</h5>
+                            <p style="font-size: 0.85rem; opacity: 0.9; margin: 0; color: white !important; text-shadow: 1px 1px 2px rgba(0,0,0,0.3);">Flask приложение</p>
+                        </div>
+                        <div class="arch-connection" style="flex: 1; height: 3px; background: linear-gradient(90deg, #11998e, #00d2ff); position: relative; min-width: 100px;"></div>
+                        <div class="arch-node" style="background: linear-gradient(135deg, #00d2ff, #3a7bd5); color: white !important; padding: 25px; border-radius: 15px; min-width: 200px; box-shadow: 0 5px 20px rgba(0,0,0,0.2);">
+                            <i class="fas fa-database" style="font-size: 3rem; margin-bottom: 15px; color: white !important;"></i>
+                            <h5 style="font-size: 1.1rem; margin-bottom: 5px; color: white !important; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">SQLite</h5>
+                            <p style="font-size: 0.85rem; opacity: 0.9; margin: 0; color: white !important; text-shadow: 1px 1px 2px rgba(0,0,0,0.3);">База данных в data/</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="code-block" style="background: #1a1a2e; color: #00ff00; padding: 20px; border-radius: 10px; font-family: 'Courier New', monospace; font-size: 0.9rem; margin: 15px 0; overflow-x: auto; box-shadow: 0 5px 20px rgba(0,0,0,0.3);">
+                    <strong style="color: #00ff00; display: block; margin-bottom: 10px; font-size: 1rem;">Структура каталога:</strong>
+                    <pre style="margin: 0; white-space: pre-wrap; word-wrap: break-word;">Task-Chat-Server-v0.3.3/
+├── Task-Chat-Server.exe    # Портативный сервер (Windows)
+├── run_server.sh           # Скрипт запуска (Linux)
+├── app/                    # Исходный код
+├── data/                   # ДАННЫЕ (БД, логи, файлы)
+│   ├── instance/           # База данных
+│   ├── logs/               # Логи
+│   └── uploads/            # Загруженные файлы
+└── venv/                   # Виртуальное окружение</pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 5: Установка Windows -->
+        <div class="slide">
+            <div class="card">
+                <h2><i class="fab fa-windows"></i> Установка на Windows</h2>
+
+                <div class="deployment-steps">
+                    <div class="deployment-step">
+                        <span class="step-number">1</span>
+                        <h4>Скопируйте каталог</h4>
+                        <p>Скопируйте <code>Task-Chat-Server-v0.3.3\</code> в нужное место (например, <code>C:\Servers\Task-Chat\</code>)</p>
+                    </div>
+
+                    <div class="deployment-step">
+                        <span class="step-number">2</span>
+                        <h4>Запустите сервер</h4>
+                        <p>Дважды кликните на <code>Task-Chat-Server.exe</code> или <code>RUN_GUI.bat</code></p>
+                    </div>
+
+                    <div class="deployment-step">
+                        <span class="step-number">3</span>
+                        <h4>Откройте браузер</h4>
+                        <p>Перейдите на <code>http://192.168.x.x:5000</code></p>
+                    </div>
+
+                    <div class="deployment-step">
+                        <span class="step-number">4</span>
+                        <h4>Войдите в систему</h4>
+                        <p>Логин: <code>admin</code> / Пароль: <code>admin123</code></p>
+                    </div>
+                </div>
+
+                <div class="card" style="background: #e8f5e9; border: 2px solid #11998e;">
+                    <h4 style="color: #11998e;"><i class="fas fa-check-circle"></i> Готово!</h4>
+                    <p style="margin-top: 10px;">Сервер запущен и готов к работе. GUI интерфейс управления откроется автоматически.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 6: Установка Linux -->
+        <div class="slide">
+            <div class="card">
+                <h2><i class="fab fa-linux"></i> Установка на Linux</h2>
+
+                <div class="deployment-steps">
+                    <div class="deployment-step">
+                        <span class="step-number">1</span>
+                        <h4>Скопируйте каталог</h4>
+                        <p>Скопируйте <code>Task-Chat-Server-v0.3.3/</code> в нужное место</p>
+                    </div>
+
+                    <div class="deployment-step">
+                        <span class="step-number">2</span>
+                        <h4>Дайте права на выполнение</h4>
+                        <p><code>chmod +x run_server.sh</code></p>
+                    </div>
+
+                    <div class="deployment-step">
+                        <span class="step-number">3</span>
+                        <h4>Запустите сервер</h4>
+                        <p><code>./run_server.sh</code></p>
+                    </div>
+
+                    <div class="deployment-step">
+                        <span class="step-number">4</span>
+                        <h4>Войдите в систему</h4>
+                        <p>Логин: <code>admin</code> / Пароль: <code>admin123</code></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 7: Безопасность -->
+        <div class="slide">
+            <div class="card">
+                <h2><i class="fas fa-shield-alt"></i> Локальная безопасность</h2>
+                <p style="text-align: center; margin-bottom: 30px;">
+                    Нет доступа извне — все данные внутри периметра сети клиники
+                </p>
+
+                <div class="security-comparison">
+                    <div class="security-box local">
+                        <h4><i class="fas fa-network-wired"></i> Task-Chat (Локально)</h4>
+                        <ul>
+                            <li><i class="fas fa-check"></i> Только локальная сеть</li>
+                            <li><i class="fas fa-check"></i> Нет доступа из интернета</li>
+                            <li><i class="fas fa-check"></i> Данные на сервере клиники</li>
+                            <li><i class="fas fa-check"></i> Соответствует требованиям</li>
+                            <li><i class="fas fa-check"></i> Простое резервное копирование</li>
+                            <li><i class="fas fa-check"></i> Не требует интернета</li>
+                        </ul>
+                        <p style="color: #11998e; font-weight: bold; margin-top: 20px;">
+                            <i class="fas fa-lock"></i> Безопасно ✓
+                        </p>
+                    </div>
+
+                    <div class="security-box cloud">
+                        <h4><i class="fas fa-cloud"></i> Облачные решения</h4>
+                        <ul>
+                            <li><i class="fas fa-times"></i> Доступ отовсюду</li>
+                            <li><i class="fas fa-times"></i> Данные в облаке провайдера</li>
+                            <li><i class="fas fa-times"></i> Риск утечки</li>
+                            <li><i class="fas fa-times"></i> Зависимость от интернета</li>
+                            <li><i class="fas fa-times"></i> Сложный аудит</li>
+                            <li><i class="fas fa-times"></i> Требуется настройка безопасности</li>
+                        </ul>
+                        <p style="color: #eb3349; font-weight: bold; margin-top: 20px;">
+                            <i class="fas fa-exclamation-triangle"></i> Риск ✗
+                        </p>
+                    </div>
+                </div>
+
+                <div class="card" style="background: #fff3cd; border: 2px solid #ffc107;">
+                    <h4 style="color: #856404;"><i class="fas fa-info-circle"></i> Важно понимать</h4>
+                    <p style="margin-top: 10px;">
+                        <strong>Недостаток:</strong> Нет удалённого доступа из дома или вне сети клиники.<br>
+                        <strong>Но это плюс:</strong> Осознанный выбор безопасности медицинских данных. 
+                        Соответствует требованиям к хранению персональной информации пациентов.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 8: Требования -->
+        <div class="slide">
+            <div class="card">
+                <h2><i class="fas fa-clipboard-check"></i> Системные требования</h2>
+                
+                <table class="requirements-table">
+                    <thead>
+                        <tr>
+                            <th>Компонент</th>
+                            <th>Минимальные</th>
+                            <th>Рекомендуемые</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>ОС</strong></td>
+                            <td>Windows 10 / Linux</td>
+                            <td>Windows 11 / Ubuntu 22.04</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Процессор</strong></td>
+                            <td>2 ядра</td>
+                            <td>4 ядра</td>
+                        </tr>
+                        <tr>
+                            <td><strong>ОЗУ</strong></td>
+                            <td>2 GB</td>
+                            <td>4 GB</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Диск</strong></td>
+                            <td>500 MB</td>
+                            <td>2 GB + место для данных</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Сеть</strong></td>
+                            <td>Локальная сеть</td>
+                            <td>Гигабитная сеть</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Браузер</strong></td>
+                            <td>Chrome/Firefox</td>
+                            <td>Chrome 100+</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="stats-grid">
+                    <div class="stat-card" style="background: linear-gradient(135deg, #f093fb, #f5576c);">
+                        <span class="stat-number">1</span>
+                        <span class="stat-label">Минута на запуск</span>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, #4e54c8, #8f94fb);">
+                        <span class="stat-number">500</span>
+                        <span class="stat-label">MB на диске</span>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, #11998e, #38ef7d);">
+                        <span class="stat-number">0</span>
+                        <span class="stat-label">₽ за лицензию</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 9: Преимущества -->
+        <div class="slide">
+            <div class="card">
+                <h2><i class="fas fa-star"></i> Преимущества развёртывания</h2>
+                
+                <div class="benefits-list">
+                    <div class="benefit-item">
+                        <i class="fas fa-bolt"></i>
+                        <div>
+                            <h4>Быстрый старт</h4>
+                            <p>Запуск за 1 минуту без установки Python и зависимостей</p>
+                        </div>
+                    </div>
+                    <div class="benefit-item">
+                        <i class="fas fa-copy"></i>
+                        <div>
+                            <h4>Переносимость</h4>
+                            <p>Скопируйте каталог и работайте на другом ПК</p>
+                        </div>
+                    </div>
+                    <div class="benefit-item">
+                        <i class="fas fa-shield-alt"></i>
+                        <div>
+                            <h4>Безопасность</h4>
+                            <p>Локальная сеть, нет доступа извне</p>
+                        </div>
+                    </div>
+                    <div class="benefit-item">
+                        <i class="fas fa-database"></i>
+                        <div>
+                            <h4>Простой бэкап</h4>
+                            <p>Все данные в папке data/ — просто скопируйте</p>
+                        </div>
+                    </div>
+                    <div class="benefit-item">
+                        <i class="fas fa-mobile-alt"></i>
+                        <div>
+                            <h4>Кроссплатформенность</h4>
+                            <p>Windows и Linux версии</p>
+                        </div>
+                    </div>
+                    <div class="benefit-item">
+                        <i class="fas fa-ruble-sign"></i>
+                        <div>
+                            <h4>Бесплатно</h4>
+                            <p>Нет лицензионных отчислений</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="navigation">
+            <button class="nav-btn prev" onclick="presentation.prevSlide()">← Назад</button>
+            <button class="nav-btn next" onclick="presentation.nextSlide()">Далее →</button>
+        </div>
+
+        <div class="slide-indicators" id="indicators"></div>
+    </div>
+
+    <script src="js/presentations.js"></script>
+    <script>
+        const presentation = new Presentation(9);
+        
+        const indicators = document.getElementById('indicators');
+        for (let i = 0; i < 9; i++) {
+            const indicator = document.createElement('div');
+            indicator.className = 'indicator';
+            indicator.onclick = () => presentation.goToSlide(i);
+            indicators.appendChild(indicator);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            presentation.initNumberAnimations();
+        });
+    </script>
+</body>
+</html>

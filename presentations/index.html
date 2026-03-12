@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task-Chat Server v0.4.9 — Презентации</title>
+    <link rel="stylesheet" href="css/presentations.css">
+    <link rel="stylesheet" href="css/mobile-frames.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .hero {
+            background: linear-gradient(135deg, #4e54c8, #8f94fb);
+            min-height: 60vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: white;
+            padding: 40px 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 20% 50%, rgba(255,255,255,0.1) 0%, transparent 50%);
+            animation: heroPulse 5s ease-in-out infinite;
+        }
+
+        @keyframes heroPulse {
+            0%, 100% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .hero p {
+            font-size: 1.4rem;
+            opacity: 0.95;
+            max-width: 700px;
+            margin: 0 auto 30px;
+        }
+
+        .version-badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            padding: 8px 20px;
+            border-radius: 50px;
+            font-size: 1rem;
+            margin-top: 20px;
+        }
+
+        .presentations-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 30px;
+            max-width: 1400px;
+            margin: -50px auto 50px;
+            padding: 0 20px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .presentation-card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px 30px;
+            text-align: center;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.1);
+            transition: all 0.4s ease;
+            cursor: pointer;
+            border-top: 5px solid transparent;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
+        .presentation-card:hover {
+            transform: translateY(-15px) scale(1.03);
+            box-shadow: 0 25px 60px rgba(0,0,0,0.2);
+        }
+
+        .presentation-card.doctor { border-color: #4e54c8; }
+        .presentation-card.physicist { border-color: #11998e; }
+        .presentation-card.admin { border-color: #eb3349; }
+        .presentation-card.deployment { border-color: #f093fb; }
+        .presentation-card.management { border-color: #00d2ff; }
+
+        .card-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            display: block;
+        }
+
+        .presentation-card.doctor .card-icon { color: #4e54c8; }
+        .presentation-card.physicist .card-icon { color: #11998e; }
+        .presentation-card.admin .card-icon { color: #eb3349; }
+        .presentation-card.deployment .card-icon { color: #f093fb; }
+        .presentation-card.management .card-icon { color: #00d2ff; }
+
+        .presentation-card h3 {
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+            color: #2c3e50;
+        }
+
+        .presentation-card p {
+            color: #666;
+            line-height: 1.7;
+            margin-bottom: 20px;
+        }
+
+        .card-features {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .feature-tag {
+            background: #f0f0f0;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            color: #555;
+        }
+
+        .info-section {
+            max-width: 1000px;
+            margin: 80px auto;
+            padding: 0 20px;
+        }
+
+        .info-section h2 {
+            text-align: center;
+            font-size: 2.5rem;
+            color: #2c3e50;
+            margin-bottom: 40px;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+        }
+
+        .info-card {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+        }
+
+        .info-card i {
+            font-size: 2.5rem;
+            color: #4e54c8;
+            margin-bottom: 20px;
+        }
+
+        .info-card h4 {
+            font-size: 1.3rem;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .info-card p {
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .footer {
+            background: #1a1a2e;
+            color: white;
+            text-align: center;
+            padding: 40px 20px;
+            margin-top: 80px;
+        }
+
+        .footer p {
+            opacity: 0.8;
+        }
+
+        .footer a {
+            color: #00d2ff;
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2rem;
+            }
+            
+            .hero p {
+                font-size: 1.1rem;
+            }
+
+            .presentations-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <i class="fas fa-comments logo" style="font-size: 6rem; margin-bottom: 30px;"></i>
+            <h1>Task-Chat Server v0.4.9</h1>
+            <p>Система управления задачами на медицинские исследования (CT, MR, PET) с коммуникацией между врачами и физиками</p>
+            <span class="version-badge">
+                <i class="fas fa-shield-alt"></i> Локальная безопасность &nbsp;•&nbsp;
+                <i class="fas fa-users"></i> Личные чаты &nbsp;•&nbsp;
+                <i class="fas fa-tasks"></i> Управление задачами &nbsp;•&nbsp;
+                <i class="fas fa-file-alt"></i> Передача данных пациентов
+            </span>
+        </div>
+    </section>
+
+    <!-- Presentations Grid -->
+    <div class="presentations-grid">
+        <!-- Для врачей -->
+        <a href="presentation_doctor.html" class="presentation-card doctor">
+            <i class="fas fa-user-md card-icon"></i>
+            <h3>Для врачей</h3>
+            <p>Создание задач на исследования, передача данных пациентов, чат с физиками</p>
+            <div class="card-features">
+                <span class="feature-tag"><i class="fas fa-tasks"></i> Создание задач</span>
+                <span class="feature-tag"><i class="fas fa-file-medical"></i> Данные пациентов</span>
+                <span class="feature-tag"><i class="fas fa-comments"></i> Личные чаты</span>
+            </div>
+        </a>
+
+        <!-- Для физиков -->
+        <a href="presentation_physicist.html" class="presentation-card physicist">
+            <i class="fas fa-atom card-icon"></i>
+            <h3>Для физиков</h3>
+            <p>Все задачи на планирование, изменение статуса, чат с врачами, файлы</p>
+            <div class="card-features">
+                <span class="feature-tag"><i class="fas fa-tasks"></i> Все задачи</span>
+                <span class="feature-tag"><i class="fas fa-sync-alt"></i> Изменение статуса</span>
+                <span class="feature-tag"><i class="fas fa-comments"></i> Чат с врачом</span>
+            </div>
+        </a>
+
+        <!-- Для администраторов -->
+        <a href="presentation_admin.html" class="presentation-card admin">
+            <i class="fas fa-user-cog card-icon"></i>
+            <h3>Для администраторов</h3>
+            <p>Полный контроль над пользователями, задачами и импортом пациентов</p>
+            <div class="card-features">
+                <span class="feature-tag"><i class="fas fa-mobile"></i> Мобильная версия</span>
+                <span class="feature-tag"><i class="fas fa-users-cog"></i> Управление</span>
+                <span class="feature-tag"><i class="fas fa-chart-line"></i> Статистика</span>
+            </div>
+        </a>
+
+        <!-- Для развёртывания -->
+        <a href="presentation_deployment.html" class="presentation-card deployment">
+            <i class="fas fa-server card-icon"></i>
+            <h3>Для развёртывания</h3>
+            <p>Портативная версия, установка за 1 минуту, локальная безопасность без доступа извне</p>
+            <div class="card-features">
+                <span class="feature-tag"><i class="fas fa-rocket"></i> Быстрый старт</span>
+                <span class="feature-tag"><i class="fas fa-shield-alt"></i> Безопасность</span>
+                <span class="feature-tag"><i class="fas fa-copy"></i> Переносимость</span>
+            </div>
+        </a>
+
+        <!-- Для руководства -->
+        <a href="presentation_management.html" class="presentation-card management">
+            <i class="fas fa-chart-bar card-icon"></i>
+            <h3>Для руководства</h3>
+            <p>Прозрачность процессов, статистика импорта, загрузка персонала, безопасность данных</p>
+            <div class="card-features">
+                <span class="feature-tag"><i class="fas fa-mobile"></i> Мобильная версия</span>
+                <span class="feature-tag"><i class="fas fa-chart-pie"></i> Дашборд</span>
+                <span class="feature-tag"><i class="fas fa-lock"></i> Безопасность</span>
+            </div>
+        </a>
+    </div>
+
+    <!-- Info Section -->
+    <section class="info-section">
+        <h2>Ключевые преимущества Task-Chat</h2>
+        <div class="info-grid">
+            <div class="info-card">
+                <i class="fas fa-file-medical"></i>
+                <h4>Передача данных пациентов</h4>
+                <p>Информация о пациентах для планирования — номер карты, тип исследования, экспертная группа, оборудование</p>
+            </div>
+            <div class="info-card">
+                <i class="fas fa-comments"></i>
+                <h4>Личные чаты</h4>
+                <p>Внутренние чаты вместо мессенджеров — всё в одном месте, не путаясь в рабочих чатах</p>
+            </div>
+            <div class="info-card">
+                <i class="fas fa-shield-alt"></i>
+                <h4>Локальная безопасность</h4>
+                <p>Нет доступа извне — все данные внутри периметра медицинской сети</p>
+            </div>
+            <div class="info-card">
+                <i class="fas fa-bolt"></i>
+                <h4>Быстрое развёртывание</h4>
+                <p>Установка за 1 минуту без необходимости установки Python и зависимостей</p>
+            </div>
+            <div class="info-card">
+                <i class="fas fa-database"></i>
+                <h4>Переносимые данные</h4>
+                <p>Все данные в папке data/ — легко резервировать и переносить</p>
+            </div>
+            <div class="info-card">
+                <i class="fas fa-paperclip"></i>
+                <h4>Файлы и документы</h4>
+                <p>Прикрепление изображений, PDF, DICOM, архивов к задачам и сообщениям</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>
+            <strong>Task-Chat Server v0.4.9</strong> — Система управления задачами на медицинские исследования (CT, MR, PET)
+        </p>
+        <p style="margin-top: 15px;">
+            <i class="fas fa-exclamation-triangle"></i>
+            <strong>Важно:</strong> Система работает только в локальной сети (нет доступа извне) —
+            это осознанный выбор безопасности медицинских данных
+        </p>
+        <p style="margin-top: 20px; font-size: 0.9rem;">
+            <a href="../README.md"><i class="fas fa-book"></i> Документация</a> &nbsp;•&nbsp;
+            <a href="../docs/DEPLOYMENT.md"><i class="fas fa-cog"></i> Развёртывание</a> &nbsp;•&nbsp;
+            <a href="../docs/API.md"><i class="fas fa-plug"></i> API</a>
+        </p>
+    </footer>
+
+    <script src="js/presentations.js"></script>
+</body>
+</html>
