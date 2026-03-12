@@ -1,0 +1,28 @@
+# Task-Chat v0.4.7 - Core Dependencies
+# Минимальные зависимости для production сервера
+
+# Flask Framework
+Flask==2.3.3
+Flask-Login==0.6.3
+Flask-SQLAlchemy==3.1.1
+Flask-WTF==1.2.1
+Werkzeug==3.0.1
+WTForms==3.1.2
+email-validator==2.1.0
+python-dotenv==1.0.0
+
+# База данных
+SQLAlchemy==2.0.36
+
+# Production WSGI Servers
+waitress>=3.0.0; platform_system == "Windows"
+gunicorn>=21.0.0; platform_system != "Windows"
+
+# Утилиты
+psutil>=5.9.0
+
+# HTTP запросы
+requests>=2.31.0
+
+# JSON парсинг
+PyYAML>=6.0
