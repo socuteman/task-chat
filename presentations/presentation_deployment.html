@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Task-Chat — Развёртывание</title>
+    <title>Task-Chat — Развёртывание v0.4.9</title>
     <link rel="stylesheet" href="css/presentations.css">
     <link rel="stylesheet" href="css/mobile-frames.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -16,32 +16,41 @@
 
     <div class="presentation-container">
         <!-- Slide 1: Титульный -->
-        <div class="slide active title-slide" style="background: linear-gradient(135deg, #f093fb, #f5576c);">
+        <div class="slide active title-slide" style="background: linear-gradient(135deg, #4f46e5, #7c3aed);">
             <i class="fas fa-server logo"></i>
-            <h1>Task-Chat — Развёртывание</h1>
-            <p class="subtitle">Портативная версия с быстрым запуском и локальной безопасностью</p>
+            <h1>Task-Chat v0.4.9 — Развёртывание</h1>
+            <p class="subtitle">Локальный сервер для клиники — быстро и безопасно</p>
             <div style="margin-top: 40px; font-size: 1.2rem; opacity: 0.9;">
-                <i class="fas fa-bolt"></i> 1 минута на запуск &nbsp;•&nbsp;
-                <i class="fas fa-shield-alt"></i> Локальная безопасность &nbsp;•&nbsp;
-                <i class="fas fa-copy"></i> Переносимость
+                <i class="fab fa-github"></i> GitHub репозиторий &nbsp;•&nbsp;
+                <i class="fas fa-shield-alt"></i> Только локальная сеть &nbsp;•&nbsp;
+                <i class="fas fa-database"></i> Простое резервирование
             </div>
-            
+
             <!-- Visual Mock Interface -->
             <div style="margin-top: 50px; display: flex; justify-content: center; gap: 30px; flex-wrap: wrap;">
                 <div class="mobile-frame" style="transform: scale(0.9);">
                     <div class="mobile-screen">
                         <div class="mock-interface">
-                            <div class="mock-header">
-                                <i class="fas fa-server"></i>
-                                <h3>Сервер</h3>
-                                <i class="fas fa-bell mock-pulse" style="margin-left: auto;"></i>
+                            <div style="background: white; border-bottom: 1px solid #e2e8f0; padding: 14px 16px; display: flex; justify-content: space-between; align-items: center;">
+                                <div style="display: flex; align-items: center; gap: 12px;">
+                                    <i class="fas fa-comments-medical" style="font-size: 1.5rem; color: #4f46e5;"></i>
+                                    <h1 style="font-size: 1.2rem; font-weight: 800; margin: 0; background: linear-gradient(135deg, #4f46e5, #7c3aed); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Task-Chat</h1>
+                                </div>
                             </div>
-                            <div class="mock-content" style="text-align: center; padding: 30px 15px;">
-                                <i class="fas fa-check-circle" style="font-size: 3rem; color: #11998e; margin-bottom: 15px;"></i>
-                                <p style="color: #2c3e50; font-weight: bold;">Сервер запущен!</p>
-                                <p style="color: #666; font-size: 0.85rem; margin-top: 10px;">http://192.168.x.x:5000</p>
-                                <div style="margin-top: 20px; padding: 10px; background: #e8f5e9; border-radius: 10px;">
-                                    <span style="color: #11998e; font-size: 0.8rem;"><i class="fas fa-shield-alt"></i> Локальная сеть</span>
+                            <div class="mock-content" style="padding: 20px; text-align: center;">
+                                <i class="fas fa-check-circle" style="font-size: 3rem; color: #10b981; margin-bottom: 15px;"></i>
+                                <p style="color: #1e293b; font-weight: 700; font-size: 14px; margin-bottom: 8px;">Сервер запущен!</p>
+                                <p style="color: #64748b; font-size: 12px; margin-bottom: 16px;">http://localhost:5000</p>
+                                <div style="background: linear-gradient(135deg, #d1fae5, #a7f3d0); padding: 12px; border-radius: 8px; border: 1px solid #10b981;">
+                                    <span style="color: #065f46; font-size: 11px; font-weight: 600;">
+                                        <i class="fas fa-shield-alt"></i> Локальная сеть клиники
+                                    </span>
+                                </div>
+                                <div style="margin-top: 16px; padding: 12px; background: #f8fafc; border-radius: 8px;">
+                                    <div style="font-size: 10px; color: #64748b; margin-bottom: 4px;">Логин</div>
+                                    <div style="font-size: 12px; color: #1e293b; font-weight: 600;">admin</div>
+                                    <div style="font-size: 10px; color: #64748b; margin-top: 8px; margin-bottom: 4px;">Пароль</div>
+                                    <div style="font-size: 12px; color: #1e293b; font-weight: 600;">admin123</div>
                                 </div>
                             </div>
                         </div>
@@ -50,444 +59,388 @@
             </div>
         </div>
 
-        <!-- Slide 2: Проблема -->
+        <!-- Slide 2: GitHub репозиторий -->
         <div class="slide">
             <div class="card">
-                <h2><i class="fas fa-exclamation-triangle"></i> Проблемы развёртывания мед. ПО</h2>
-                <div class="feature-grid">
-                    <div class="feature-card">
-                        <i class="fas fa-clock feature-icon"></i>
-                        <h4>Долгая установка</h4>
-                        <p>Часы на установку и настройку зависимостей</p>
-                    </div>
-                    <div class="feature-card">
-                        <i class="fas fa-shield-alt feature-icon"></i>
-                        <h4>Требования безопасности</h4>
-                        <p>Нет доступа извне, только локальная сеть</p>
-                    </div>
-                    <div class="feature-card">
-                        <i class="fas fa-mobile-alt feature-icon"></i>
-                        <h4>Мобильность</h4>
-                        <p>Нужно на разных рабочих местах</p>
-                    </div>
-                    <div class="feature-card">
-                        <i class="fas fa-database feature-icon"></i>
-                        <h4>Данные</h4>
-                        <p>Сложность резервного копирования</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Slide 3: Решение -->
-        <div class="slide">
-            <div class="card">
-                <h2><i class="fas fa-check-circle"></i> Решение Task-Chat</h2>
-                <p style="font-size: 1.2rem; text-align: center; margin-bottom: 30px;">
-                    <strong>Портативная версия</strong> — скопировал и работает
+                <h2><i class="fab fa-github"></i> Исходный код на GitHub</h2>
+                <p style="text-align: center; margin-bottom: 30px; color: #64748b;">
+                    Все версии проекта доступны в открытом репозитории
                 </p>
 
-                <style>
-                    @keyframes cardFadeIn {
-                        from { opacity: 0; transform: translateY(30px); }
-                        to { opacity: 1; transform: translateY(0); }
-                    }
-                    @keyframes cardPulse {
-                        0%, 100% { transform: scale(1); }
-                        50% { transform: scale(1.05); }
-                    }
-                    @keyframes iconBounce {
-                        0%, 100% { transform: translateY(0); }
-                        50% { transform: translateY(-8px); }
-                    }
-                    .feature-card {
-                        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-                        animation: cardFadeIn 0.6s ease-out forwards;
-                        opacity: 0;
-                    }
-                    .feature-card:nth-child(1) { animation-delay: 0.1s; }
-                    .feature-card:nth-child(2) { animation-delay: 0.2s; }
-                    .feature-card:nth-child(3) { animation-delay: 0.3s; }
-                    .feature-card:nth-child(4) { animation-delay: 0.4s; }
-                    .feature-card:nth-child(5) { animation-delay: 0.5s; }
-                    .feature-card:nth-child(6) { animation-delay: 0.6s; }
-                    .feature-card:hover {
-                        transform: translateY(-12px) scale(1.03);
-                        box-shadow: 0 20px 40px rgba(0,0,0,0.15);
-                    }
-                    .feature-card:hover .icon-circle {
-                        animation: iconBounce 0.6s ease-in-out;
-                    }
-                    .icon-circle {
-                        transition: all 0.3s ease;
-                    }
-                    .feature-card:hover .icon-circle {
-                        box-shadow: 0 8px 25px rgba(0,0,0,0.3);
-                    }
-                </style>
-
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; margin: 30px 0;">
-                    <!-- Карточка 1 - Быстрый старт (жёлтый/оранжевый) -->
-                    <div class="feature-card" style="background: white; padding: 30px 25px; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.08); text-align: center; border-top: 4px solid #f5af19;">
-                        <div class="icon-circle" style="width: 70px; height: 70px; background: #f5af19; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; box-shadow: 0 4px 15px rgba(245, 175, 25, 0.4);">
-                            <i class="fas fa-bolt" style="font-size: 2rem; color: white;"></i>
+                <div style="background: linear-gradient(135deg, #1e293b, #334155); padding: 24px; border-radius: 12px; margin: 20px 0;">
+                    <h4 style="margin: 0 0 16px 0; color: #10b981; font-size: 14px; display: flex; align-items: center; gap: 8px;">
+                        <i class="fab fa-github"></i> Репозиторий проекта
+                    </h4>
+                    <code style="background: #0f172a; color: #10b981; padding: 16px; border-radius: 8px; font-size: 13px; display: block; word-break: break-all; margin-bottom: 16px;">
+                        https://github.com/socuteman/task-chat
+                    </code>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
+                        <div style="background: rgba(16, 185, 129, 0.1); padding: 12px; border-radius: 6px; border-left: 3px solid #10b981;">
+                            <div style="color: #10b981; font-size: 11px; margin-bottom: 4px;">Версия</div>
+                            <div style="color: white; font-size: 14px; font-weight: 600;">v0.4.9</div>
                         </div>
-                        <h4 style="color: #2c3e50; margin-bottom: 12px; font-size: 1.2rem; font-weight: 600;">Быстрый старт</h4>
-                        <p style="color: #666; font-size: 0.95rem; line-height: 1.6; margin: 0;">Запуск за 1 минуту без установки Python</p>
+                        <div style="background: rgba(16, 185, 129, 0.1); padding: 12px; border-radius: 6px; border-left: 3px solid #10b981;">
+                            <div style="color: #10b981; font-size: 11px; margin-bottom: 4px;">Лицензия</div>
+                            <div style="color: white; font-size: 14px; font-weight: 600;">MIT</div>
+                        </div>
+                        <div style="background: rgba(16, 185, 129, 0.1); padding: 12px; border-radius: 6px; border-left: 3px solid #10b981;">
+                            <div style="color: #10b981; font-size: 11px; margin-bottom: 4px;">Язык</div>
+                            <div style="color: white; font-size: 14px; font-weight: 600;">Python</div>
+                        </div>
                     </div>
+                </div>
 
-                    <!-- Карточка 2 - Один EXE файл (зелёный) -->
-                    <div class="feature-card" style="background: white; padding: 30px 25px; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.08); text-align: center; border-top: 4px solid #11998e;">
-                        <div class="icon-circle" style="width: 70px; height: 70px; background: #11998e; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; box-shadow: 0 4px 15px rgba(17, 153, 142, 0.4);">
-                            <i class="fas fa-box" style="font-size: 2rem; color: white;"></i>
+                <div style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.06); margin: 20px 0;">
+                    <h4 style="margin: 0 0 16px 0; color: #1e293b; font-size: 14px; font-weight: 600;">
+                        <i class="fas fa-download"></i> Способы получения кода
+                    </h4>
+                    <div style="display: grid; gap: 16px;">
+                        <div style="padding: 16px; background: #f8fafc; border-radius: 8px; border-left: 4px solid #4f46e5;">
+                            <h5 style="margin: 0 0 8px 0; color: #1e293b; font-size: 13px; font-weight: 600;">
+                                <i class="fas fa-download"></i> Скачать ZIP-архив
+                            </h5>
+                            <p style="margin: 0 0 12px 0; color: #64748b; font-size: 12px; line-height: 1.6;">
+                                На странице репозитория нажмите <strong>Code → Download ZIP</strong>
+                            </p>
+                            <code style="background: #1e293b; color: #10b981; padding: 8px 12px; border-radius: 6px; font-size: 11px; display: block;">
+                                Распакуйте в любую директорию
+                            </code>
                         </div>
-                        <h4 style="color: #2c3e50; margin-bottom: 12px; font-size: 1.2rem; font-weight: 600;">Один EXE файл</h4>
-                        <p style="color: #666; font-size: 0.95rem; line-height: 1.6; margin: 0;">Всё включено в один исполняемый файл</p>
-                    </div>
-
-                    <!-- Карточка 3 - Переносимость (синий) -->
-                    <div class="feature-card" style="background: white; padding: 30px 25px; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.08); text-align: center; border-top: 4px solid #0984e3;">
-                        <div class="icon-circle" style="width: 70px; height: 70px; background: #0984e3; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; box-shadow: 0 4px 15px rgba(9, 132, 227, 0.4);">
-                            <i class="fas fa-folder" style="font-size: 2rem; color: white;"></i>
+                        <div style="padding: 16px; background: #f8fafc; border-radius: 8px; border-left: 4px solid #10b981;">
+                            <h5 style="margin: 0 0 8px 0; color: #1e293b; font-size: 13px; font-weight: 600;">
+                                <i class="fab fa-git-alt"></i> Клонировать через Git
+                            </h5>
+                            <p style="margin: 0 0 12px 0; color: #64748b; font-size: 12px; line-height: 1.6;">
+                                Если установлен Git, выполните команду:
+                            </p>
+                            <pre style="background: #1e293b; color: #10b981; padding: 12px; border-radius: 6px; font-size: 11px; margin: 0; overflow-x: auto;">git clone https://github.com/socuteman/task-chat.git</pre>
                         </div>
-                        <h4 style="color: #2c3e50; margin-bottom: 12px; font-size: 1.2rem; font-weight: 600;">Переносимость</h4>
-                        <p style="color: #666; font-size: 0.95rem; line-height: 1.6; margin: 0;">Скопируйте каталог и работайте</p>
-                    </div>
-
-                    <!-- Карточка 4 - Данные отдельно (фиолетовый) -->
-                    <div class="feature-card" style="background: white; padding: 30px 25px; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.08); text-align: center; border-top: 4px solid #6c5ce7;">
-                        <div class="icon-circle" style="width: 70px; height: 70px; background: #6c5ce7; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; box-shadow: 0 4px 15px rgba(108, 92, 231, 0.4);">
-                            <i class="fas fa-database" style="font-size: 2rem; color: white;"></i>
-                        </div>
-                        <h4 style="color: #2c3e50; margin-bottom: 12px; font-size: 1.2rem; font-weight: 600;">Данные отдельно</h4>
-                        <p style="color: #666; font-size: 0.95rem; line-height: 1.6; margin: 0;">Все данные в папке data/</p>
-                    </div>
-
-                    <!-- Карточка 5 - Безопасность (красный) -->
-                    <div class="feature-card" style="background: white; padding: 30px 25px; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.08); text-align: center; border-top: 4px solid #d63031;">
-                        <div class="icon-circle" style="width: 70px; height: 70px; background: #d63031; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; box-shadow: 0 4px 15px rgba(214, 48, 49, 0.4);">
-                            <i class="fas fa-shield-alt" style="font-size: 2rem; color: white;"></i>
-                        </div>
-                        <h4 style="color: #2c3e50; margin-bottom: 12px; font-size: 1.2rem; font-weight: 600;">Безопасность</h4>
-                        <p style="color: #666; font-size: 0.95rem; line-height: 1.6; margin: 0;">Нет доступа извне, только локально</p>
-                    </div>
-
-                    <!-- Карточка 6 - Бэкап (бирюзовый) -->
-                    <div class="feature-card" style="background: white; padding: 30px 25px; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.08); text-align: center; border-top: 4px solid #00cec9;">
-                        <div class="icon-circle" style="width: 70px; height: 70px; background: #00cec9; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; box-shadow: 0 4px 15px rgba(0, 206, 201, 0.4);">
-                            <i class="fas fa-copy" style="font-size: 2rem; color: white;"></i>
-                        </div>
-                        <h4 style="color: #2c3e50; margin-bottom: 12px; font-size: 1.2rem; font-weight: 600;">Бэкап</h4>
-                        <p style="color: #666; font-size: 0.95rem; line-height: 1.6; margin: 0;">Просто скопируйте data/</p>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Slide 4: Архитектура -->
+        <!-- Slide 3: Структура проекта -->
         <div class="slide">
             <div class="card">
-                <h2><i class="fas fa-sitemap"></i> Архитектура развёртывания</h2>
-                <p style="text-align: center; margin-bottom: 30px;">
-                    Простая структура — легко понять и обслуживать
+                <h2><i class="fas fa-folder-tree"></i> Структура проекта</h2>
+                <p style="text-align: center; margin-bottom: 30px; color: #64748b;">
+                    Понятная организация файлов и данных
                 </p>
 
-                <div class="architecture-diagram" style="background: white; border-radius: 15px; padding: 40px; margin: 30px 0; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
-                    <div class="arch-nodes" style="display: flex; justify-content: space-around; align-items: center; flex-wrap: wrap; gap: 30px;">
-                        <div class="arch-node" style="background: linear-gradient(135deg, #4e54c8, #8f94fb); color: white !important; padding: 25px; border-radius: 15px; min-width: 200px; box-shadow: 0 5px 20px rgba(0,0,0,0.2);">
-                            <i class="fas fa-desktop" style="font-size: 3rem; margin-bottom: 15px; color: white !important;"></i>
-                            <h5 style="font-size: 1.1rem; margin-bottom: 5px; color: white !important; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">Клиенты</h5>
-                            <p style="font-size: 0.85rem; opacity: 0.9; margin: 0; color: white !important; text-shadow: 1px 1px 2px rgba(0,0,0,0.3);">Браузеры врачей и физиков</p>
-                        </div>
-                        <div class="arch-connection" style="flex: 1; height: 3px; background: linear-gradient(90deg, #4e54c8, #11998e); position: relative; min-width: 100px;"></div>
-                        <div class="arch-node" style="background: linear-gradient(135deg, #11998e, #38ef7d); color: white !important; padding: 25px; border-radius: 15px; min-width: 200px; box-shadow: 0 5px 20px rgba(0,0,0,0.2);">
-                            <i class="fas fa-server" style="font-size: 3rem; margin-bottom: 15px; color: white !important;"></i>
-                            <h5 style="font-size: 1.1rem; margin-bottom: 5px; color: white !important; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">Task-Chat Server</h5>
-                            <p style="font-size: 0.85rem; opacity: 0.9; margin: 0; color: white !important; text-shadow: 1px 1px 2px rgba(0,0,0,0.3);">Flask приложение</p>
-                        </div>
-                        <div class="arch-connection" style="flex: 1; height: 3px; background: linear-gradient(90deg, #11998e, #00d2ff); position: relative; min-width: 100px;"></div>
-                        <div class="arch-node" style="background: linear-gradient(135deg, #00d2ff, #3a7bd5); color: white !important; padding: 25px; border-radius: 15px; min-width: 200px; box-shadow: 0 5px 20px rgba(0,0,0,0.2);">
-                            <i class="fas fa-database" style="font-size: 3rem; margin-bottom: 15px; color: white !important;"></i>
-                            <h5 style="font-size: 1.1rem; margin-bottom: 5px; color: white !important; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">SQLite</h5>
-                            <p style="font-size: 0.85rem; opacity: 0.9; margin: 0; color: white !important; text-shadow: 1px 1px 2px rgba(0,0,0,0.3);">База данных в data/</p>
-                        </div>
-                    </div>
+                <div style="background: #1e293b; color: #10b981; padding: 24px; border-radius: 12px; font-family: 'Courier New', monospace; font-size: 11px; line-height: 1.8; overflow-x: auto; margin: 20px 0;">
+<pre style="margin: 0;">
+task-chat/
+├── app/                          # Исходный код приложения
+│   ├── app.py                    # Основное Flask-приложение
+│   ├── run.py                    # Точка входа для запуска
+│   ├── config.py                 # Конфигурация
+│   ├── logging_config.py         # Настройка логирования
+│   ├── models/
+│   │   └── __init__.py           # Модели БД (User, Task, ChatMessage...)
+│   ├── forms/
+│   │   ├── auth.py               # Формы авторизации
+│   │   └── task.py               # Формы задач
+│   ├── templates/                # HTML-шаблоны
+│   └── static/                   # Статические файлы (CSS, JS, images)
+│
+├── data/                         # ДАННЫЕ (создаётся при запуске)
+│   ├── instance/
+│   │   └── taskchat.db           # SQLite база данных
+│   ├── uploads/                  # Загруженные файлы
+│   │   └── &lt;task_id&gt;/           # Файлы по задачам
+│   └── logs/
+│       ├── taskchat.log          # Текущий лог
+│       └── taskchat_history.log  # Архив логов
+│
+├── dist/
+│   └── TaskChat-Server/          # EXE-дистрибутив (после сборки)
+│       ├── TaskChat-Server.exe   # Портативный сервер
+│       └── _internal/            # Внутренние файлы
+│
+├── docs/                         # Документация
+├── presentations/                # Презентации
+├── requirements.txt              # Зависимости Python
+└── taskchat.spec                 # Spec-файл для PyInstaller
+</pre>
                 </div>
 
-                <div class="code-block" style="background: #1a1a2e; color: #00ff00; padding: 20px; border-radius: 10px; font-family: 'Courier New', monospace; font-size: 0.9rem; margin: 15px 0; overflow-x: auto; box-shadow: 0 5px 20px rgba(0,0,0,0.3);">
-                    <strong style="color: #00ff00; display: block; margin-bottom: 10px; font-size: 1rem;">Структура каталога:</strong>
-                    <pre style="margin: 0; white-space: pre-wrap; word-wrap: break-word;">Task-Chat-Server-v0.3.3/
-├── Task-Chat-Server.exe    # Портативный сервер (Windows)
-├── run_server.sh           # Скрипт запуска (Linux)
-├── app/                    # Исходный код
-├── data/                   # ДАННЫЕ (БД, логи, файлы)
-│   ├── instance/           # База данных
-│   ├── logs/               # Логи
-│   └── uploads/            # Загруженные файлы
-└── venv/                   # Виртуальное окружение</pre>
-                </div>
-            </div>
-        </div>
-
-        <!-- Slide 5: Установка Windows -->
-        <div class="slide">
-            <div class="card">
-                <h2><i class="fab fa-windows"></i> Установка на Windows</h2>
-
-                <div class="deployment-steps">
-                    <div class="deployment-step">
-                        <span class="step-number">1</span>
-                        <h4>Скопируйте каталог</h4>
-                        <p>Скопируйте <code>Task-Chat-Server-v0.3.3\</code> в нужное место (например, <code>C:\Servers\Task-Chat\</code>)</p>
-                    </div>
-
-                    <div class="deployment-step">
-                        <span class="step-number">2</span>
-                        <h4>Запустите сервер</h4>
-                        <p>Дважды кликните на <code>Task-Chat-Server.exe</code> или <code>RUN_GUI.bat</code></p>
-                    </div>
-
-                    <div class="deployment-step">
-                        <span class="step-number">3</span>
-                        <h4>Откройте браузер</h4>
-                        <p>Перейдите на <code>http://192.168.x.x:5000</code></p>
-                    </div>
-
-                    <div class="deployment-step">
-                        <span class="step-number">4</span>
-                        <h4>Войдите в систему</h4>
-                        <p>Логин: <code>admin</code> / Пароль: <code>admin123</code></p>
-                    </div>
-                </div>
-
-                <div class="card" style="background: #e8f5e9; border: 2px solid #11998e;">
-                    <h4 style="color: #11998e;"><i class="fas fa-check-circle"></i> Готово!</h4>
-                    <p style="margin-top: 10px;">Сервер запущен и готов к работе. GUI интерфейс управления откроется автоматически.</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Slide 6: Установка Linux -->
-        <div class="slide">
-            <div class="card">
-                <h2><i class="fab fa-linux"></i> Установка на Linux</h2>
-
-                <div class="deployment-steps">
-                    <div class="deployment-step">
-                        <span class="step-number">1</span>
-                        <h4>Скопируйте каталог</h4>
-                        <p>Скопируйте <code>Task-Chat-Server-v0.3.3/</code> в нужное место</p>
-                    </div>
-
-                    <div class="deployment-step">
-                        <span class="step-number">2</span>
-                        <h4>Дайте права на выполнение</h4>
-                        <p><code>chmod +x run_server.sh</code></p>
-                    </div>
-
-                    <div class="deployment-step">
-                        <span class="step-number">3</span>
-                        <h4>Запустите сервер</h4>
-                        <p><code>./run_server.sh</code></p>
-                    </div>
-
-                    <div class="deployment-step">
-                        <span class="step-number">4</span>
-                        <h4>Войдите в систему</h4>
-                        <p>Логин: <code>admin</code> / Пароль: <code>admin123</code></p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Slide 7: Безопасность -->
-        <div class="slide">
-            <div class="card">
-                <h2><i class="fas fa-shield-alt"></i> Локальная безопасность</h2>
-                <p style="text-align: center; margin-bottom: 30px;">
-                    Нет доступа извне — все данные внутри периметра сети клиники
-                </p>
-
-                <div class="security-comparison">
-                    <div class="security-box local">
-                        <h4><i class="fas fa-network-wired"></i> Task-Chat (Локально)</h4>
-                        <ul>
-                            <li><i class="fas fa-check"></i> Только локальная сеть</li>
-                            <li><i class="fas fa-check"></i> Нет доступа из интернета</li>
-                            <li><i class="fas fa-check"></i> Данные на сервере клиники</li>
-                            <li><i class="fas fa-check"></i> Соответствует требованиям</li>
-                            <li><i class="fas fa-check"></i> Простое резервное копирование</li>
-                            <li><i class="fas fa-check"></i> Не требует интернета</li>
-                        </ul>
-                        <p style="color: #11998e; font-weight: bold; margin-top: 20px;">
-                            <i class="fas fa-lock"></i> Безопасно ✓
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px; margin-top: 20px;">
+                    <div style="background: linear-gradient(135deg, #d1fae5, #a7f3d0); padding: 16px; border-radius: 8px; border: 1px solid #10b981;">
+                        <h4 style="margin: 0 0 8px 0; color: #065f46; font-size: 13px; font-weight: 600;">
+                            <i class="fas fa-database"></i> База данных
+                        </h4>
+                        <p style="margin: 0; color: #065f46; font-size: 11px;">
+                            <code style="background: rgba(0,0,0,0.1); padding: 2px 6px; border-radius: 4px;">data/instance/taskchat.db</code>
+                        </p>
+                        <p style="margin: 8px 0 0 0; color: #047857; font-size: 11px;">
+                            SQLite — не требует отдельного сервера
                         </p>
                     </div>
-
-                    <div class="security-box cloud">
-                        <h4><i class="fas fa-cloud"></i> Облачные решения</h4>
-                        <ul>
-                            <li><i class="fas fa-times"></i> Доступ отовсюду</li>
-                            <li><i class="fas fa-times"></i> Данные в облаке провайдера</li>
-                            <li><i class="fas fa-times"></i> Риск утечки</li>
-                            <li><i class="fas fa-times"></i> Зависимость от интернета</li>
-                            <li><i class="fas fa-times"></i> Сложный аудит</li>
-                            <li><i class="fas fa-times"></i> Требуется настройка безопасности</li>
-                        </ul>
-                        <p style="color: #eb3349; font-weight: bold; margin-top: 20px;">
-                            <i class="fas fa-exclamation-triangle"></i> Риск ✗
+                    <div style="background: linear-gradient(135deg, #e0e7ff, #c7d2fe); padding: 16px; border-radius: 8px; border: 1px solid #4f46e5;">
+                        <h4 style="margin: 0 0 8px 0; color: #312e81; font-size: 13px; font-weight: 600;">
+                            <i class="fas fa-folder-open"></i> Файлы
+                        </h4>
+                        <p style="margin: 0; color: #312e81; font-size: 11px;">
+                            <code style="background: rgba(0,0,0,0.1); padding: 2px 6px; border-radius: 4px;">data/uploads/&lt;task_id&gt;/</code>
+                        </p>
+                        <p style="margin: 8px 0 0 0; color: #4338ca; font-size: 11px;">
+                            Файлы задач сгруппированы по ID
+                        </p>
+                    </div>
+                    <div style="background: linear-gradient(135deg, #fef3c7, #fde68a); padding: 16px; border-radius: 8px; border: 1px solid #f59e0b;">
+                        <h4 style="margin: 0 0 8px 0; color: #92400e; font-size: 13px; font-weight: 600;">
+                            <i class="fas fa-file-alt"></i> Логи
+                        </h4>
+                        <p style="margin: 0; color: #92400e; font-size: 11px;">
+                            <code style="background: rgba(0,0,0,0.1); padding: 2px 6px; border-radius: 4px;">data/logs/taskchat.log</code>
+                        </p>
+                        <p style="margin: 8px 0 0 0; color: #b45309; font-size: 11px;">
+                            Категории: auth, tasks, chat, files, admin
                         </p>
                     </div>
                 </div>
+            </div>
+        </div>
 
-                <div class="card" style="background: #fff3cd; border: 2px solid #ffc107;">
-                    <h4 style="color: #856404;"><i class="fas fa-info-circle"></i> Важно понимать</h4>
-                    <p style="margin-top: 10px;">
-                        <strong>Недостаток:</strong> Нет удалённого доступа из дома или вне сети клиники.<br>
-                        <strong>Но это плюс:</strong> Осознанный выбор безопасности медицинских данных. 
-                        Соответствует требованиям к хранению персональной информации пациентов.
+        <!-- Slide 4: Запуск из исходного кода -->
+        <div class="slide">
+            <div class="card">
+                <h2><i class="fab fa-python"></i> Запуск из исходного кода</h2>
+                <p style="text-align: center; margin-bottom: 30px; color: #64748b;">
+                    Основной способ развёртывания для Windows и Linux
+                </p>
+
+                <div style="display: grid; gap: 20px; margin: 30px 0;">
+                    <!-- Шаг 1 -->
+                    <div style="background: white; padding: 24px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.06); display: flex; gap: 20px; align-items: flex-start;">
+                        <div style="background: linear-gradient(135deg, #4f46e5, #7c3aed); color: white; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 1.5rem; font-weight: 700;">1</div>
+                        <div style="flex: 1;">
+                            <h3 style="margin: 0 0 8px 0; color: #1e293b; font-size: 1.1rem;">Установите Python 3.8+</h3>
+                            <p style="margin: 0; color: #64748b; font-size: 14px; line-height: 1.6;">
+                                Скачайте с <a href="https://www.python.org/" target="_blank" style="color: #4f46e5;">python.org</a> и установите, отметив «Add Python to PATH»
+                            </p>
+                            <pre style="background: #1e293b; color: #10b981; padding: 12px; border-radius: 6px; font-size: 11px; margin-top: 8px;">python --version
+pip --version</pre>
+                        </div>
+                    </div>
+
+                    <!-- Шаг 2 -->
+                    <div style="background: white; padding: 24px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.06); display: flex; gap: 20px; align-items: flex-start;">
+                        <div style="background: linear-gradient(135deg, #10b981, #34d399); color: white; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 1.5rem; font-weight: 700;">2</div>
+                        <div style="flex: 1;">
+                            <h3 style="margin: 0 0 8px 0; color: #1e293b; font-size: 1.1rem;">Перейдите в директорию проекта</h3>
+                            <pre style="background: #1e293b; color: #10b981; padding: 12px; border-radius: 6px; font-size: 11px; margin-top: 8px;">cd task-chat/app</pre>
+                        </div>
+                    </div>
+
+                    <!-- Шаг 3 -->
+                    <div style="background: white; padding: 24px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.06); display: flex; gap: 20px; align-items: flex-start;">
+                        <div style="background: linear-gradient(135deg, #f59e0b, #fbbf24); color: white; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 1.5rem; font-weight: 700;">3</div>
+                        <div style="flex: 1;">
+                            <h3 style="margin: 0 0 8px 0; color: #1e293b; font-size: 1.1rem;">Установите зависимости</h3>
+                            <pre style="background: #1e293b; color: #10b981; padding: 12px; border-radius: 6px; font-size: 11px; margin-top: 8px;">pip install -r ../requirements.txt</pre>
+                            <p style="margin: 8px 0 0 0; color: #64748b; font-size: 12px;">
+                                Основные зависимости: Flask, Flask-Login, Flask-SQLAlchemy, Werkzeug, waitress (Windows) / gunicorn (Linux)
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Шаг 4 -->
+                    <div style="background: white; padding: 24px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.06); display: flex; gap: 20px; align-items: flex-start;">
+                        <div style="background: linear-gradient(135deg, #ef4444, #f87171); color: white; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 1.5rem; font-weight: 700;">4</div>
+                        <div style="flex: 1;">
+                            <h3 style="margin: 0 0 8px 0; color: #1e293b; font-size: 1.1rem;">Запустите сервер</h3>
+                            <pre style="background: #1e293b; color: #10b981; padding: 12px; border-radius: 6px; font-size: 11px; margin-top: 8px;">python run.py</pre>
+                            <p style="margin: 8px 0 0 0; color: #64748b; font-size: 12px;">
+                                Сервер запустится на <code style="background: #f8fafc; color: #10b981; padding: 2px 6px; border-radius: 4px;">http://localhost:5000</code>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="background: linear-gradient(135deg, #d1fae5, #a7f3d0); padding: 20px; border-radius: 12px; border: 2px solid #10b981; margin-top: 24px;">
+                    <h4 style="margin: 0 0 12px 0; color: #065f46; font-size: 14px; font-weight: 600;">
+                        <i class="fas fa-check-circle"></i> После первого запуска
+                    </h4>
+                    <p style="margin: 0; color: #047857; font-size: 13px; line-height: 1.6;">
+                        В директории проекта создастся папка <code style="background: rgba(0,0,0,0.1); padding: 2px 6px; border-radius: 4px;">data/</code> с базой данных, логами и загруженными файлами.
                     </p>
                 </div>
             </div>
         </div>
 
-        <!-- Slide 8: Требования -->
+        <!-- Slide 5: Конфигурация и переменные окружения -->
         <div class="slide">
             <div class="card">
-                <h2><i class="fas fa-clipboard-check"></i> Системные требования</h2>
-                
-                <table class="requirements-table">
-                    <thead>
-                        <tr>
-                            <th>Компонент</th>
-                            <th>Минимальные</th>
-                            <th>Рекомендуемые</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td><strong>ОС</strong></td>
-                            <td>Windows 10 / Linux</td>
-                            <td>Windows 11 / Ubuntu 22.04</td>
-                        </tr>
-                        <tr>
-                            <td><strong>Процессор</strong></td>
-                            <td>2 ядра</td>
-                            <td>4 ядра</td>
-                        </tr>
-                        <tr>
-                            <td><strong>ОЗУ</strong></td>
-                            <td>2 GB</td>
-                            <td>4 GB</td>
-                        </tr>
-                        <tr>
-                            <td><strong>Диск</strong></td>
-                            <td>500 MB</td>
-                            <td>2 GB + место для данных</td>
-                        </tr>
-                        <tr>
-                            <td><strong>Сеть</strong></td>
-                            <td>Локальная сеть</td>
-                            <td>Гигабитная сеть</td>
-                        </tr>
-                        <tr>
-                            <td><strong>Браузер</strong></td>
-                            <td>Chrome/Firefox</td>
-                            <td>Chrome 100+</td>
-                        </tr>
-                    </tbody>
-                </table>
+                <h2><i class="fas fa-cog"></i> Конфигурация</h2>
+                <p style="text-align: center; margin-bottom: 30px; color: #64748b;">
+                    Настройка через переменные окружения
+                </p>
 
-                <div class="stats-grid">
-                    <div class="stat-card" style="background: linear-gradient(135deg, #f093fb, #f5576c);">
-                        <span class="stat-number">1</span>
-                        <span class="stat-label">Минута на запуск</span>
-                    </div>
-                    <div class="stat-card" style="background: linear-gradient(135deg, #4e54c8, #8f94fb);">
-                        <span class="stat-number">500</span>
-                        <span class="stat-label">MB на диске</span>
-                    </div>
-                    <div class="stat-card" style="background: linear-gradient(135deg, #11998e, #38ef7d);">
-                        <span class="stat-number">0</span>
-                        <span class="stat-label">₽ за лицензию</span>
-                    </div>
+                <div style="background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.06); margin: 20px 0;">
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <thead style="background: linear-gradient(135deg, #4f46e5, #7c3aed); color: white;">
+                            <tr>
+                                <th style="padding: 14px; text-align: left; font-size: 13px;">Переменная</th>
+                                <th style="padding: 14px; text-align: left; font-size: 13px;">По умолчанию</th>
+                                <th style="padding: 14px; text-align: left; font-size: 13px;">Описание</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr style="border-bottom: 1px solid #e2e8f0;">
+                                <td style="padding: 12px; font-family: monospace; font-size: 12px; color: #4f46e5;">SECRET_KEY</td>
+                                <td style="padding: 12px; font-size: 12px; color: #64748b;">Встроенный</td>
+                                <td style="padding: 12px; font-size: 12px; color: #64748b;">Ключ сессии</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid #e2e8f0;">
+                                <td style="padding: 12px; font-family: monospace; font-size: 12px; color: #4f46e5;">DATABASE_URL</td>
+                                <td style="padding: 12px; font-size: 12px; color: #64748b;">sqlite:///data/instance/taskchat.db</td>
+                                <td style="padding: 12px; font-size: 12px; color: #64748b;">Строка подключения к БД</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid #e2e8f0;">
+                                <td style="padding: 12px; font-family: monospace; font-size: 12px; color: #4f46e5;">PORT</td>
+                                <td style="padding: 12px; font-size: 12px; color: #64748b;">5000</td>
+                                <td style="padding: 12px; font-size: 12px; color: #64748b;">Порт сервера</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid #e2e8f0;">
+                                <td style="padding: 12px; font-family: monospace; font-size: 12px; color: #4f46e5;">HOST</td>
+                                <td style="padding: 12px; font-size: 12px; color: #64748b;">0.0.0.0</td>
+                                <td style="padding: 12px; font-size: 12px; color: #64748b;">Хост для bind</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid #e2e8f0;">
+                                <td style="padding: 12px; font-family: monospace; font-size: 12px; color: #4f46e5;">FLASK_CONFIG</td>
+                                <td style="padding: 12px; font-size: 12px; color: #64748b;">development</td>
+                                <td style="padding: 12px; font-size: 12px; color: #64748b;">development / production</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid #e2e8f0;">
+                                <td style="padding: 12px; font-family: monospace; font-size: 12px; color: #4f46e5;">LOG_LEVEL</td>
+                                <td style="padding: 12px; font-size: 12px; color: #64748b;">INFO</td>
+                                <td style="padding: 12px; font-size: 12px; color: #64748b;">Уровень логирования</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div style="background: #f8fafc; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0; margin-top: 20px;">
+                    <h4 style="margin: 0 0 12px 0; color: #1e293b; font-size: 14px; font-weight: 600;">
+                        <i class="fas fa-terminal"></i> Установка переменных (Windows)
+                    </h4>
+                    <pre style="background: #1e293b; color: #10b981; padding: 16px; border-radius: 6px; font-size: 12px; margin: 0; overflow-x: auto;"># Временная установка (до перезапуска консоли)
+set PORT=8080
+set HOST=127.0.0.1
+set LOG_LEVEL=DEBUG
+
+# Постоянная установка — через «Переменные среды» в свойствах системы</pre>
                 </div>
             </div>
         </div>
 
-        <!-- Slide 9: Преимущества -->
+        <!-- Slide 6: Резервное копирование -->
         <div class="slide">
             <div class="card">
-                <h2><i class="fas fa-star"></i> Преимущества развёртывания</h2>
-                
-                <div class="benefits-list">
-                    <div class="benefit-item">
-                        <i class="fas fa-bolt"></i>
-                        <div>
-                            <h4>Быстрый старт</h4>
-                            <p>Запуск за 1 минуту без установки Python и зависимостей</p>
-                        </div>
+                <h2><i class="fas fa-copy"></i> Резервное копирование</h2>
+                <p style="text-align: center; margin-bottom: 30px; color: #64748b;">
+                    Простое резервирование данных
+                </p>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin: 30px 0;">
+                    <div style="background: linear-gradient(135deg, #d1fae5, #a7f3d0); padding: 24px; border-radius: 12px; border: 2px solid #10b981;">
+                        <h4 style="margin: 0 0 12px 0; color: #065f46; font-size: 14px; font-weight: 600;">
+                            <i class="fas fa-database"></i> База данных
+                        </h4>
+                        <p style="margin: 0 0 8px 0; color: #047857; font-size: 13px;">
+                            <strong>Путь:</strong> <code style="background: rgba(0,0,0,0.1); padding: 2px 6px; border-radius: 4px;">data/instance/taskchat.db</code>
+                        </p>
+                        <p style="margin: 0; color: #047857; font-size: 13px;">
+                            <strong>Частота:</strong> Ежедневно
+                        </p>
                     </div>
-                    <div class="benefit-item">
-                        <i class="fas fa-copy"></i>
-                        <div>
-                            <h4>Переносимость</h4>
-                            <p>Скопируйте каталог и работайте на другом ПК</p>
-                        </div>
+                    <div style="background: linear-gradient(135deg, #e0e7ff, #c7d2fe); padding: 24px; border-radius: 12px; border: 2px solid #4f46e5;">
+                        <h4 style="margin: 0 0 12px 0; color: #312e81; font-size: 14px; font-weight: 600;">
+                            <i class="fas fa-folder-open"></i> Файлы
+                        </h4>
+                        <p style="margin: 0 0 8px 0; color: #3730a3; font-size: 13px;">
+                            <strong>Путь:</strong> <code style="background: rgba(0,0,0,0.1); padding: 2px 6px; border-radius: 4px;">data/uploads/</code>
+                        </p>
+                        <p style="margin: 0; color: #3730a3; font-size: 13px;">
+                            <strong>Частота:</strong> Ежедневно
+                        </p>
                     </div>
-                    <div class="benefit-item">
-                        <i class="fas fa-shield-alt"></i>
-                        <div>
-                            <h4>Безопасность</h4>
-                            <p>Локальная сеть, нет доступа извне</p>
-                        </div>
+                    <div style="background: linear-gradient(135deg, #fef3c7, #fde68a); padding: 24px; border-radius: 12px; border: 2px solid #f59e0b;">
+                        <h4 style="margin: 0 0 12px 0; color: #92400e; font-size: 14px; font-weight: 600;">
+                            <i class="fas fa-file-alt"></i> Логи
+                        </h4>
+                        <p style="margin: 0 0 8px 0; color: #b45309; font-size: 13px;">
+                            <strong>Путь:</strong> <code style="background: rgba(0,0,0,0.1); padding: 2px 6px; border-radius: 4px;">data/logs/</code>
+                        </p>
+                        <p style="margin: 0; color: #b45309; font-size: 13px;">
+                            <strong>Частота:</strong> Еженедельно (опционально)
+                        </p>
                     </div>
-                    <div class="benefit-item">
-                        <i class="fas fa-database"></i>
-                        <div>
-                            <h4>Простой бэкап</h4>
-                            <p>Все данные в папке data/ — просто скопируйте</p>
-                        </div>
-                    </div>
-                    <div class="benefit-item">
-                        <i class="fas fa-mobile-alt"></i>
-                        <div>
-                            <h4>Кроссплатформенность</h4>
-                            <p>Windows и Linux версии</p>
-                        </div>
-                    </div>
-                    <div class="benefit-item">
-                        <i class="fas fa-ruble-sign"></i>
-                        <div>
-                            <h4>Бесплатно</h4>
-                            <p>Нет лицензионных отчислений</p>
-                        </div>
-                    </div>
+                </div>
+
+                <div style="background: #1e293b; color: #10b981; padding: 20px; border-radius: 12px; font-family: 'Courier New', monospace; font-size: 12px; margin: 20px 0;">
+<pre style="margin: 0;"># Пример скрипта резервного копирования (Windows)
+@echo off
+set BACKUP_DIR=E:\Backups\TaskChat
+set DATA_DIR=task-chat\data
+set DATE=%DATE:~-4,4%%DATE:~-7,2%%DATE:~-10,2%
+
+echo Creating backup: %DATE%
+mkdir %BACKUP_DIR%
+
+:: Резервное копирование БД
+xcopy %DATA_DIR%\instance %BACKUP_DIR%\instance_%DATE% /E /I /Y
+
+:: Резервное копирование файлов
+xcopy %DATA_DIR%\uploads %BACKUP_DIR%\uploads_%DATE% /E /I /Y
+
+echo Backup completed: %DATE%</pre>
+                </div>
+
+                <div style="background: linear-gradient(135deg, #fee2e2, #fecaca); padding: 20px; border-radius: 12px; border: 2px solid #ef4444; margin-top: 20px;">
+                    <h4 style="margin: 0 0 12px 0; color: #991b1b; font-size: 14px; font-weight: 600;">
+                        <i class="fas fa-exclamation-triangle"></i> Важно
+                    </h4>
+                    <p style="margin: 0; color: #991b1b; font-size: 13px; line-height: 1.6;">
+                        Перед обновлением версии обязательно сделайте резервную копию директории <code style="background: rgba(0,0,0,0.1); padding: 2px 6px; border-radius: 4px;">data/</code>
+                    </p>
                 </div>
             </div>
         </div>
 
         <!-- Navigation -->
-        <div class="navigation">
-            <button class="nav-btn prev" onclick="presentation.prevSlide()">← Назад</button>
-            <button class="nav-btn next" onclick="presentation.nextSlide()">Далее →</button>
+        <div class="navigation" style="display: flex; justify-content: center; align-items: center; gap: 30px; margin-top: 40px; padding: 20px;">
+            <button class="nav-btn prev" onclick="presentation.prevSlide()" style="background: linear-gradient(135deg, #4e54c8, #8f94fb); color: white; border: none; padding: 14px 28px; border-radius: 10px; cursor: pointer; font-size: 15px; font-weight: 600; display: flex; align-items: center; gap: 10px; transition: all 0.3s;">
+                <i class="fas fa-arrow-left"></i> Назад
+            </button>
+            <div class="slide-counter" style="color: #666; font-size: 14px; min-width: 120px; text-align: center;">
+                Слайд <span id="currentSlideNum">1</span> / <span id="totalSlidesNum">6</span>
+            </div>
+            <button class="nav-btn next" onclick="presentation.nextSlide()" style="background: linear-gradient(135deg, #11998e, #38ef7d); color: white; border: none; padding: 14px 28px; border-radius: 10px; cursor: pointer; font-size: 15px; font-weight: 600; display: flex; align-items: center; gap: 10px; transition: all 0.3s;">
+                Далее <i class="fas fa-arrow-right"></i>
+            </button>
         </div>
 
-        <div class="slide-indicators" id="indicators"></div>
+        <div class="slide-indicators" id="indicators" style="display: flex; justify-content: center; gap: 10px; margin-top: 20px;"></div>
     </div>
 
     <script src="js/presentations.js"></script>
     <script>
-        const presentation = new Presentation(9);
-        
+        const presentation = new Presentation(6);
+
+        // Инициализация индикаторов
         const indicators = document.getElementById('indicators');
-        for (let i = 0; i < 9; i++) {
+        for (let i = 0; i < 6; i++) {
             const indicator = document.createElement('div');
             indicator.className = 'indicator';
+            indicator.style.cssText = 'width: 12px; height: 12px; border-radius: 50%; background: #ddd; cursor: pointer; transition: all 0.3s;';
             indicator.onclick = () => presentation.goToSlide(i);
             indicators.appendChild(indicator);
         }
 
+        // Инициализация
         document.addEventListener('DOMContentLoaded', () => {
             presentation.initNumberAnimations();
         });

@@ -1,4 +1,4 @@
-error: unknown switch `f'
+error: unknown switch `F'
 usage: git reset [--mixed | --soft | --hard | --merge | --keep] [-q] [<commit>]
    or: git reset [-q] [<tree-ish>] [--] <pathspec>...
    or: git reset [-q] [--pathspec-from-file [--pathspec-file-nul]] [<tree-ish>]

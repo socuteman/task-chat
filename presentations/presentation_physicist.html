@@ -9,247 +9,804 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <style>
-        .task-board {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 20px;
-            margin: 30px 0;
-        }
-
-        .task-column {
+        /* Точное отражение списка задач физика */
+        .physicist-task-list-mock {
             background: #f8f9fa;
-            border-radius: 15px;
+            border-radius: 12px;
             padding: 20px;
+            margin: 20px 0;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
         }
 
-        .task-column h4 {
-            color: #2c3e50;
-            margin-bottom: 15px;
-            padding-bottom: 10px;
-            border-bottom: 3px solid;
-        }
-
-        .task-column.new h4 { border-color: #4e54c8; }
-        .task-column.progress h4 { border-color: #f093fb; }
-        .task-column.completed h4 { border-color: #11998e; }
-
-        .task-item {
-            background: white;
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 10px;
-            box-shadow: 0 3px 10px rgba(0,0,0,0.05);
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
-
-        .task-item:hover {
-            transform: translateX(5px);
-        }
-
-        .task-item h5 {
-            color: #2c3e50;
-            margin-bottom: 8px;
-        }
-
-        .task-item p {
-            font-size: 0.9rem;
-            color: #666;
-            margin-bottom: 5px;
-        }
-
-        .task-tag {
-            display: inline-block;
-            padding: 3px 10px;
-            border-radius: 15px;
-            font-size: 0.75rem;
-            margin-right: 5px;
-        }
-
-        .tag-ct { background: #e3f2fd; color: #1976d2; }
-        .tag-mrt { background: #f3e5f5; color: #7b1fa2; }
-        .tag-pet { background: #fff3e0; color: #f57c00; }
-
-        .chat-demo {
-            background: white;
-            border-radius: 15px;
-            padding: 20px;
-            margin: 30px 0;
-            border: 2px solid #11998e;
-        }
-
-        .chat-demo h4 {
-            color: #11998e;
+        .task-filters-mock {
+            display: flex;
+            gap: 10px;
             margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn-mock {
+            padding: 10px 16px;
+            border: 1px solid #ddd;
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.2s;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
         }
 
-        .chat-messages {
-            max-height: 400px;
-            overflow-y: auto;
+        .filter-btn-mock:hover {
+            background: #f1f5f9;
         }
 
-        .chat-message {
+        .filter-btn-mock.active {
+            background: linear-gradient(135deg, #11998e, #38ef7d);
+            color: white;
+            border-color: #11998e;
+        }
+
+        .task-grid-mock {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 16px;
+        }
+
+        .task-card-physicist {
+            background: white;
+            border-radius: 10px;
+            padding: 18px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            border-left: 4px solid #f39c12;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .task-card-physicist:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+        }
+
+        .task-card-physicist.status-pending {
+            border-left-color: #f39c12;
+        }
+
+        .task-card-physicist.status-in_progress {
+            border-left-color: #3498db;
+        }
+
+        .task-card-physicist.status-completed {
+            border-left-color: #27ae60;
+        }
+
+        .task-card-physicist.status-cancelled {
+            border-left-color: #e74c3c;
+        }
+
+        .task-card-header {
             display: flex;
-            gap: 15px;
-            margin-bottom: 20px;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
         }
 
-        .chat-message.doctor {
-            flex-direction: row;
+        .task-card-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: #2c3e50;
+            margin: 0 0 8px 0;
         }
 
-        .chat-message.physicist {
-            flex-direction: row-reverse;
+        .task-card-meta {
+            display: flex;
+            gap: 12px;
+            font-size: 12px;
+            color: #7f8c8d;
         }
 
-        .chat-avatar {
-            width: 45px;
-            height: 45px;
+        .task-card-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .task-card-status.status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .task-card-status.status-in_progress {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .task-card-status.status-completed {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .task-card-status.status-cancelled {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .task-card-body {
+            margin-top: 12px;
+        }
+
+        .task-card-fields {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .task-card-field {
+            font-size: 12px;
+        }
+
+        .task-card-field-label {
+            color: #7f8c8d;
+            font-size: 10px;
+            text-transform: uppercase;
+            margin-bottom: 3px;
+        }
+
+        .task-card-field-value {
+            color: #2c3e50;
+            font-weight: 600;
+            font-size: 12px;
+        }
+
+        .task-card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 14px;
+            padding-top: 12px;
+            border-top: 1px solid #f1f5f9;
+        }
+
+        .task-card-doctor {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            color: #555;
+        }
+
+        .task-card-doctor i {
+            color: #3498db;
+        }
+
+        .task-card-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .task-card-btn {
+            padding: 6px 12px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 500;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .task-card-btn-chat {
+            background: linear-gradient(135deg, #11998e, #38ef7d);
+            color: white;
+        }
+
+        .task-card-btn-chat:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(17, 153, 142, 0.3);
+        }
+
+        .task-card-btn-status {
+            background: #f1f5f9;
+            color: #2c3e50;
+        }
+
+        .task-card-btn-status:hover {
+            background: #e2e8f0;
+        }
+
+        /* Точное отражение чата задачи */
+        .task-chat-mockup {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            margin: 20px 0;
+        }
+
+        .chat-header-mock {
+            background: linear-gradient(135deg, #11998e, #38ef7d);
+            color: white;
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .chat-header-mock .btn-back {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            width: 36px;
+            height: 36px;
             border-radius: 50%;
-            background: linear-gradient(135deg, #4e54c8, #8f94fb);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .chat-header-mock .btn-back:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .chat-task-info {
+            flex: 1;
+        }
+
+        .chat-task-title {
+            font-size: 16px;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .chat-task-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 12px;
+            font-size: 11px;
+            margin-top: 6px;
+        }
+
+        .chat-partner-mock {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .chat-partner-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
-            font-weight: bold;
+            font-weight: 700;
             flex-shrink: 0;
         }
 
-        .chat-bubble {
+        .chat-partner-details h4 {
+            margin: 0 0 4px 0;
+            font-size: 14px;
+            color: #2c3e50;
+        }
+
+        .chat-partner-details p {
+            margin: 0;
+            font-size: 12px;
+            color: #7f8c8d;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .online-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #27ae60;
+            display: inline-block;
+        }
+
+        .chat-messages-mock {
+            height: 400px;
+            overflow-y: auto;
+            padding: 20px;
+            background: #f8f9fa;
+        }
+
+        .chat-message-mock {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .chat-message-mock.incoming {
+            flex-direction: row;
+        }
+
+        .chat-message-mock.outgoing {
+            flex-direction: row-reverse;
+        }
+
+        .chat-message-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+
+        .chat-message-mock.incoming .chat-message-avatar {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+        }
+
+        .chat-message-mock.outgoing .chat-message-avatar {
+            background: linear-gradient(135deg, #11998e, #38ef7d);
+        }
+
+        .chat-message-bubble {
             max-width: 70%;
-            padding: 12px 18px;
+            padding: 12px 16px;
             border-radius: 18px;
             position: relative;
         }
 
-        .chat-message.doctor .chat-bubble {
-            background: #f0f0f0;
+        .chat-message-mock.incoming .chat-message-bubble {
+            background: white;
             border-bottom-left-radius: 5px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
         }
 
-        .chat-message.physicist .chat-bubble {
+        .chat-message-mock.outgoing .chat-message-bubble {
             background: linear-gradient(135deg, #11998e, #38ef7d);
             color: white;
             border-bottom-right-radius: 5px;
         }
 
-        .chat-bubble .sender {
-            font-weight: bold;
-            font-size: 0.85rem;
-            margin-bottom: 5px;
+        .chat-message-text {
+            font-size: 14px;
+            line-height: 1.5;
+            margin-bottom: 6px;
         }
 
-        .chat-bubble .time {
-            font-size: 0.75rem;
-            opacity: 0.7;
-            margin-top: 8px;
-            text-align: right;
-        }
-
-        .file-attachment {
+        .chat-message-file {
             display: flex;
             align-items: center;
             gap: 10px;
             padding: 10px;
-            background: rgba(255,255,255,0.2);
+            background: rgba(0,0,0,0.05);
             border-radius: 8px;
-            margin-top: 10px;
+            margin-top: 8px;
         }
 
-        .file-attachment i {
+        .chat-message-mock.outgoing .chat-message-file {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .chat-message-file i {
             font-size: 1.5rem;
         }
 
-        .patient-flow {
-            position: relative;
-            padding: 30px 0;
+        .chat-message-time {
+            font-size: 11px;
+            opacity: 0.7;
+            text-align: right;
+            margin-top: 6px;
         }
 
-        .flow-timeline {
-            display: flex;
-            justify-content: space-between;
-            position: relative;
-        }
-
-        .flow-timeline::before {
-            content: '';
-            position: absolute;
-            top: 40px;
-            left: 50px;
-            right: 50px;
-            height: 4px;
-            background: linear-gradient(90deg, #4e54c8, #11998e);
-            z-index: 1;
-        }
-
-        .flow-point {
-            position: relative;
-            z-index: 2;
-            text-align: center;
-            flex: 1;
-        }
-
-        .flow-point-icon {
-            width: 80px;
-            height: 80px;
-            margin: 0 auto 15px;
-            border-radius: 50%;
+        .chat-input-mock {
+            padding: 16px;
             background: white;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .chat-input-form {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .chat-input-wrapper {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #f8f9fa;
+            border: 1px solid #e0e0e0;
+            border-radius: 24px;
+            padding: 8px 16px;
+        }
+
+        .chat-input-wrapper input {
+            flex: 1;
+            border: none;
+            background: transparent;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .chat-input-wrapper button {
+            background: none;
+            border: none;
+            color: #7f8c8d;
+            cursor: pointer;
+            padding: 4px;
+            transition: color 0.2s;
+        }
+
+        .chat-input-wrapper button:hover {
+            color: #11998e;
+        }
+
+        .chat-send-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #11998e, #38ef7d);
+            border: none;
+            color: white;
+            cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
-            border: 4px solid;
+            transition: all 0.2s;
         }
 
-        .flow-point:nth-child(1) .flow-point-icon { border-color: #4e54c8; }
-        .flow-point:nth-child(2) .flow-point-icon { border-color: #f093fb; }
-        .flow-point:nth-child(3) .flow-point-icon { border-color: #11998e; }
-        .flow-point:nth-child(4) .flow-point-icon { border-color: #00d2ff; }
+        .chat-send-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(17, 153, 142, 0.3);
+        }
 
-        .flow-point-icon i {
+        /* Панель информации о задаче */
+        .task-info-panel-mock {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+
+        .task-info-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .task-info-header h4 {
+            margin: 0;
+            color: #2c3e50;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 15px;
+        }
+
+        .task-info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+        }
+
+        .task-info-item {
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .task-info-label {
+            font-size: 11px;
+            color: #7f8c8d;
+            text-transform: uppercase;
+            margin-bottom: 6px;
+            font-weight: 600;
+        }
+
+        .task-info-value {
+            color: #2c3e50;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        /* Статусы для физика */
+        .status-selector-mock {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .status-option-mock {
+            flex: 1;
+            min-width: 140px;
+            padding: 14px;
+            border-radius: 10px;
+            border: 2px solid #e0e0e0;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+
+        .status-option-mock:hover {
+            border-color: #11998e;
+            background: #f1f8f7;
+        }
+
+        .status-option-mock.selected {
+            border-color: #11998e;
+            background: linear-gradient(135deg, #11998e, #38ef7d);
+            color: white;
+        }
+
+        .status-option-mock i {
+            font-size: 1.5rem;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .status-option-mock span {
+            font-weight: 600;
+            font-size: 13px;
+        }
+
+        /* Навигация */
+        .navbar-mockup {
+            background: white;
+            border-bottom: 1px solid #e2e8f0;
+            padding: 14px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .nav-brand-mock {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .nav-brand-mock i {
             font-size: 2rem;
+            color: #4f46e5;
         }
 
-        .flow-point:nth-child(1) .flow-point-icon i { color: #4e54c8; }
-        .flow-point:nth-child(2) .flow-point-icon i { color: #f093fb; }
-        .flow-point:nth-child(3) .flow-point-icon i { color: #11998e; }
-        .flow-point:nth-child(4) .flow-point-icon i { color: #00d2ff; }
-
-        .flow-point h5 {
-            font-weight: bold;
-            margin-bottom: 5px;
+        .nav-brand-mock h1 {
+            font-size: 1.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin: 0;
         }
 
-        .flow-point p {
-            font-size: 0.85rem;
+        .nav-links-mock {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .user-role-mock {
+            padding: 8px 14px;
+            border-radius: 50px;
+            font-size: 12px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-right: 12px;
+            border-right: 1px solid #e2e8f0;
+        }
+
+        .user-role-mock.role-physicist {
+            background: linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%);
+            color: #7b1fa2;
+        }
+
+        .nav-link-mock {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            border-radius: 8px;
+            text-decoration: none;
+            color: #64748b;
+            font-weight: 500;
+            font-size: 13px;
+            white-space: nowrap;
+            transition: all 0.2s;
+        }
+
+        .nav-link-mock:hover {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            color: #1e293b;
+        }
+
+        .nav-link-mock.logout {
+            color: #ef4444;
+        }
+
+        .nav-link-mock.logout:hover {
+            background: #ef4444;
+            color: white;
+        }
+
+        /* Преимущества */
+        .benefits-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .benefit-item {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+            transition: transform 0.2s;
+        }
+
+        .benefit-item:hover {
+            transform: translateY(-4px);
+        }
+
+        .benefit-item i {
+            font-size: 2.5rem;
+            color: #11998e;
+            flex-shrink: 0;
+        }
+
+        .benefit-item h4 {
+            color: #2c3e50;
+            margin-bottom: 8px;
+            font-size: 1.1rem;
+        }
+
+        .benefit-item p {
             color: #666;
+            line-height: 1.6;
+            font-size: 14px;
         }
 
-        .status-badge {
+        /* Поток задач */
+        .task-flow-diagram {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .task-flow-column {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            min-height: 400px;
+        }
+
+        .task-flow-column h4 {
+            color: #2c3e50;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 15px;
+            padding-bottom: 12px;
+            border-bottom: 3px solid;
+        }
+
+        .task-flow-column.new h4 { border-color: #4e54c8; }
+        .task-flow-column.progress h4 { border-color: #f093fb; }
+        .task-flow-column.completed h4 { border-color: #11998e; }
+
+        .task-flow-item {
+            background: white;
+            padding: 14px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .task-flow-item:hover {
+            transform: translateX(4px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .task-flow-item h5 {
+            color: #2c3e50;
+            margin: 0 0 8px 0;
+            font-size: 14px;
+        }
+
+        .task-flow-item p {
+            font-size: 12px;
+            color: #666;
+            margin: 4px 0;
+        }
+
+        .task-flow-tag {
             display: inline-block;
-            padding: 5px 15px;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            font-weight: bold;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 600;
+            margin-right: 4px;
         }
 
-        .status-wait { background: #ffebee; color: #c62828; }
-        .status-progress { background: #fff3e0; color: #ef6c00; }
-        .status-done { background: #e8f5e9; color: #2e7d32; }
+        .tag-ct { background: #e3f2fd; color: #1976d2; }
+        .tag-mr { background: #f3e5f5; color: #7b1fa2; }
+        .tag-pet { background: #fff3e0; color: #f57c00; }
 
-        @media (max-width: 768px) {
-            .flow-timeline {
-                flex-direction: column;
-                gap: 30px;
-            }
-            
-            .flow-timeline::before {
-                display: none;
-            }
+        /* Статистика */
+        .stats-grid-mock {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 16px;
+            margin-top: 20px;
+        }
+
+        .stat-card-mock {
+            background: linear-gradient(135deg, #11998e, #38ef7d);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(17, 153, 142, 0.3);
+        }
+
+        .stat-card-mock .stat-icon {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            opacity: 0.9;
+            color: white !important;
+        }
+
+        .stat-card-mock h3 {
+            font-size: 13px;
+            margin: 0 0 8px 0;
+            opacity: 0.9;
+            font-weight: 500;
+            color: white !important;
+        }
+
+        .stat-card-mock .stat-number {
+            font-size: 2.2rem;
+            font-weight: bold;
+            display: block;
+            color: white !important;
         }
     </style>
 </head>
@@ -263,46 +820,171 @@
         <div class="slide active title-slide" style="background: linear-gradient(135deg, #11998e, #38ef7d);">
             <i class="fas fa-atom logo"></i>
             <h1>Task-Chat для физиков</h1>
-            <p class="subtitle">Все задачи на планирование, изменение статуса, чат с врачами</p>
+            <p class="subtitle">Получение информации о пациентах от врачей для импорта и планирования</p>
             <div style="margin-top: 40px; font-size: 1.2rem; opacity: 0.9;">
-                <i class="fas fa-tasks"></i> Все задачи &nbsp;•&nbsp;
+                <i class="fas fa-inbox"></i> Все задачи &nbsp;•&nbsp;
                 <i class="fas fa-sync-alt"></i> Изменение статуса &nbsp;•&nbsp;
                 <i class="fas fa-comments"></i> Чат с врачом
             </div>
-            
-            <!-- Visual Mock Interface -->
+
+            <!-- Visual Mock Interface - Точное отражение реальной навигации для физика -->
             <div style="margin-top: 50px; display: flex; justify-content: center; gap: 30px; flex-wrap: wrap;">
                 <div class="mobile-frame" style="transform: scale(0.9);">
                     <div class="mobile-screen">
                         <div class="mock-interface">
-                            <div class="mock-header">
-                                <i class="fas fa-bars"></i>
-                                <h3>Задачи</h3>
-                                <i class="fas fa-bell mock-pulse" style="margin-left: auto;"></i>
+                            <!-- Верхняя навигация из base.html -->
+                            <div style="background: white; border-bottom: 1px solid #e2e8f0; padding: 14px 16px; display: flex; justify-content: space-between; align-items: center;">
+                                <div style="display: flex; align-items: center; gap: 12px;">
+                                    <i class="fas fa-comments-medical" style="font-size: 1.5rem; color: #4f46e5;"></i>
+                                    <h1 style="font-size: 1.2rem; font-weight: 800; margin: 0; background: linear-gradient(135deg, #4f46e5, #7c3aed); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Task-Chat</h1>
+                                </div>
+                                <div style="background: linear-gradient(135deg, #10b981, #059669); color: white; padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px;">
+                                    <i class="fas fa-atom"></i> Физик
+                                </div>
                             </div>
-                            <div class="mock-content">
+                            <div class="mock-content" style="padding: 16px; padding-bottom: 80px;">
+                                <!-- Welcome message -->
+                                <div style="background: linear-gradient(135deg, #f8fafc, #f1f5f9); padding: 16px; border-radius: 12px; margin-bottom: 16px;">
+                                    <h4 style="color: #1e293b; margin: 0 0 8px 0; font-size: 14px; display: flex; align-items: center; gap: 8px;">
+                                        <i class="fas fa-heartbeat" style="color: #ef4444;"></i> Добро пожаловать, sidorov_ap!
+                                    </h4>
+                                    <span style="background: linear-gradient(135deg, #10b981, #059669); color: white; padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px;">
+                                        <i class="fas fa-atom"></i> Физик
+                                    </span>
+                                </div>
+                                <!-- Статистика -->
+                                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 16px;">
+                                    <div style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 10px; border-radius: 8px; text-align: center;">
+                                        <div style="font-size: 9px; opacity: 0.9;">Всего</div>
+                                        <div style="font-size: 1.2rem; font-weight: bold;">42</div>
+                                    </div>
+                                    <div style="background: linear-gradient(135deg, #f093fb, #f5576c); color: white; padding: 10px; border-radius: 8px; text-align: center;">
+                                        <div style="font-size: 9px; opacity: 0.9;">Ожидают</div>
+                                        <div style="font-size: 1.2rem; font-weight: bold;">15</div>
+                                    </div>
+                                    <div style="background: linear-gradient(135deg, #11998e, #38ef7d); color: white; padding: 10px; border-radius: 8px; text-align: center;">
+                                        <div style="font-size: 9px; opacity: 0.9;">В работе</div>
+                                        <div style="font-size: 1.2rem; font-weight: bold;">20</div>
+                                    </div>
+                                    <div style="background: linear-gradient(135deg, #4facfe, #00f2fe); color: white; padding: 10px; border-radius: 8px; text-align: center;">
+                                        <div style="font-size: 9px; opacity: 0.9;">Готово</div>
+                                        <div style="font-size: 1.2rem; font-weight: bold;">7</div>
+                                    </div>
+                                </div>
+                                <!-- Фильтры -->
+                                <div style="display: flex; gap: 6px; overflow-x: auto; margin-bottom: 16px; padding-bottom: 8px;">
+                                    <span style="background: linear-gradient(135deg, #11998e, #38ef7d); color: white; padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 600; white-space: nowrap;">Все</span>
+                                    <span style="background: #f1f5f9; color: #64748b; padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 600; white-space: nowrap;">Ожидают</span>
+                                    <span style="background: #f1f5f9; color: #64748b; padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 600; white-space: nowrap;">В работе</span>
+                                    <span style="background: #f1f5f9; color: #64748b; padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 600; white-space: nowrap;">Готово</span>
+                                </div>
+                                <!-- Список задач -->
                                 <div class="mock-task-list">
-                                    <div class="mock-task-item">
-                                        <div class="mock-patient">#156: Пациент 32123</div>
-                                        <div class="mock-details">
-                                            <span class="mock-tag kt">КТ</span>
-                                            <span class="mock-tag status-new">Новая</span>
+                                    <div class="mock-task-item" style="border-left: 4px solid #f39c12; background: white; border-radius: 10px; padding: 14px; margin-bottom: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.06);">
+                                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+                                            <div style="font-weight: 700; color: #1e293b; font-size: 14px;">Задача #156</div>
+                                            <span style="background: #fff3cd; color: #856404; padding: 4px 10px; border-radius: 12px; font-size: 10px; font-weight: 600;">Ожидает</span>
+                                        </div>
+                                        <div style="font-size: 11px; color: #64748b; margin-bottom: 8px;">
+                                            <i class="far fa-calendar"></i> 12.03.2026
+                                        </div>
+                                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 8px;">
+                                            <div style="font-size: 11px;">
+                                                <div style="color: #9ca3af; font-size: 9px; text-transform: uppercase;">Пациент</div>
+                                                <div style="color: #1e293b; font-weight: 600;">12345678</div>
+                                            </div>
+                                            <div style="font-size: 11px;">
+                                                <div style="color: #9ca3af; font-size: 9px; text-transform: uppercase;">Исследование</div>
+                                                <div style="color: #1e293b; font-weight: 600;">Импорт CT</div>
+                                            </div>
+                                        </div>
+                                        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px;">
+                                            <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                                                <span style="background: #e3f2fd; color: #1976d2; padding: 3px 8px; border-radius: 12px; font-size: 10px; font-weight: 600;">КТ</span>
+                                            </div>
+                                            <button style="background: linear-gradient(135deg, #11998e, #38ef7d); color: white; border: none; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 600; display: flex; align-items: center; gap: 4px;">
+                                                <i class="fas fa-comments"></i> Чат
+                                            </button>
                                         </div>
                                     </div>
-                                    <div class="mock-task-item">
-                                        <div class="mock-patient">#155: Пациент 32120</div>
-                                        <div class="mock-details">
-                                            <span class="mock-tag pet">ПЭТ</span>
-                                            <span class="mock-tag status-progress">В работе</span>
+                                    <div class="mock-task-item" style="border-left: 4px solid #3498db; background: white; border-radius: 10px; padding: 14px; margin-bottom: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.06);">
+                                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+                                            <div style="font-weight: 700; color: #1e293b; font-size: 14px;">Задача #155</div>
+                                            <span style="background: #d1ecf1; color: #0c5460; padding: 4px 10px; border-radius: 12px; font-size: 10px; font-weight: 600;">В работе</span>
+                                        </div>
+                                        <div style="font-size: 11px; color: #64748b; margin-bottom: 8px;">
+                                            <i class="far fa-calendar"></i> 11.03.2026
+                                        </div>
+                                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 8px;">
+                                            <div style="font-size: 11px;">
+                                                <div style="color: #9ca3af; font-size: 9px; text-transform: uppercase;">Пациент</div>
+                                                <div style="color: #1e293b; font-weight: 600;">32120</div>
+                                            </div>
+                                            <div style="font-size: 11px;">
+                                                <div style="color: #9ca3af; font-size: 9px; text-transform: uppercase;">Исследование</div>
+                                                <div style="color: #1e293b; font-weight: 600;">Импорт PET</div>
+                                            </div>
+                                        </div>
+                                        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px;">
+                                            <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                                                <span style="background: #fff3e0; color: #f57c00; padding: 3px 8px; border-radius: 12px; font-size: 10px; font-weight: 600;">ПЭТ</span>
+                                            </div>
+                                            <button style="background: linear-gradient(135deg, #11998e, #38ef7d); color: white; border: none; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 600; display: flex; align-items: center; gap: 4px;">
+                                                <i class="fas fa-comments"></i> Чат
+                                            </button>
                                         </div>
                                     </div>
-                                    <div class="mock-task-item">
-                                        <div class="mock-patient">#154: Пациент 32115</div>
-                                        <div class="mock-details">
-                                            <span class="mock-tag kt">КТ</span>
-                                            <span class="mock-tag status-done">Готово</span>
+                                    <div class="mock-task-item" style="border-left: 4px solid #27ae60; background: white; border-radius: 10px; padding: 14px; margin-bottom: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.06);">
+                                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+                                            <div style="font-weight: 700; color: #1e293b; font-size: 14px;">Задача #154</div>
+                                            <span style="background: #d4edda; color: #155724; padding: 4px 10px; border-radius: 12px; font-size: 10px; font-weight: 600;">Готово</span>
+                                        </div>
+                                        <div style="font-size: 11px; color: #64748b; margin-bottom: 8px;">
+                                            <i class="far fa-calendar"></i> 10.03.2026
+                                        </div>
+                                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 8px;">
+                                            <div style="font-size: 11px;">
+                                                <div style="color: #9ca3af; font-size: 9px; text-transform: uppercase;">Пациент</div>
+                                                <div style="color: #1e293b; font-weight: 600;">32115</div>
+                                            </div>
+                                            <div style="font-size: 11px;">
+                                                <div style="color: #9ca3af; font-size: 9px; text-transform: uppercase;">Исследование</div>
+                                                <div style="color: #1e293b; font-weight: 600;">Импорт MR</div>
+                                            </div>
+                                        </div>
+                                        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px;">
+                                            <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                                                <span style="background: #f3e5f5; color: #7b1fa2; padding: 3px 8px; border-radius: 12px; font-size: 10px; font-weight: 600;">МРТ</span>
+                                            </div>
+                                            <button style="background: linear-gradient(135deg, #11998e, #38ef7d); color: white; border: none; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 600; display: flex; align-items: center; gap: 4px;">
+                                                <i class="fas fa-comments"></i> Чат
+                                            </button>
                                         </div>
                                     </div>
+                                </div>
+                            </div>
+                            <!-- Нижняя навигация из base.html -->
+                            <div style="position: absolute; bottom: 0; left: 0; right: 0; background: white; border-top: 1px solid #e2e8f0; padding: 8px 0; display: flex; justify-content: space-around; padding-bottom: max(8px, env(safe-area-inset-bottom));">
+                                <div style="display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 8px 12px; color: #4f46e5;">
+                                    <i class="fas fa-home" style="font-size: 1.3rem;"></i>
+                                    <span style="font-size: 10px; color: #4f46e5; font-weight: 500;">Главная</span>
+                                </div>
+                                <div style="display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 8px 12px; color: #64748b;">
+                                    <i class="fas fa-comments" style="font-size: 1.3rem;"></i>
+                                    <span style="font-size: 10px; font-weight: 500;">Чаты</span>
+                                </div>
+                                <div style="display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 8px 12px; color: #64748b;">
+                                    <i class="fas fa-users" style="font-size: 1.3rem;"></i>
+                                    <span style="font-size: 10px; font-weight: 500;">Онлайн</span>
+                                </div>
+                                <div style="display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 8px 12px; color: #64748b; position: relative;">
+                                    <i class="fas fa-tasks" style="font-size: 1.3rem;"></i>
+                                    <span style="font-size: 10px; font-weight: 500;">Задачи</span>
+                                    <span style="position: absolute; top: 4px; right: 8px; background: #ef4444; color: white; border-radius: 50%; min-width: 18px; height: 18px; font-size: 9px; display: flex; align-items: center; justify-content: center; font-weight: 700; box-shadow: 0 2px 8px rgba(239, 68, 68, 0.5);">5</span>
+                                </div>
+                                <div style="display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 8px 12px; color: #ef4444;">
+                                    <i class="fas fa-sign-out-alt" style="font-size: 1.3rem;"></i>
+                                    <span style="font-size: 10px; font-weight: 500;">Выход</span>
                                 </div>
                             </div>
                         </div>
@@ -311,258 +993,399 @@
             </div>
         </div>
 
-        <!-- Slide 2: Проблема -->
+        <!-- Slide 2: Список задач физика -->
         <div class="slide">
             <div class="card">
-                <h2><i class="fas fa-exclamation-triangle"></i> Проблемы в работе физика</h2>
-                <div class="feature-grid">
-                    <div class="feature-card">
-                        <i class="fas fa-inbox feature-icon"></i>
-                        <h4>Хаотичное поступление</h4>
-                        <p>Задачи приходят из разных источников — сложно отслеживать приоритеты</p>
-                    </div>
-                    <div class="feature-card">
-                        <i class="fas fa-search feature-icon"></i>
-                        <h4>Поиск данных</h4>
-                        <p>Информация о пациентах разбросана по разным системам</p>
-                    </div>
-                    <div class="feature-card">
-                        <i class="fas fa-phone feature-icon"></i>
-                        <h4>Звонки и сообщения</h4>
-                        <p>Постоянные уточнения по телефону, нет истории обсуждений</p>
-                    </div>
-                    <div class="feature-card">
-                        <i class="fas fa-clock feature-icon"></i>
-                        <h4>Простои</h4>
-                        <p>Время теряется на поиск информации и согласования</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Slide 3: Решение -->
-        <div class="slide">
-            <div class="card">
-                <h2><i class="fas fa-check-circle"></i> Решение Task-Chat</h2>
-                <p style="font-size: 1.2rem; text-align: center; margin-bottom: 30px;">
-                    <strong>Все импортированные пациенты</strong> — сразу видны в списке задач
-                </p>
-
-                <div class="task-board">
-                    <div class="task-column new">
-                        <h4 style="color: #2c3e50; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 3px solid #4e54c8; display: flex; align-items: center; gap: 10px;"><i class="fas fa-plus-circle" style="color: #4e54c8;"></i> Новые</h4>
-                        <div class="task-item">
-                            <h5 style="color: #2c3e50; margin-bottom: 8px;">Пациент #32123</h5>
-                            <p style="font-size: 0.9rem; color: #666; margin-bottom: 5px;"><span class="task-tag tag-ct">КТ</span></p>
-                            <p style="font-size: 0.9rem; color: #666; margin-bottom: 5px;"><i class="fas fa-user-md" style="color: #4e54c8; margin-right: 5px;"></i>Врач: Иванов А.С.</p>
-                            <span class="status-badge status-wait" style="display: inline-block; padding: 5px 15px; border-radius: 20px; font-size: 0.85rem; font-weight: bold; background: #ffebee; color: #c62828;">Ожидает</span>
-                        </div>
-                        <div class="task-item">
-                            <h5 style="color: #2c3e50; margin-bottom: 8px;">Пациент #32124</h5>
-                            <p style="font-size: 0.9rem; color: #666; margin-bottom: 5px;"><span class="task-tag tag-mrt">МРТ</span></p>
-                            <p style="font-size: 0.9rem; color: #666; margin-bottom: 5px;"><i class="fas fa-user-md" style="color: #4e54c8; margin-right: 5px;"></i>Врач: Петров В.К.</p>
-                            <span class="status-badge status-wait" style="display: inline-block; padding: 5px 15px; border-radius: 20px; font-size: 0.85rem; font-weight: bold; background: #ffebee; color: #c62828;">Ожидает</span>
-                        </div>
-                    </div>
-
-                    <div class="task-column progress">
-                        <h4 style="color: #2c3e50; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 3px solid #f093fb; display: flex; align-items: center; gap: 10px;"><i class="fas fa-spinner" style="color: #f093fb;"></i> В работе</h4>
-                        <div class="task-item">
-                            <h5 style="color: #2c3e50; margin-bottom: 8px;">Пациент #32120</h5>
-                            <p style="font-size: 0.9rem; color: #666; margin-bottom: 5px;"><span class="task-tag tag-pet">ПЭТ</span></p>
-                            <p style="font-size: 0.9rem; color: #666; margin-bottom: 5px;"><i class="fas fa-user-md" style="color: #4e54c8; margin-right: 5px;"></i>Врач: Сидорова Е.М.</p>
-                            <span class="status-badge status-progress" style="display: inline-block; padding: 5px 15px; border-radius: 20px; font-size: 0.85rem; font-weight: bold; background: #fff3e0; color: #ef6c00;">Планирование</span>
-                        </div>
-                    </div>
-
-                    <div class="task-column completed">
-                        <h4 style="color: #2c3e50; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 3px solid #11998e; display: flex; align-items: center; gap: 10px;"><i class="fas fa-check-circle" style="color: #11998e;"></i> Выполнено</h4>
-                        <div class="task-item">
-                            <h5 style="color: #2c3e50; margin-bottom: 8px;">Пациент #32115</h5>
-                            <p style="font-size: 0.9rem; color: #666; margin-bottom: 5px;"><span class="task-tag tag-ct">КТ</span></p>
-                            <p style="font-size: 0.9rem; color: #666; margin-bottom: 5px;"><i class="fas fa-user-md" style="color: #4e54c8; margin-right: 5px;"></i>Врач: Иванов А.С.</p>
-                            <span class="status-badge status-done" style="display: inline-block; padding: 5px 15px; border-radius: 20px; font-size: 0.85rem; font-weight: bold; background: #e8f5e9; color: #2e7d32;">Готово ✓</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Slide 4: Мобильная версия -->
-        <div class="slide">
-            <div class="card">
-                <h2><i class="fas fa-mobile-alt"></i> Мобильная версия для физика</h2>
+                <h2><i class="fas fa-list"></i> Список задач - Все пациенты на импорт</h2>
                 <p style="text-align: center; margin-bottom: 30px;">
-                    Проверяйте задачи и общайтесь с врачами с любого устройства
+                    <strong>Врачи передают информацию о пациентах</strong> — физик видит все задачи для импорта
                 </p>
 
-                <div class="comparison-view">
-                    <div class="desktop-frame">
-                        <div class="desktop-header">
-                            <div class="desktop-dot red"></div>
-                            <div class="desktop-dot yellow"></div>
-                            <div class="desktop-dot green"></div>
+                <!-- Навигация - точное отражение -->
+                <div class="navbar-mockup">
+                    <div class="nav-brand-mock">
+                        <i class="fas fa-comments-medical"></i>
+                        <h1>Task-Chat</h1>
+                    </div>
+                    <div class="nav-links-mock">
+                        <div class="user-role-mock role-physicist">
+                            <i class="fas fa-atom"></i>
+                            <span>Физик</span>
                         </div>
-                        <div class="desktop-screen">
-                            <div class="mock-desktop-content">
-                                <div class="mock-patient-grid">
-                                    <div class="mock-patient-card">
-                                        <h5><i class="fas fa-tasks"></i> Задача #156</h5>
-                                        <div class="mock-field">
-                                            <span class="mock-label">Пациент:</span>
-                                            <span class="mock-value">#32123</span>
-                                        </div>
-                                        <div class="mock-field">
-                                            <span class="mock-label">Исследование:</span>
-                                            <span class="mock-value">КТ</span>
-                                        </div>
-                                        <div class="mock-field">
-                                            <span class="mock-label">Статус:</span>
-                                            <span class="mock-tag status-new">Новая</span>
-                                        </div>
+                        <a class="nav-link-mock" href="#">
+                            <i class="fas fa-tasks"></i>
+                            <span>Задачи</span>
+                        </a>
+                        <a class="nav-link-mock" href="#">
+                            <i class="fas fa-comments"></i>
+                            <span>Чаты</span>
+                        </a>
+                        <a class="nav-link-mock" href="#">
+                            <i class="fas fa-users"></i>
+                            <span>Пользователи</span>
+                        </a>
+                        <a class="nav-link-mock logout" href="#">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>Выход</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Фильтры задач -->
+                <div class="physicist-task-list-mock">
+                    <div class="task-filters-mock">
+                        <button class="filter-btn-mock active">
+                            <i class="fas fa-list"></i> Все
+                        </button>
+                        <button class="filter-btn-mock">
+                            <i class="fas fa-clock"></i> Ожидают
+                        </button>
+                        <button class="filter-btn-mock">
+                            <i class="fas fa-spinner"></i> В работе
+                        </button>
+                        <button class="filter-btn-mock">
+                            <i class="fas fa-check"></i> Выполнены
+                        </button>
+                    </div>
+
+                    <div class="task-grid-mock">
+                        <!-- Задача 1 -->
+                        <div class="task-card-physicist status-pending">
+                            <div class="task-card-header">
+                                <div>
+                                    <h5 class="task-card-title">Задача #156</h5>
+                                    <div class="task-card-meta">
+                                        <span>#156</span>
+                                        <span><i class="far fa-calendar"></i> 12.03.2026</span>
                                     </div>
-                                    <div class="mock-patient-card">
-                                        <h5><i class="fas fa-tasks"></i> Задача #155</h5>
-                                        <div class="mock-field">
-                                            <span class="mock-label">Пациент:</span>
-                                            <span class="mock-value">#32120</span>
-                                        </div>
-                                        <div class="mock-field">
-                                            <span class="mock-label">Исследование:</span>
-                                            <span class="mock-value">ПЭТ</span>
-                                        </div>
-                                        <div class="mock-field">
-                                            <span class="mock-label">Статус:</span>
-                                            <span class="mock-tag status-progress">В работе</span>
-                                        </div>
+                                </div>
+                                <span class="task-card-status status-pending">
+                                    <i class="fas fa-clock"></i> Ожидает
+                                </span>
+                            </div>
+                            <div class="task-card-body">
+                                <p style="font-size: 13px; color: #666; margin: 0 0 12px 0;">Передача данных для импорта и планирования</p>
+                                <div class="task-card-fields">
+                                    <div class="task-card-field">
+                                        <div class="task-card-field-label">Пациент</div>
+                                        <div class="task-card-field-value">12345678</div>
+                                    </div>
+                                    <div class="task-card-field">
+                                        <div class="task-card-field-label">Исследование</div>
+                                        <div class="task-card-field-value">Импорт CT</div>
+                                    </div>
+                                    <div class="task-card-field">
+                                        <div class="task-card-field-label">Экспертная группа</div>
+                                        <div class="task-card-field-value">ПГШ</div>
+                                    </div>
+                                    <div class="task-card-field">
+                                        <div class="task-card-field-label">Aria</div>
+                                        <div class="task-card-field-value">Уже есть</div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-                    <div class="mobile-frame">
-                        <div class="mobile-screen">
-                            <div class="mock-interface">
-                                <div class="mock-header">
-                                    <i class="fas fa-bars"></i>
-                                    <h3>Задачи</h3>
-                                    <i class="fas fa-bell mock-pulse" style="margin-left: auto;"></i>
+                            <div class="task-card-footer">
+                                <div class="task-card-doctor">
+                                    <i class="fas fa-user-md"></i>
+                                    <span>Иванов И.И. (РО1)</span>
                                 </div>
-                                <div class="mock-content">
-                                    <div class="mock-task-list">
-                                        <div class="mock-task-item">
-                                            <div class="mock-patient">#156: Пациент 32123</div>
-                                            <div class="mock-details">
-                                                <span class="mock-tag kt">КТ</span>
-                                                <span class="mock-tag status-new">Новая</span>
-                                            </div>
-                                        </div>
-                                        <div class="mock-task-item">
-                                            <div class="mock-patient">#155: Пациент 32120</div>
-                                            <div class="mock-details">
-                                                <span class="mock-tag pet">ПЭТ</span>
-                                                <span class="mock-tag status-progress">В работе</span>
-                                            </div>
-                                        </div>
-                                        <div class="mock-task-item">
-                                            <div class="mock-patient">#154: Пациент 32115</div>
-                                            <div class="mock-details">
-                                                <span class="mock-tag kt">КТ</span>
-                                                <span class="mock-tag status-done">Готово</span>
-                                            </div>
-                                        </div>
+                                <div class="task-card-actions">
+                                    <button class="task-card-btn task-card-btn-chat">
+                                        <i class="fas fa-comments"></i> Чат
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Задача 2 -->
+                        <div class="task-card-physicist status-in_progress">
+                            <div class="task-card-header">
+                                <div>
+                                    <h5 class="task-card-title">Задача #155</h5>
+                                    <div class="task-card-meta">
+                                        <span>#155</span>
+                                        <span><i class="far fa-calendar"></i> 11.03.2026</span>
                                     </div>
+                                </div>
+                                <span class="task-card-status status-in_progress">
+                                    <i class="fas fa-spinner"></i> В работе
+                                </span>
+                            </div>
+                            <div class="task-card-body">
+                                <p style="font-size: 13px; color: #666; margin: 0 0 12px 0;">ПЭТ-КТ для оценки метаболической активности</p>
+                                <div class="task-card-fields">
+                                    <div class="task-card-field">
+                                        <div class="task-card-field-label">Пациент</div>
+                                        <div class="task-card-field-value">32120</div>
+                                    </div>
+                                    <div class="task-card-field">
+                                        <div class="task-card-field-label">Исследование</div>
+                                        <div class="task-card-field-value">Импорт PET</div>
+                                    </div>
+                                    <div class="task-card-field">
+                                        <div class="task-card-field-label">ПЭТ диагностика</div>
+                                        <div class="task-card-field-value">GE Discovery</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="task-card-footer">
+                                <div class="task-card-doctor">
+                                    <i class="fas fa-user-md"></i>
+                                    <span>Петров В.К. (РО2)</span>
+                                </div>
+                                <div class="task-card-actions">
+                                    <button class="task-card-btn task-card-btn-chat">
+                                        <i class="fas fa-comments"></i> Чат
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Задача 3 -->
+                        <div class="task-card-physicist status-completed">
+                            <div class="task-card-header">
+                                <div>
+                                    <h5 class="task-card-title">Задача #154</h5>
+                                    <div class="task-card-meta">
+                                        <span>#154</span>
+                                        <span><i class="far fa-calendar"></i> 10.03.2026</span>
+                                    </div>
+                                </div>
+                                <span class="task-card-status status-completed">
+                                    <i class="fas fa-check"></i> Готово
+                                </span>
+                            </div>
+                            <div class="task-card-body">
+                                <p style="font-size: 13px; color: #666; margin: 0 0 12px 0;">МРТ для планирования лечения</p>
+                                <div class="task-card-fields">
+                                    <div class="task-card-field">
+                                        <div class="task-card-field-label">Пациент</div>
+                                        <div class="task-card-field-value">32115</div>
+                                    </div>
+                                    <div class="task-card-field">
+                                        <div class="task-card-field-label">Исследование</div>
+                                        <div class="task-card-field-value">Импорт MR</div>
+                                    </div>
+                                    <div class="task-card-field">
+                                        <div class="task-card-field-label">MR диагностика</div>
+                                        <div class="task-card-field-value">Siemens 3T</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="task-card-footer">
+                                <div class="task-card-doctor">
+                                    <i class="fas fa-user-md"></i>
+                                    <span>Сидорова Е.М. (РО3)</span>
+                                </div>
+                                <div class="task-card-actions">
+                                    <button class="task-card-btn task-card-btn-chat">
+                                        <i class="fas fa-comments"></i> Чат
+                                    </button>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-                <p class="screenshot-caption">Проверка задач с планшета на рабочем месте</p>
 
-                <div class="benefits-list">
-                    <div class="benefit-item">
-                        <i class="fas fa-bell"></i>
-                        <div>
-                            <h4>Уведомления</h4>
-                            <p>Мгновенные уведомления о новых задачах от врачей</p>
-                        </div>
+                <!-- Статистика -->
+                <div class="stats-grid-mock">
+                    <div class="stat-card-mock">
+                        <i class="fas fa-tasks stat-icon"></i>
+                        <h3>Всего задач</h3>
+                        <span class="stat-number">42</span>
                     </div>
-                    <div class="benefit-item">
-                        <i class="fas fa-sync-alt"></i>
-                        <div>
-                            <h4>Обновление статуса</h4>
-                            <p>Изменяйте статус задачи прямо с телефона</p>
-                        </div>
+                    <div class="stat-card-mock">
+                        <i class="fas fa-clock stat-icon"></i>
+                        <h3>Ожидают</h3>
+                        <span class="stat-number">15</span>
                     </div>
-                    <div class="benefit-item">
-                        <i class="fas fa-file-download"></i>
-                        <div>
-                            <h4>Доступ к файлам</h4>
-                            <p>Просмотр DICOM, изображений и документов</p>
+                    <div class="stat-card-mock">
+                        <i class="fas fa-spinner stat-icon"></i>
+                        <h3>В работе</h3>
+                        <span class="stat-number">20</span>
+                    </div>
+                    <div class="stat-card-mock">
+                        <i class="fas fa-check stat-icon"></i>
+                        <h3>Выполнены</h3>
+                        <span class="stat-number">7</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 3: Изменение статуса задачи -->
+        <div class="slide">
+            <div class="card">
+                <h2><i class="fas fa-sync-alt"></i> Изменение статуса задачи</h2>
+                <p style="text-align: center; margin-bottom: 30px;">
+                    <strong>Физик управляет статусом</strong> — врач видит прогресс обработки
+                </p>
+
+                <div class="status-selector-mock">
+                    <div class="status-option-mock">
+                        <i class="fas fa-clock"></i>
+                        <span>Ожидает</span>
+                        <div style="font-size: 10px; margin-top: 4px; opacity: 0.8;">Задача создана, но ещё не обрабатывается</div>
+                    </div>
+                    <div class="status-option-mock selected">
+                        <i class="fas fa-spinner"></i>
+                        <span>В работе</span>
+                        <div style="font-size: 10px; margin-top: 4px; opacity: 0.8;">Физик обрабатывает задачу</div>
+                    </div>
+                    <div class="status-option-mock">
+                        <i class="fas fa-check"></i>
+                        <span>Выполнена</span>
+                        <div style="font-size: 10px; margin-top: 4px; opacity: 0.8;">Задача завершена</div>
+                    </div>
+                    <div class="status-option-mock">
+                        <i class="fas fa-ban"></i>
+                        <span>Отменена</span>
+                        <div style="font-size: 10px; margin-top: 4px; opacity: 0.8;">Задача отменена</div>
+                    </div>
+                </div>
+
+                <!-- Панель информации о задаче -->
+                <div class="task-info-panel-mock">
+                    <div class="task-info-header">
+                        <h4><i class="fas fa-info-circle"></i> Информация о задаче #156</h4>
+                        <button class="task-card-btn task-card-btn-status">
+                            <i class="fas fa-edit"></i> Редактировать
+                        </button>
+                    </div>
+                    <div class="task-info-grid">
+                        <div class="task-info-item">
+                            <div class="task-info-label">Тип исследования</div>
+                            <div class="task-info-value">Импорт CT</div>
+                        </div>
+                        <div class="task-info-item">
+                            <div class="task-info-label">Карта пациента</div>
+                            <div class="task-info-value">12345678</div>
+                        </div>
+                        <div class="task-info-item">
+                            <div class="task-info-label">Экспертная группа</div>
+                            <div class="task-info-value">ПГШ</div>
+                        </div>
+                        <div class="task-info-item">
+                            <div class="task-info-label">Доступность в Aria</div>
+                            <div class="task-info-value">Уже есть</div>
+                        </div>
+                        <div class="task-info-item">
+                            <div class="task-info-label">CT диагностика</div>
+                            <div class="task-info-value">Siemens (Электросигнальная)</div>
+                        </div>
+                        <div class="task-info-item">
+                            <div class="task-info-label">Лечение</div>
+                            <div class="task-info-value">Varian (Челюскинцев)</div>
+                        </div>
+                        <div class="task-info-item">
+                            <div class="task-info-label">Контроль по дыханию</div>
+                            <div class="task-info-value">На задержке</div>
+                        </div>
+                        <div class="task-info-item">
+                            <div class="task-info-label">Дата создания</div>
+                            <div class="task-info-value">10:30 12.03.2026</div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Slide 5: Чат с врачом -->
+        <!-- Slide 4: Чат с врачом -->
         <div class="slide">
             <div class="card">
-                <h2><i class="fas fa-comments"></i> Чат с врачом по каждому пациенту</h2>
+                <h2><i class="fas fa-comments"></i> Чат с врачом по каждой задаче</h2>
                 <p style="text-align: center; margin-bottom: 30px;">
-                    Все уточнения в одном месте — не нужно звонить или писать в мессенджеры
+                    Все уточнения по пациенту в одном месте — не нужно звонить
                 </p>
 
-                <div class="chat-demo">
-                    <h4><i class="fas fa-comments"></i> Чат по пациенту #32123</h4>
-                    <div class="chat-messages">
-                        <div class="chat-message doctor">
-                            <div class="chat-avatar">И</div>
-                            <div class="chat-bubble">
-                                <div class="sender">Иванов А.С. (Врач)</div>
-                                <div>Добрый день! По пациенту #32123 нужна срочная консультация. КТ показало необычную локализацию.</div>
-                                <div class="time">10:30</div>
+                <!-- Точное отражение чата -->
+                <div class="task-chat-mockup">
+                    <div class="chat-header-mock">
+                        <button class="btn-back">
+                            <i class="fas fa-arrow-left"></i>
+                        </button>
+                        <div class="chat-task-info">
+                            <h4 class="chat-task-title">Задача #156 - Пациент 12345678</h4>
+                            <div class="chat-task-status">
+                                <i class="fas fa-clock"></i> Ожидает
+                            </div>
+                        </div>
+                        <div class="chat-partner-mock" style="background: rgba(255,255,255,0.1); border-radius: 8px; padding: 8px 12px;">
+                            <div class="chat-partner-avatar" style="width: 36px; height: 36px; font-size: 14px;">И</div>
+                            <div class="chat-partner-details">
+                                <h4 style="color: white; font-size: 13px;">Иванов И.И.</h4>
+                                <p style="color: rgba(255,255,255,0.8); font-size: 11px;">
+                                    <span class="online-dot"></span> Врач
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="chat-messages-mock">
+                        <!-- Входящее сообщение от врача -->
+                        <div class="chat-message-mock incoming">
+                            <div class="chat-message-avatar">И</div>
+                            <div class="chat-message-bubble">
+                                <div class="chat-message-text">Добрый день! По пациенту #12345678 нужна срочная консультация. КТ показало необычную локализацию.</div>
+                                <div class="chat-message-time">10:30</div>
                             </div>
                         </div>
 
-                        <div class="chat-message physicist">
-                            <div class="chat-bubble">
-                                <div class="sender">Вы (Физик)</div>
-                                <div>Принял. Изучаю снимки. Есть особенности по углу наклона?</div>
-                                <div class="time">10:35</div>
+                        <!-- Исходящее сообщение от физика -->
+                        <div class="chat-message-mock outgoing">
+                            <div class="chat-message-bubble">
+                                <div class="chat-message-text">Принял. Изучаю снимки. Есть особенности по углу наклона?</div>
+                                <div class="chat-message-time">10:35</div>
                             </div>
-                            <div class="chat-avatar" style="background: linear-gradient(135deg, #11998e, #38ef7d);">Ф</div>
+                            <div class="chat-message-avatar">Ф</div>
                         </div>
 
-                        <div class="chat-message doctor">
-                            <div class="chat-avatar">И</div>
-                            <div class="chat-bubble">
-                                <div class="sender">Иванов А.С. (Врач)</div>
-                                <div>Да, смещение на 15 градусов. Прикрепляю снимки.</div>
-                                <div class="file-attachment">
+                        <!-- Входящее сообщение с файлом -->
+                        <div class="chat-message-mock incoming">
+                            <div class="chat-message-avatar">И</div>
+                            <div class="chat-message-bubble">
+                                <div class="chat-message-text">Да, смещение на 15 градусов. Прикрепляю снимки.</div>
+                                <div class="chat-message-file">
                                     <i class="fas fa-file-image"></i>
-                                    <span>ct_scan_32123.png</span>
+                                    <span>ct_scan_12345678.png</span>
                                 </div>
-                                <div class="time">10:38</div>
+                                <div class="chat-message-time">10:38</div>
                             </div>
                         </div>
 
-                        <div class="chat-message physicist">
-                            <div class="chat-avatar" style="background: linear-gradient(135deg, #11998e, #38ef7d);">Ф</div>
-                            <div class="chat-bubble">
-                                <div class="sender">Вы (Физик)</div>
-                                <div>Понял. Учту при планировании. Через 30 минут буду готов.</div>
-                                <div class="time">10:42</div>
+                        <!-- Исходящее сообщение -->
+                        <div class="chat-message-mock outgoing">
+                            <div class="chat-message-avatar">Ф</div>
+                            <div class="chat-message-bubble">
+                                <div class="chat-message-text">Понял. Учту при планировании. Через 30 минут буду готов.</div>
+                                <div class="chat-message-time">10:42</div>
                             </div>
                         </div>
                     </div>
+
+                    <div class="chat-input-mock">
+                        <form class="chat-input-form">
+                            <div class="chat-input-wrapper">
+                                <button type="button">
+                                    <i class="fas fa-paperclip"></i>
+                                </button>
+                                <input type="text" placeholder="Введите сообщение...">
+                                <button type="button">
+                                    <i class="far fa-smile"></i>
+                                </button>
+                            </div>
+                            <button type="submit" class="chat-send-btn">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </form>
+                    </div>
                 </div>
 
-                <div class="card" style="background: #e8f5e9; border: 2px solid #11998e;">
+                <div class="card" style="background: #e8f5e9; border: 2px solid #11998e; margin-top: 20px;">
                     <h4 style="color: #11998e;"><i class="fas fa-check"></i> Преимущества чата в Task-Chat</h4>
                     <ul style="list-style: none; margin-top: 15px;">
                         <li style="padding: 8px 0;"><i class="fas fa-check" style="color: #11998e;"></i> История переписки привязана к пациенту</li>
-                        <li style="padding: 8px 0;"><i class="fas fa-check" style="color: #11998e;"></i> Можно прикреплять файлы и изображения</li>
+                        <li style="padding: 8px 0;"><i class="fas fa-check" style="color: #11998e;"></i> Можно прикреплять файлы и DICOM</li>
                         <li style="padding: 8px 0;"><i class="fas fa-check" style="color: #11998e;"></i> Не нужно искать в мессенджерах</li>
                         <li style="padding: 8px 0;"><i class="fas fa-check" style="color: #11998e;"></i> Все коллеги видят контекст</li>
                     </ul>
@@ -570,109 +1393,82 @@
             </div>
         </div>
 
-        <!-- Slide 6: Личные чаты -->
+        <!-- Slide 5: Поток работы физика -->
         <div class="slide">
             <div class="card">
-                <h2><i class="fas fa-user-secret"></i> Личные чаты с коллегами</h2>
+                <h2><i class="fas fa-project-diagram"></i> Поток работы физика</h2>
                 <p style="text-align: center; margin-bottom: 30px;">
-                    Приватное обсуждение сложных случаев — только вы и собеседник
+                    <strong>Врач создаёт задачу → Физик получает информацию → Импорт в систему планирования</strong>
                 </p>
 
-                <div class="feature-grid">
-                    <div class="feature-card">
-                        <i class="fas fa-lock feature-icon"></i>
-                        <h4>Приватность</h4>
-                        <p>Личный чат видят только участники — идеально для обсуждения сложных случаев</p>
+                <div class="task-flow-diagram">
+                    <div class="task-flow-column new">
+                        <h4><i class="fas fa-clock"></i> Новые задачи</h4>
+                        <div class="task-flow-item">
+                            <h5>Пациент #32123</h5>
+                            <p><span class="task-flow-tag tag-ct">КТ</span></p>
+                            <p><i class="fas fa-user-md" style="color: #4e54c8; margin-right: 5px;"></i>Иванов А.С.</p>
+                            <span class="task-card-status status-pending" style="margin-top: 8px; display: inline-block;">Ожидает</span>
+                        </div>
+                        <div class="task-flow-item">
+                            <h5>Пациент #32124</h5>
+                            <p><span class="task-flow-tag tag-mr">МРТ</span></p>
+                            <p><i class="fas fa-user-md" style="color: #4e54c8; margin-right: 5px;"></i>Петров В.К.</p>
+                            <span class="task-card-status status-pending" style="margin-top: 8px; display: inline-block;">Ожидает</span>
+                        </div>
                     </div>
-                    <div class="feature-card">
-                        <i class="fas fa-history feature-icon"></i>
-                        <h4>История</h4>
-                        <p>Вся переписка сохраняется — можно вернуться к обсуждению позже</p>
-                    </div>
-                    <div class="feature-card">
-                        <i class="fas fa-paperclip feature-icon"></i>
-                        <h4>Файлы</h4>
-                        <p>Прикрепляйте снимки, документы, расчёты прямо в чате</p>
-                    </div>
-                    <div class="feature-card">
-                        <i class="fas fa-bell feature-icon"></i>
-                        <h4>Уведомления</h4>
-                        <p>Мгновенные уведомления о новых сообщениях в чате</p>
-                    </div>
-                </div>
 
-                <div class="card" style="background: #fff3cd; border: 2px solid #ffc107; margin-top: 30px;">
-                    <h4 style="color: #856404;"><i class="fas fa-lightbulb"></i> Сценарии использования</h4>
-                    <ul style="margin-top: 15px; line-height: 2;">
-                        <li><i class="fas fa-comment-dots" style="color: #856404;"></i> Обсуждение нестандартного случая с опытным коллегой</li>
-                        <li><i class="fas fa-comment-dots" style="color: #856404;"></i> Консультация по сложному планированию</li>
-                        <li><i class="fas fa-comment-dots" style="color: #856404;"></i> Быстрый вопрос без создания задачи</li>
-                        <li><i class="fas fa-comment-dots" style="color: #856404;"></i> Обмен опытом и методиками</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
+                    <div class="task-flow-column progress">
+                        <h4><i class="fas fa-spinner"></i> В работе</h4>
+                        <div class="task-flow-item">
+                            <h5>Пациент #32120</h5>
+                            <p><span class="task-flow-tag tag-pet">ПЭТ</span></p>
+                            <p><i class="fas fa-user-md" style="color: #4e54c8; margin-right: 5px;"></i>Сидорова Е.М.</p>
+                            <span class="task-card-status status-in_progress" style="margin-top: 8px; display: inline-block;">В работе</span>
+                        </div>
+                    </div>
 
-        <!-- Slide 7: Процесс работы -->
-        <div class="slide">
-            <div class="card">
-                <h2><i class="fas fa-project-diagram"></i> Процесс работы физика</h2>
-                
-                <div class="patient-flow">
-                    <div class="flow-timeline">
-                        <div class="flow-point">
-                            <div class="flow-point-icon">
-                                <i class="fas fa-inbox"></i>
-                            </div>
-                            <h5>Получение</h5>
-                            <p>Задача от врача</p>
-                        </div>
-                        <div class="flow-point">
-                            <div class="flow-point-icon">
-                                <i class="fas fa-eye"></i>
-                            </div>
-                            <h5>Изучение</h5>
-                            <p>Данные пациента</p>
-                        </div>
-                        <div class="flow-point">
-                            <div class="flow-point-icon">
-                                <i class="fas fa-comments"></i>
-                            </div>
-                            <h5>Уточнение</h5>
-                            <p>Чат с врачом</p>
-                        </div>
-                        <div class="flow-point">
-                            <div class="flow-point-icon">
-                                <i class="fas fa-clipboard-check"></i>
-                            </div>
-                            <h5>Планирование</h5>
-                            <p>Внешняя система</p>
+                    <div class="task-flow-column completed">
+                        <h4><i class="fas fa-check"></i> Выполнено</h4>
+                        <div class="task-flow-item">
+                            <h5>Пациент #32115</h5>
+                            <p><span class="task-flow-tag tag-ct">КТ</span></p>
+                            <p><i class="fas fa-user-md" style="color: #4e54c8; margin-right: 5px;"></i>Иванов А.С.</p>
+                            <span class="task-card-status status-completed" style="margin-top: 8px; display: inline-block;">Готово ✓</span>
                         </div>
                     </div>
                 </div>
 
-                <div class="stats-grid">
-                    <div class="stat-card" style="background: linear-gradient(135deg, #11998e, #38ef7d);">
-                        <span class="stat-number" data-animate-number="40">0</span>
-                        <span class="stat-label">% быстрее обработка</span>
+                <div class="import-flow" style="display: flex; align-items: center; justify-content: space-between; margin: 40px 0; flex-wrap: wrap; gap: 20px;">
+                    <div class="flow-step" style="flex: 1; min-width: 150px; text-align: center; padding: 20px; background: white; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); position: relative;">
+                        <i class="fas fa-user-md" style="font-size: 3rem; color: #4e54c8; margin-bottom: 15px;"></i>
+                        <h4 style="color: #2c3e50; margin-bottom: 10px;">Врач</h4>
+                        <p style="font-size: 0.9rem; color: #666;">Проводит исследование/разметку</p>
                     </div>
-                    <div class="stat-card" style="background: linear-gradient(135deg, #4e54c8, #8f94fb);">
-                        <span class="stat-number" data-animate-number="0">0</span>
-                        <span class="stat-label">% пропущенных задач</span>
+                    <div class="flow-step" style="flex: 1; min-width: 150px; text-align: center; padding: 20px; background: white; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); position: relative;">
+                        <i class="fas fa-plus-circle" style="font-size: 3rem; color: #4e54c8; margin-bottom: 15px;"></i>
+                        <h4 style="color: #2c3e50; margin-bottom: 10px;">Задача</h4>
+                        <p style="font-size: 0.9rem; color: #666;">Создаёт задачу в Task-Chat</p>
                     </div>
-                    <div class="stat-card" style="background: linear-gradient(135deg, #f093fb, #f5576c);">
-                        <span class="stat-number" data-animate-number="100">0</span>
-                        <span class="stat-label">% прозрачности</span>
+                    <div class="flow-step" style="flex: 1; min-width: 150px; text-align: center; padding: 20px; background: white; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); position: relative;">
+                        <i class="fas fa-atom" style="font-size: 3rem; color: #11998e; margin-bottom: 15px;"></i>
+                        <h4 style="color: #2c3e50; margin-bottom: 10px;">Физик</h4>
+                        <p style="font-size: 0.9rem; color: #666;">Получает информацию</p>
+                    </div>
+                    <div class="flow-step" style="flex: 1; min-width: 150px; text-align: center; padding: 20px; background: white; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); position: relative;">
+                        <i class="fas fa-file-import" style="font-size: 3rem; color: #11998e; margin-bottom: 15px;"></i>
+                        <h4 style="color: #2c3e50; margin-bottom: 10px;">Импорт</h4>
+                        <p style="font-size: 0.9rem; color: #666;">В систему планирования</p>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Slide 8: Преимущества -->
+        <!-- Slide 6: Преимущества -->
         <div class="slide">
             <div class="card">
                 <h2><i class="fas fa-star"></i> Преимущества для физика</h2>
-                
+
                 <div class="benefits-list">
                     <div class="benefit-item">
                         <i class="fas fa-inbox"></i>
@@ -682,10 +1478,17 @@
                         </div>
                     </div>
                     <div class="benefit-item">
-                        <i class="fas fa-sort-amount-down"></i>
+                        <i class="fas fa-file-export"></i>
                         <div>
-                            <h4>Приоритизация</h4>
-                            <p>Чёткое понимание приоритетов задач</p>
+                            <h4>Информация для импорта</h4>
+                            <p>Врач передаёт все данные о пациенте для импорта в систему планирования</p>
+                        </div>
+                    </div>
+                    <div class="benefit-item">
+                        <i class="fas fa-sync-alt"></i>
+                        <div>
+                            <h4>Управление статусом</h4>
+                            <p>Изменяйте статус задачи по мере выполнения</p>
                         </div>
                     </div>
                     <div class="benefit-item">
@@ -696,10 +1499,10 @@
                         </div>
                     </div>
                     <div class="benefit-item">
-                        <i class="fas fa-user-secret"></i>
+                        <i class="fas fa-paperclip"></i>
                         <div>
-                            <h4>Личные чаты</h4>
-                            <p>Приватное обсуждение с коллегами</p>
+                            <h4>Файлы и DICOM</h4>
+                            <p>Просмотр снимков и документов прямо в браузере</p>
                         </div>
                     </div>
                     <div class="benefit-item">
@@ -709,81 +1512,41 @@
                             <p>Работа с любого устройства в сети</p>
                         </div>
                     </div>
-                    <div class="benefit-item">
-                        <i class="fas fa-history"></i>
-                        <div>
-                            <h4>История</h4>
-                            <p>Полная история по каждому пациенту</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Slide 9: Как начать -->
-        <div class="slide">
-            <div class="card">
-                <h2><i class="fas fa-rocket"></i> Как начать работу</h2>
-                
-                <div class="flow-steps">
-                    <div class="flow-step-card">
-                        <span class="step-number">1</span>
-                        <h4>Регистрация</h4>
-                        <p>Администратор создаёт вашу учётную запись с ролью "Физик"</p>
-                    </div>
-                    <div class="flow-step-card">
-                        <span class="step-number">2</span>
-                        <h4>Вход в систему</h4>
-                        <p>Откройте http://192.168.x.x:5000 в браузере</p>
-                    </div>
-                    <div class="flow-step-card">
-                        <span class="step-number">3</span>
-                        <h4>Просмотр задач</h4>
-                        <p>Все импортированные пациенты в списке задач</p>
-                    </div>
-                    <div class="flow-step-card">
-                        <span class="step-number">4</span>
-                        <h4>Чат с врачом</h4>
-                        <p>Уточняйте детали в чате по задаче</p>
-                    </div>
-                    <div class="flow-step-card">
-                        <span class="step-number">5</span>
-                        <h4>Обновление статуса</h4>
-                        <p>Меняйте статус по мере выполнения</p>
-                    </div>
-                </div>
-
-                <div class="gradient-info-box" style="background: linear-gradient(135deg, #11998e, #38ef7d);">
-                    <i class="fas fa-headset" style="font-size: 3rem; margin-bottom: 15px;"></i>
-                    <h3 style="margin-bottom: 10px;">Нужна помощь?</h3>
-                    <p>Обратитесь к администратору системы или ознакомьтесь с документацией</p>
                 </div>
             </div>
         </div>
 
         <!-- Navigation -->
-        <div class="navigation">
-            <button class="nav-btn prev" onclick="presentation.prevSlide()">← Назад</button>
-            <button class="nav-btn next" onclick="presentation.nextSlide()">Далее →</button>
+        <div class="navigation" style="display: flex; justify-content: center; align-items: center; gap: 30px; margin-top: 40px; padding: 20px;">
+            <button class="nav-btn prev" onclick="presentation.prevSlide()" style="background: linear-gradient(135deg, #4e54c8, #8f94fb); color: white; border: none; padding: 14px 28px; border-radius: 10px; cursor: pointer; font-size: 15px; font-weight: 600; display: flex; align-items: center; gap: 10px; transition: all 0.3s;">
+                <i class="fas fa-arrow-left"></i> Назад
+            </button>
+            <div class="slide-counter" style="color: #666; font-size: 14px; min-width: 120px; text-align: center;">
+                Слайд <span id="currentSlideNum">1</span> / <span id="totalSlidesNum">6</span>
+            </div>
+            <button class="nav-btn next" onclick="presentation.nextSlide()" style="background: linear-gradient(135deg, #11998e, #38ef7d); color: white; border: none; padding: 14px 28px; border-radius: 10px; cursor: pointer; font-size: 15px; font-weight: 600; display: flex; align-items: center; gap: 10px; transition: all 0.3s;">
+                Далее <i class="fas fa-arrow-right"></i>
+            </button>
         </div>
 
-        <div class="slide-indicators" id="indicators"></div>
+        <div class="slide-indicators" id="indicators" style="display: flex; justify-content: center; gap: 10px; margin-top: 20px;"></div>
     </div>
 
     <script src="js/presentations.js"></script>
     <script>
-        const presentation = new Presentation(9);
-        
+        const presentation = new Presentation(6);
+
         // Инициализация индикаторов
         const indicators = document.getElementById('indicators');
-        for (let i = 0; i < 9; i++) {
+        for (let i = 0; i < 6; i++) {
             const indicator = document.createElement('div');
             indicator.className = 'indicator';
+            indicator.style.cssText = 'width: 12px; height: 12px; border-radius: 50%; background: #ddd; cursor: pointer; transition: all 0.3s;';
             indicator.onclick = () => presentation.goToSlide(i);
             indicators.appendChild(indicator);
         }
 
-        // Инициализация анимации чисел
+        // Инициализация
         document.addEventListener('DOMContentLoaded', () => {
             presentation.initNumberAnimations();
         });

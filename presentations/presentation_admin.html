@@ -9,158 +9,586 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <style>
-        .admin-dashboard {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin: 30px 0;
+        /* Точное отражение админ-панели */
+        .admin-dashboard-mock {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 24px;
+            margin: 20px 0;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
         }
 
-        .admin-widget {
+        .admin-header-mock {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .admin-header-mock h2 {
+            margin: 0;
+            color: #2c3e50;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 22px;
+        }
+
+        .admin-header-mock h2 i {
+            color: #eb3349;
+        }
+
+        .admin-stats-grid-mock {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .admin-stat-card-mock {
             background: linear-gradient(135deg, #eb3349, #f5576c);
             color: white;
-            padding: 25px;
-            border-radius: 15px;
+            padding: 20px;
+            border-radius: 12px;
             text-align: center;
+            box-shadow: 0 4px 15px rgba(235, 51, 73, 0.3);
         }
 
-        .admin-widget.blue { background: linear-gradient(135deg, #4e54c8, #8f94fb); }
-        .admin-widget.green { background: linear-gradient(135deg, #11998e, #38ef7d); }
-        .admin-widget.orange { background: linear-gradient(135deg, #f093fb, #f5576c); }
+        .admin-stat-card-mock.blue {
+            background: linear-gradient(135deg, #4e54c8, #8f94fb);
+            box-shadow: 0 4px 15px rgba(78, 84, 200, 0.3);
+        }
 
-        .admin-widget i {
-            font-size: 3rem;
-            margin-bottom: 15px;
+        .admin-stat-card-mock.green {
+            background: linear-gradient(135deg, #11998e, #38ef7d);
+            box-shadow: 0 4px 15px rgba(17, 153, 142, 0.3);
+        }
+
+        .admin-stat-card-mock.orange {
+            background: linear-gradient(135deg, #f093fb, #f5576c);
+            box-shadow: 0 4px 15px rgba(240, 147, 251, 0.3);
+        }
+
+        .admin-stat-card-mock.purple {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .admin-stat-card-mock.teal {
+            background: linear-gradient(135deg, #43e97b, #38f9d7);
+            box-shadow: 0 4px 15px rgba(67, 233, 123, 0.3);
+        }
+
+        .admin-stat-card-mock .stat-icon {
+            font-size: 2.5rem;
+            margin-bottom: 12px;
             opacity: 0.9;
         }
 
-        .admin-widget .number {
-            font-size: 3rem;
+        .admin-stat-card-mock .stat-number {
+            font-size: 2.5rem;
             font-weight: bold;
             display: block;
+            margin-bottom: 4px;
         }
 
-        .admin-widget .label {
-            font-size: 1rem;
+        .admin-stat-card-mock .stat-label {
+            font-size: 13px;
             opacity: 0.9;
+            display: block;
+            margin-bottom: 8px;
         }
 
-        .user-table {
+        .stat-breakdown {
+            display: flex;
+            gap: 6px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .stat-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        /* Таблица пользователей */
+        .admin-table-mock {
             width: 100%;
             border-collapse: collapse;
-            margin: 30px 0;
             background: white;
-            border-radius: 15px;
+            border-radius: 10px;
             overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            margin: 20px 0;
         }
 
-        .user-table th {
+        .admin-table-mock thead {
             background: linear-gradient(135deg, #eb3349, #f5576c);
             color: white;
-            padding: 15px;
+        }
+
+        .admin-table-mock th {
+            padding: 14px 12px;
             text-align: left;
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
         }
 
-        .user-table td {
-            padding: 12px 15px;
-            border-bottom: 1px solid #eee;
+        .admin-table-mock td {
+            padding: 12px;
+            border-bottom: 1px solid #f1f5f9;
+            font-size: 13px;
         }
 
-        .user-table tr:hover {
+        .admin-table-mock tr:hover {
             background: #f8f9fa;
         }
 
-        .role-badge {
+        .role-badge-mock {
             display: inline-block;
             padding: 4px 12px;
             border-radius: 15px;
-            font-size: 0.8rem;
-            font-weight: bold;
+            font-size: 11px;
+            font-weight: 700;
         }
 
-        .role-admin { background: #ffebee; color: #c62828; }
-        .role-doctor { background: #e3f2fd; color: #1976d2; }
-        .role-physicist { background: #e8f5e9; color: #2e7d32; }
+        .role-badge-mock.role-admin {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        .role-badge-mock.role-doctor {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+
+        .role-badge-mock.role-physicist {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .status-badge-mock {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .status-badge-mock.status-online {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-badge-mock.status-offline {
+            background: #f8f9fa;
+            color: #666;
+        }
 
         .status-dot {
-            display: inline-block;
-            width: 10px;
-            height: 10px;
+            width: 8px;
+            height: 8px;
             border-radius: 50%;
-            margin-right: 8px;
+            display: inline-block;
         }
 
-        .status-online { background: #4caf50; }
-        .status-offline { background: #9e9e9e; }
+        .status-dot.online {
+            background: #27ae60;
+            box-shadow: 0 0 8px #27ae60;
+        }
 
-        .logs-list {
+        .status-dot.offline {
+            background: #95a5a6;
+        }
+
+        .admin-action-btn {
+            padding: 6px 10px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-size: 12px;
+            margin-right: 4px;
+            transition: all 0.2s;
+        }
+
+        .admin-action-btn.edit {
+            background: #f39c12;
+            color: white;
+        }
+
+        .admin-action-btn.password {
+            background: #3498db;
+            color: white;
+        }
+
+        .admin-action-btn.delete {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .admin-action-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        /* Таблица задач */
+        .research-type-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .research-type-badge.ct {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+
+        .research-type-badge.ct_diag {
+            background: #bbdefb;
+            color: #1565c0;
+        }
+
+        .research-type-badge.mr {
+            background: #f3e5f5;
+            color: #7b1fa2;
+        }
+
+        .research-type-badge.pet {
+            background: #fff3e0;
+            color: #f57c00;
+        }
+
+        /* Быстрые действия */
+        .admin-actions-grid-mock {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 16px;
+            margin: 20px 0;
+        }
+
+        .admin-action-card-mock {
+            background: white;
+            padding: 24px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .admin-action-card-mock:hover {
+            border-color: #eb3349;
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(235, 51, 73, 0.2);
+        }
+
+        .admin-action-card-mock i {
+            font-size: 3rem;
+            color: #eb3349;
+            margin-bottom: 16px;
+        }
+
+        .admin-action-card-mock h4 {
+            color: #2c3e50;
+            margin: 0 0 8px 0;
+            font-size: 16px;
+        }
+
+        .admin-action-card-mock p {
+            color: #666;
+            font-size: 13px;
+            margin: 0;
+        }
+
+        /* Модальное окно */
+        .modal-mock {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            margin: 20px 0;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+            border: 2px solid #eb3349;
+        }
+
+        .modal-header-mock {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .modal-header-mock h3 {
+            margin: 0;
+            color: #2c3e50;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 18px;
+        }
+
+        .modal-close-mock {
+            background: none;
+            border: none;
+            color: #7f8c8d;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 4px 8px;
+            transition: all 0.2s;
+        }
+
+        .modal-close-mock:hover {
+            color: #e74c3c;
+        }
+
+        .modal-body-mock {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 16px;
+        }
+
+        .form-group-admin {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .form-group-admin label {
+            font-size: 13px;
+            color: #2c3e50;
+            font-weight: 600;
+        }
+
+        .form-group-admin input,
+        .form-group-admin select {
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .form-group-admin input:focus,
+        .form-group-admin select:focus {
+            outline: none;
+            border-color: #eb3349;
+            box-shadow: 0 0 0 3px rgba(235, 51, 73, 0.1);
+        }
+
+        /* Логи */
+        .logs-mock {
             background: #1a1a2e;
             color: #00ff00;
             padding: 20px;
             border-radius: 10px;
             font-family: 'Courier New', monospace;
-            font-size: 0.85rem;
+            font-size: 12px;
             max-height: 300px;
             overflow-y: auto;
             margin: 20px 0;
         }
 
         .log-entry {
-            padding: 5px 0;
+            padding: 6px 0;
             border-bottom: 1px solid #333;
+            display: flex;
+            gap: 12px;
         }
 
         .log-entry .timestamp {
             color: #666;
-            margin-right: 10px;
+            white-space: nowrap;
         }
 
         .log-entry .level {
             font-weight: bold;
-            margin-right: 10px;
+            white-space: nowrap;
         }
 
         .log-entry .level-info { color: #00d2ff; }
         .log-entry .level-warn { color: #ffc107; }
         .log-entry .level-error { color: #ff4444; }
 
-        .management-grid {
+        .log-entry .message {
+            color: #00ff00;
+        }
+
+        /* Навигация */
+        .navbar-mockup {
+            background: white;
+            border-bottom: 1px solid #e2e8f0;
+            padding: 14px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .nav-brand-mock {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .nav-brand-mock i {
+            font-size: 2rem;
+            color: #4f46e5;
+        }
+
+        .nav-brand-mock h1 {
+            font-size: 1.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin: 0;
+        }
+
+        .nav-links-mock {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .user-role-mock {
+            padding: 8px 14px;
+            border-radius: 50px;
+            font-size: 12px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-right: 12px;
+            border-right: 1px solid #e2e8f0;
+        }
+
+        .user-role-mock.role-admin {
+            background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
+            color: #c62828;
+        }
+
+        .nav-link-mock {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            border-radius: 8px;
+            text-decoration: none;
+            color: #64748b;
+            font-weight: 500;
+            font-size: 13px;
+            white-space: nowrap;
+            transition: all 0.2s;
+        }
+
+        .nav-link-mock:hover {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            color: #1e293b;
+        }
+
+        .nav-link-mock.logout {
+            color: #ef4444;
+        }
+
+        .nav-link-mock.logout:hover {
+            background: #ef4444;
+            color: white;
+        }
+
+        /* Преимущества */
+        .benefits-list {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 25px;
+            gap: 20px;
             margin: 30px 0;
         }
 
-        .manage-card {
+        .benefit-item {
             background: white;
             padding: 25px;
             border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            border-left: 5px solid #eb3349;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+            transition: transform 0.2s;
         }
 
-        .manage-card h4 {
+        .benefit-item:hover {
+            transform: translateY(-4px);
+        }
+
+        .benefit-item i {
+            font-size: 2.5rem;
+            color: #eb3349;
+            flex-shrink: 0;
+        }
+
+        .benefit-item h4 {
             color: #2c3e50;
-            margin-bottom: 15px;
+            margin-bottom: 8px;
+            font-size: 1.1rem;
+        }
+
+        .benefit-item p {
+            color: #666;
+            line-height: 1.6;
+            font-size: 14px;
+        }
+
+        /* Фильтры */
+        .admin-filters-mock {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .search-box-mock {
+            flex: 1;
+            min-width: 250px;
             display: flex;
             align-items: center;
             gap: 10px;
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 10px 14px;
         }
 
-        .manage-card ul {
-            list-style: none;
+        .search-box-mock i {
+            color: #7f8c8d;
         }
 
-        .manage-card li {
-            padding: 8px 0;
-            display: flex;
-            align-items: center;
-            gap: 10px;
+        .search-box-mock input {
+            flex: 1;
+            border: none;
+            outline: none;
+            font-size: 14px;
         }
 
-        .manage-card li i {
-            color: #11998e;
+        .filter-select-mock {
+            padding: 10px 14px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            background: white;
+            cursor: pointer;
         }
     </style>
 </head>
@@ -174,46 +602,125 @@
         <div class="slide active title-slide" style="background: linear-gradient(135deg, #eb3349, #f5576c);">
             <i class="fas fa-user-cog logo"></i>
             <h1>Task-Chat для администраторов</h1>
-            <p class="subtitle">Полный контроль над системой, пользователями и импортом пациентов</p>
+            <p class="subtitle">Полный контроль над системой, пользователями и задачами</p>
             <div style="margin-top: 40px; font-size: 1.2rem; opacity: 0.9;">
-                <i class="fas fa-mobile-alt"></i> Мобильная версия &nbsp;•&nbsp;
-                <i class="fas fa-users-cog"></i> Управление &nbsp;•&nbsp;
-                <i class="fas fa-chart-line"></i> Мониторинг
+                <i class="fas fa-users-cog"></i> Управление пользователями &nbsp;•&nbsp;
+                <i class="fas fa-tasks"></i> Управление задачами &nbsp;•&nbsp;
+                <i class="fas fa-chart-line"></i> Мониторинг системы
             </div>
-            
-            <!-- Visual Mock Interface -->
+
+            <!-- Visual Mock Interface - Точное отражение реальной навигации для администратора -->
             <div style="margin-top: 50px; display: flex; justify-content: center; gap: 30px; flex-wrap: wrap;">
                 <div class="mobile-frame" style="transform: scale(0.9);">
                     <div class="mobile-screen">
                         <div class="mock-interface">
-                            <div class="mock-header">
-                                <i class="fas fa-cog"></i>
-                                <h3>Админка</h3>
-                                <i class="fas fa-bell mock-pulse" style="margin-left: auto;"></i>
+                            <!-- Верхняя навигация из base.html -->
+                            <div style="background: white; border-bottom: 1px solid #e2e8f0; padding: 14px 16px; display: flex; justify-content: space-between; align-items: center;">
+                                <div style="display: flex; align-items: center; gap: 12px;">
+                                    <i class="fas fa-comments-medical" style="font-size: 1.5rem; color: #4f46e5;"></i>
+                                    <h1 style="font-size: 1.2rem; font-weight: 800; margin: 0; background: linear-gradient(135deg, #4f46e5, #7c3aed); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Task-Chat</h1>
+                                </div>
+                                <div style="background: linear-gradient(135deg, #ef4444, #dc2626); color: white; padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px;">
+                                    <i class="fas fa-user-shield"></i> Админ
+                                </div>
                             </div>
-                            <div class="mock-content">
+                            <div class="mock-content" style="padding: 16px; padding-bottom: 80px;">
+                                <!-- Welcome message -->
+                                <div style="background: linear-gradient(135deg, #f8fafc, #f1f5f9); padding: 16px; border-radius: 12px; margin-bottom: 16px;">
+                                    <h4 style="color: #1e293b; margin: 0 0 8px 0; font-size: 14px; display: flex; align-items: center; gap: 8px;">
+                                        <i class="fas fa-heartbeat" style="color: #ef4444;"></i> Добро пожаловать, admin!
+                                    </h4>
+                                    <span style="background: linear-gradient(135deg, #ef4444, #dc2626); color: white; padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px;">
+                                        <i class="fas fa-user-shield"></i> Администратор
+                                    </span>
+                                </div>
+                                <!-- Статистика -->
+                                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 16px;">
+                                    <div style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 10px; border-radius: 8px; text-align: center;">
+                                        <div style="font-size: 8px; opacity: 0.9;">Пользователей</div>
+                                        <div style="font-size: 1.2rem; font-weight: bold;">24</div>
+                                    </div>
+                                    <div style="background: linear-gradient(135deg, #f093fb, #f5576c); color: white; padding: 10px; border-radius: 8px; text-align: center;">
+                                        <div style="font-size: 8px; opacity: 0.9;">Задач</div>
+                                        <div style="font-size: 1.2rem; font-weight: bold;">89</div>
+                                    </div>
+                                    <div style="background: linear-gradient(135deg, #11998e, #38ef7d); color: white; padding: 10px; border-radius: 8px; text-align: center;">
+                                        <div style="font-size: 8px; opacity: 0.9;">Чатов</div>
+                                        <div style="font-size: 1.2rem; font-weight: bold;">45</div>
+                                    </div>
+                                </div>
+                                <!-- Быстрые действия -->
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px;">
+                                    <button style="background: linear-gradient(135deg, #4f46e5, #7c3aed); color: white; border: none; padding: 12px; border-radius: 8px; font-size: 11px; font-weight: 600; display: flex; flex-direction: column; align-items: center; gap: 6px;">
+                                        <i class="fas fa-user-plus" style="font-size: 1.3rem;"></i>
+                                        <span>Добавить пользователя</span>
+                                    </button>
+                                    <button style="background: linear-gradient(135deg, #11998e, #38ef7d); color: white; border: none; padding: 12px; border-radius: 8px; font-size: 11px; font-weight: 600; display: flex; flex-direction: column; align-items: center; gap: 6px;">
+                                        <i class="fas fa-tasks" style="font-size: 1.3rem;"></i>
+                                        <span>Управление задачами</span>
+                                    </button>
+                                </div>
+                                <!-- Пользователи -->
                                 <div class="mock-task-list">
-                                    <div class="mock-task-item">
-                                        <div class="mock-patient">admin</div>
-                                        <div class="mock-details">
-                                            <span class="mock-tag kt">Админ</span>
-                                            <span class="mock-tag status-done">✓</span>
+                                    <div class="mock-task-item" style="background: white; border-radius: 10px; padding: 14px; margin-bottom: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); border-left: 4px solid #ef4444;">
+                                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                            <div style="font-weight: 700; color: #1e293b; font-size: 14px;">admin</div>
+                                            <span style="background: #ffebee; color: #c62828; padding: 4px 10px; border-radius: 12px; font-size: 10px; font-weight: 600;">Админ</span>
+                                        </div>
+                                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                                            <span style="font-size: 11px; color: #64748b;">ТП</span>
+                                            <span style="background: #d4edda; color: #155724; padding: 4px 10px; border-radius: 12px; font-size: 10px; font-weight: 600; display: flex; align-items: center; gap: 4px;">
+                                                <span style="width: 6px; height: 6px; background: #27ae60; border-radius: 50%;"></span> Онлайн
+                                            </span>
                                         </div>
                                     </div>
-                                    <div class="mock-task-item">
-                                        <div class="mock-patient">ivanov_as</div>
-                                        <div class="mock-details">
-                                            <span class="mock-tag mrt">Врач</span>
-                                            <span class="mock-tag status-done">✓</span>
+                                    <div class="mock-task-item" style="background: white; border-radius: 10px; padding: 14px; margin-bottom: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); border-left: 4px solid #3b82f6;">
+                                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                            <div style="font-weight: 700; color: #1e293b; font-size: 14px;">ivanov_as</div>
+                                            <span style="background: #e3f2fd; color: #1976d2; padding: 4px 10px; border-radius: 12px; font-size: 10px; font-weight: 600;">Врач</span>
+                                        </div>
+                                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                                            <span style="font-size: 11px; color: #64748b;">РО1</span>
+                                            <span style="background: #d4edda; color: #155724; padding: 4px 10px; border-radius: 12px; font-size: 10px; font-weight: 600; display: flex; align-items: center; gap: 4px;">
+                                                <span style="width: 6px; height: 6px; background: #27ae60; border-radius: 50%;"></span> Онлайн
+                                            </span>
                                         </div>
                                     </div>
-                                    <div class="mock-task-item">
-                                        <div class="mock-patient">petrov_vk</div>
-                                        <div class="mock-details">
-                                            <span class="mock-tag pet">Физик</span>
-                                            <span class="mock-tag status-progress">○</span>
+                                    <div class="mock-task-item" style="background: white; border-radius: 10px; padding: 14px; margin-bottom: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); border-left: 4px solid #10b981;">
+                                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                            <div style="font-weight: 700; color: #1e293b; font-size: 14px;">sidorov_ap</div>
+                                            <span style="background: #e8f5e9; color: #2e7d32; padding: 4px 10px; border-radius: 12px; font-size: 10px; font-weight: 600;">Физик</span>
+                                        </div>
+                                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                                            <span style="font-size: 11px; color: #64748b;">ФРО</span>
+                                            <span style="background: #f8f9fa; color: #64748b; padding: 4px 10px; border-radius: 12px; font-size: 10px; font-weight: 600; display: flex; align-items: center; gap: 4px;">
+                                                <span style="width: 6px; height: 6px; background: #95a5a6; border-radius: 50%;"></span> Офлайн
+                                            </span>
                                         </div>
                                     </div>
+                                </div>
+                            </div>
+                            <!-- Нижняя навигация из base.html -->
+                            <div style="position: absolute; bottom: 0; left: 0; right: 0; background: white; border-top: 1px solid #e2e8f0; padding: 8px 0; display: flex; justify-content: space-around; padding-bottom: max(8px, env(safe-area-inset-bottom));">
+                                <div style="display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 8px 12px; color: #4f46e5;">
+                                    <i class="fas fa-home" style="font-size: 1.3rem;"></i>
+                                    <span style="font-size: 10px; color: #4f46e5; font-weight: 500;">Главная</span>
+                                </div>
+                                <div style="display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 8px 12px; color: #64748b;">
+                                    <i class="fas fa-comments" style="font-size: 1.3rem;"></i>
+                                    <span style="font-size: 10px; font-weight: 500;">Чаты</span>
+                                </div>
+                                <div style="display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 8px 12px; color: #64748b;">
+                                    <i class="fas fa-users" style="font-size: 1.3rem;"></i>
+                                    <span style="font-size: 10px; font-weight: 500;">Онлайн</span>
+                                </div>
+                                <div style="display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 8px 12px; color: #4f46e5; position: relative;">
+                                    <i class="fas fa-cog" style="font-size: 1.3rem;"></i>
+                                    <span style="font-size: 10px; color: #4f46e5; font-weight: 500;">Админ</span>
+                                </div>
+                                <div style="display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 8px 12px; color: #ef4444;">
+                                    <i class="fas fa-sign-out-alt" style="font-size: 1.3rem;"></i>
+                                    <span style="font-size: 10px; font-weight: 500;">Выход</span>
                                 </div>
                             </div>
                         </div>
@@ -222,521 +729,589 @@
             </div>
         </div>
 
-        <!-- Slide 2: Проблема -->
+        <!-- Slide 2: Главная админ-панели -->
         <div class="slide">
             <div class="card">
-                <h2><i class="fas fa-exclamation-triangle"></i> Проблемы администрирования</h2>
-                <div class="feature-grid">
-                    <div class="feature-card">
-                        <i class="fas fa-users feature-icon"></i>
-                        <h4>Управление пользователями</h4>
-                        <p>Ручное создание учётных записей, отслеживание доступов</p>
+                <h2><i class="fas fa-tachometer-alt"></i> Главная панель администратора</h2>
+                <p style="text-align: center; margin-bottom: 30px;">
+                    <strong>Полная статистика системы</strong> — все данные в реальном времени
+                </p>
+
+                <!-- Навигация -->
+                <div class="navbar-mockup">
+                    <div class="nav-brand-mock">
+                        <i class="fas fa-comments-medical"></i>
+                        <h1>Task-Chat</h1>
                     </div>
-                    <div class="feature-card">
-                        <i class="fas fa-search feature-icon"></i>
-                        <h4>Отсутствие мониторинга</h4>
-                        <p>Не видно кто и что делает в системе</p>
+                    <div class="nav-links-mock">
+                        <div class="user-role-mock role-admin">
+                            <i class="fas fa-user-cog"></i>
+                            <span>Админ</span>
+                        </div>
+                        <a class="nav-link-mock" href="#">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Главная</span>
+                        </a>
+                        <a class="nav-link-mock" href="#">
+                            <i class="fas fa-users"></i>
+                            <span>Пользователи</span>
+                        </a>
+                        <a class="nav-link-mock" href="#">
+                            <i class="fas fa-tasks"></i>
+                            <span>Задачи</span>
+                        </a>
+                        <a class="nav-link-mock logout" href="#">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>Выход</span>
+                        </a>
                     </div>
-                    <div class="feature-card">
-                        <i class="fas fa-database feature-icon"></i>
-                        <h4>Контроль импорта</h4>
-                        <p>Сложно отслеживать импорт пациентов</p>
+                </div>
+
+                <!-- Статистика -->
+                <div class="admin-dashboard-mock">
+                    <div class="admin-header-mock">
+                        <h2><i class="fas fa-chart-bar"></i> Статистика системы</h2>
                     </div>
-                    <div class="feature-card">
-                        <i class="fas fa-shield-alt feature-icon"></i>
-                        <h4>Безопасность</h4>
-                        <p>Нет аудита действий пользователей</p>
+
+                    <div class="admin-stats-grid-mock">
+                        <div class="admin-stat-card-mock">
+                            <i class="fas fa-users stat-icon"></i>
+                            <span class="stat-number">24</span>
+                            <span class="stat-label">Пользователей</span>
+                            <div class="stat-breakdown">
+                                <span class="stat-badge">8 врачей</span>
+                                <span class="stat-badge">4 физика</span>
+                                <span class="stat-badge">2 админ</span>
+                            </div>
+                        </div>
+
+                        <div class="admin-stat-card-mock blue">
+                            <i class="fas fa-procedures stat-icon"></i>
+                            <span class="stat-number">156</span>
+                            <span class="stat-label">Пациентов</span>
+                            <div class="stat-breakdown">
+                                <span class="stat-badge">89 CT</span>
+                                <span class="stat-badge">42 MR</span>
+                                <span class="stat-badge">25 PET</span>
+                            </div>
+                        </div>
+
+                        <div class="admin-stat-card-mock green">
+                            <i class="fas fa-tasks stat-icon"></i>
+                            <span class="stat-number">89</span>
+                            <span class="stat-label">Задач</span>
+                            <div class="stat-breakdown">
+                                <span class="stat-badge">15 ожидает</span>
+                                <span class="stat-badge">52 в работе</span>
+                                <span class="stat-badge">22 готово</span>
+                            </div>
+                        </div>
+
+                        <div class="admin-stat-card-mock orange">
+                            <i class="fas fa-comments stat-icon"></i>
+                            <span class="stat-number">342</span>
+                            <span class="stat-label">Сообщений</span>
+                            <div class="stat-breakdown">
+                                <span class="stat-badge">28 сегодня</span>
+                            </div>
+                        </div>
+
+                        <div class="admin-stat-card-mock purple">
+                            <i class="fas fa-user-friends stat-icon"></i>
+                            <span class="stat-number">45</span>
+                            <span class="stat-label">Личных чатов</span>
+                            <div class="stat-breakdown">
+                                <span class="stat-badge">12 активных</span>
+                            </div>
+                        </div>
+
+                        <div class="admin-stat-card-mock teal">
+                            <i class="fas fa-paperclip stat-icon"></i>
+                            <span class="stat-number">234</span>
+                            <span class="stat-label">Файлов</span>
+                            <div class="stat-breakdown">
+                                <span class="stat-badge">1.2 ГБ</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Быстрые действия -->
+                <div class="admin-actions-grid-mock">
+                    <div class="admin-action-card-mock">
+                        <i class="fas fa-user-plus"></i>
+                        <h4>Добавить пользователя</h4>
+                        <p>Создать новую учётную запись врача или физика</p>
+                    </div>
+                    <div class="admin-action-card-mock">
+                        <i class="fas fa-tasks"></i>
+                        <h4>Управление задачами</h4>
+                        <p>Редактирование и массовые операции с задачами</p>
+                    </div>
+                    <div class="admin-action-card-mock">
+                        <i class="fas fa-file-alt"></i>
+                        <h4>Просмотр логов</h4>
+                        <p>Аудит действий пользователей</p>
+                    </div>
+                    <div class="admin-action-card-mock">
+                        <i class="fas fa-cog"></i>
+                        <h4>Настройки системы</h4>
+                        <p>Конфигурация параметров приложения</p>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Slide 3: Решение -->
+        <!-- Slide 3: Управление пользователями -->
         <div class="slide">
             <div class="card">
-                <h2><i class="fas fa-check-circle"></i> Решение Task-Chat</h2>
-                <p style="font-size: 1.2rem; text-align: center; margin-bottom: 30px;">
-                    <strong>Админ-панель</strong> — полный контроль над системой в одном месте
+                <h2><i class="fas fa-users-cog"></i> Управление пользователями</h2>
+                <p style="text-align: center; margin-bottom: 30px;">
+                    <strong>Регистрация, редактирование, удаление</strong> — полный контроль над учётными записями
                 </p>
 
-                <div class="admin-dashboard">
-                    <div class="admin-widget">
-                        <i class="fas fa-users"></i>
-                        <span class="number">24</span>
-                        <span class="label">Пользователя</span>
+                <!-- Фильтры -->
+                <div class="admin-filters-mock">
+                    <div class="search-box-mock">
+                        <i class="fas fa-search"></i>
+                        <input type="text" placeholder="Поиск пользователей...">
                     </div>
-                    <div class="admin-widget blue">
-                        <i class="fas fa-procedures"></i>
-                        <span class="number">156</span>
-                        <span class="label">Пациентов</span>
-                    </div>
-                    <div class="admin-widget green">
-                        <i class="fas fa-tasks"></i>
-                        <span class="number">89</span>
-                        <span class="label">Задач</span>
-                    </div>
-                    <div class="admin-widget orange">
-                        <i class="fas fa-comments"></i>
-                        <span class="number">342</span>
-                        <span class="label">Сообщений</span>
-                    </div>
+                    <select class="filter-select-mock">
+                        <option value="">Все роли</option>
+                        <option value="admin">Администраторы</option>
+                        <option value="doctor">Врачи</option>
+                        <option value="physicist">Физики</option>
+                    </select>
                 </div>
 
-                <table class="user-table">
+                <!-- Таблица пользователей -->
+                <table class="admin-table-mock">
                     <thead>
                         <tr>
-                            <th>Пользователь</th>
+                            <th>ID</th>
+                            <th>ФИО</th>
+                            <th>Логин</th>
                             <th>Роль</th>
                             <th>Отделение</th>
+                            <th>Был в сети</th>
                             <th>Статус</th>
                             <th>Действия</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
-                            <td><i class="fas fa-user-circle"></i> admin</td>
-                            <td><span class="role-badge role-admin">Администратор</span></td>
+                            <td>1</td>
+                            <td><strong>Админов А.А.</strong></td>
+                            <td>admin</td>
+                            <td><span class="role-badge-mock role-admin">Администратор</span></td>
                             <td>ТП</td>
-                            <td><span class="status-dot status-online"></span>Онлайн</td>
-                            <td><i class="fas fa-edit"></i> <i class="fas fa-key"></i></td>
+                            <td>12.03.2026 14:30</td>
+                            <td><span class="status-badge-mock status-online"><span class="status-dot online"></span>Онлайн</span></td>
+                            <td>
+                                <button class="admin-action-btn edit"><i class="fas fa-edit"></i></button>
+                                <button class="admin-action-btn password"><i class="fas fa-key"></i></button>
+                            </td>
                         </tr>
                         <tr>
-                            <td><i class="fas fa-user-md"></i> ivanov_as</td>
-                            <td><span class="role-badge role-doctor">Врач</span></td>
+                            <td>2</td>
+                            <td><strong>Иванов И.И.</strong></td>
+                            <td>ivanov_as</td>
+                            <td><span class="role-badge-mock role-doctor">Врач</span></td>
                             <td>РО1</td>
-                            <td><span class="status-dot status-online"></span>Онлайн</td>
-                            <td><i class="fas fa-edit"></i> <i class="fas fa-key"></i></td>
+                            <td>12.03.2026 14:25</td>
+                            <td><span class="status-badge-mock status-online"><span class="status-dot online"></span>Онлайн</span></td>
+                            <td>
+                                <button class="admin-action-btn edit"><i class="fas fa-edit"></i></button>
+                                <button class="admin-action-btn password"><i class="fas fa-key"></i></button>
+                                <button class="admin-action-btn delete"><i class="fas fa-trash"></i></button>
+                            </td>
                         </tr>
                         <tr>
-                            <td><i class="fas fa-atom"></i> petrov_vk</td>
-                            <td><span class="role-badge role-physicist">Физик</span></td>
+                            <td>3</td>
+                            <td><strong>Петров В.К.</strong></td>
+                            <td>petrov_vk</td>
+                            <td><span class="role-badge-mock role-doctor">Врач</span></td>
+                            <td>РО2</td>
+                            <td>12.03.2026 13:45</td>
+                            <td><span class="status-badge-mock status-offline"><span class="status-dot offline"></span>Офлайн</span></td>
+                            <td>
+                                <button class="admin-action-btn edit"><i class="fas fa-edit"></i></button>
+                                <button class="admin-action-btn password"><i class="fas fa-key"></i></button>
+                                <button class="admin-action-btn delete"><i class="fas fa-trash"></i></button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>4</td>
+                            <td><strong>Сидоров А.П.</strong></td>
+                            <td>sidorov_ap</td>
+                            <td><span class="role-badge-mock role-physicist">Физик</span></td>
                             <td>ФРО</td>
-                            <td><span class="status-dot status-offline"></span>Офлайн</td>
-                            <td><i class="fas fa-edit"></i> <i class="fas fa-key"></i></td>
+                            <td>12.03.2026 14:20</td>
+                            <td><span class="status-badge-mock status-online"><span class="status-dot online"></span>Онлайн</span></td>
+                            <td>
+                                <button class="admin-action-btn edit"><i class="fas fa-edit"></i></button>
+                                <button class="admin-action-btn password"><i class="fas fa-key"></i></button>
+                                <button class="admin-action-btn delete"><i class="fas fa-trash"></i></button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>5</td>
+                            <td><strong>Смирнова Е.М.</strong></td>
+                            <td>smirnova_em</td>
+                            <td><span class="role-badge-mock role-physicist">Физик</span></td>
+                            <td>ФРО</td>
+                            <td>12.03.2026 12:15</td>
+                            <td><span class="status-badge-mock status-offline"><span class="status-dot offline"></span>Офлайн</span></td>
+                            <td>
+                                <button class="admin-action-btn edit"><i class="fas fa-edit"></i></button>
+                                <button class="admin-action-btn password"><i class="fas fa-key"></i></button>
+                                <button class="admin-action-btn delete"><i class="fas fa-trash"></i></button>
+                            </td>
                         </tr>
                     </tbody>
                 </table>
+
+                <!-- Модальное окно добавления -->
+                <div class="modal-mock">
+                    <div class="modal-header-mock">
+                        <h3><i class="fas fa-user-plus"></i> Добавить пользователя</h3>
+                        <button class="modal-close-mock"><i class="fas fa-times"></i></button>
+                    </div>
+                    <div class="modal-body-mock">
+                        <div class="form-group-admin">
+                            <label>Фамилия *</label>
+                            <input type="text" placeholder="Иванов">
+                        </div>
+                        <div class="form-group-admin">
+                            <label>Имя *</label>
+                            <input type="text" placeholder="Иван">
+                        </div>
+                        <div class="form-group-admin">
+                            <label>Отчество</label>
+                            <input type="text" placeholder="Иванович">
+                        </div>
+                        <div class="form-group-admin">
+                            <label>Логин *</label>
+                            <input type="text" placeholder="ivanov_ii">
+                        </div>
+                        <div class="form-group-admin">
+                            <label>Пароль *</label>
+                            <input type="password" placeholder="Минимум 3 символа">
+                        </div>
+                        <div class="form-group-admin">
+                            <label>Роль *</label>
+                            <select>
+                                <option value="doctor">Врач</option>
+                                <option value="physicist">Физик</option>
+                                <option value="admin">Администратор</option>
+                            </select>
+                        </div>
+                        <div class="form-group-admin">
+                            <label>Отделение *</label>
+                            <select>
+                                <option value="РО1">РО1</option>
+                                <option value="РО2">РО2</option>
+                                <option value="РО3">РО3</option>
+                                <option value="РО4">РО4</option>
+                                <option value="РО5">РО5</option>
+                                <option value="ФРО">ФРО</option>
+                                <option value="ТП">ТП</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 12px; margin-top: 20px; justify-content: flex-end;">
+                        <button class="btn-secondary-mock" style="padding: 10px 20px; border-radius: 6px; border: none; background: #95a5a6; color: white; cursor: pointer;">
+                            <i class="fas fa-times"></i> Отмена
+                        </button>
+                        <button class="btn-primary-mock" style="padding: 10px 20px; border-radius: 6px; border: none; background: linear-gradient(135deg, #eb3349, #f5576c); color: white; cursor: pointer;">
+                            <i class="fas fa-save"></i> Сохранить
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <!-- Slide 4: Мобильная версия -->
+        <!-- Slide 4: Управление задачами -->
         <div class="slide">
             <div class="card">
-                <h2><i class="fas fa-mobile-alt"></i> Мобильная версия для администратора</h2>
+                <h2><i class="fas fa-tasks"></i> Управление задачами</h2>
                 <p style="text-align: center; margin-bottom: 30px;">
-                    Администрирование с любого устройства в сети
+                    <strong>Редактирование, удаление, массовые операции</strong> — полный контроль над задачами
                 </p>
 
-                <div class="comparison-view">
-                    <div class="desktop-frame">
-                        <div class="desktop-header">
-                            <div class="desktop-dot red"></div>
-                            <div class="desktop-dot yellow"></div>
-                            <div class="desktop-dot green"></div>
-                        </div>
-                        <div class="desktop-screen">
-                            <div class="mock-desktop-content">
-                                <h4 style="margin-bottom: 15px; color: #2c3e50;"><i class="fas fa-users-cog"></i> Управление пользователями</h4>
-                                <div class="mock-patient-grid">
-                                    <div class="mock-patient-card">
-                                        <h5><i class="fas fa-user-shield"></i> admin</h5>
-                                        <div class="mock-field">
-                                            <span class="mock-label">Роль:</span>
-                                            <span class="mock-value">Админ</span>
-                                        </div>
-                                        <div class="mock-field">
-                                            <span class="mock-label">Отделение:</span>
-                                            <span class="mock-value">ТП</span>
-                                        </div>
-                                        <div class="mock-field">
-                                            <span class="mock-label">Статус:</span>
-                                            <span class="mock-tag status-done">Онлайн</span>
-                                        </div>
-                                    </div>
-                                    <div class="mock-patient-card">
-                                        <h5><i class="fas fa-user-md"></i> ivanov_as</h5>
-                                        <div class="mock-field">
-                                            <span class="mock-label">Роль:</span>
-                                            <span class="mock-value">Врач</span>
-                                        </div>
-                                        <div class="mock-field">
-                                            <span class="mock-label">Отделение:</span>
-                                            <span class="mock-value">РО1</span>
-                                        </div>
-                                        <div class="mock-field">
-                                            <span class="mock-label">Статус:</span>
-                                            <span class="mock-tag status-done">Онлайн</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                <!-- Фильтры -->
+                <div class="admin-filters-mock">
+                    <div class="search-box-mock">
+                        <i class="fas fa-search"></i>
+                        <input type="text" placeholder="Поиск задач...">
                     </div>
-                    <div class="mobile-frame">
-                        <div class="mobile-screen">
-                            <div class="mock-interface">
-                                <div class="mock-header">
-                                    <i class="fas fa-cog"></i>
-                                    <h3>Админка</h3>
-                                    <i class="fas fa-bell mock-pulse" style="margin-left: auto;"></i>
-                                </div>
-                                <div class="mock-content">
-                                    <div class="mock-task-list">
-                                        <div class="mock-task-item">
-                                            <div class="mock-patient">admin</div>
-                                            <div class="mock-details">
-                                                <span class="mock-tag kt">Админ</span>
-                                                <span class="mock-tag status-done">✓</span>
-                                            </div>
-                                        </div>
-                                        <div class="mock-task-item">
-                                            <div class="mock-patient">ivanov_as</div>
-                                            <div class="mock-details">
-                                                <span class="mock-tag mrt">Врач</span>
-                                                <span class="mock-tag status-done">✓</span>
-                                            </div>
-                                        </div>
-                                        <div class="mock-task-item">
-                                            <div class="mock-patient">petrov_vk</div>
-                                            <div class="mock-details">
-                                                <span class="mock-tag pet">Физик</span>
-                                                <span class="mock-tag status-progress">○</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    <select class="filter-select-mock">
+                        <option value="">Все статусы</option>
+                        <option value="pending">Ожидает</option>
+                        <option value="in_progress">В работе</option>
+                        <option value="completed">Выполнена</option>
+                        <option value="cancelled">Отменена</option>
+                    </select>
                 </div>
-                <p class="screenshot-caption">Мониторинг системы с планшета</p>
 
-                <div class="benefits-list">
-                    <div class="benefit-item">
-                        <i class="fas fa-bell"></i>
-                        <div>
-                            <h4>Уведомления</h4>
-                            <p>Оповещения о критических событиях системы</p>
-                        </div>
+                <!-- Таблица задач -->
+                <table class="admin-table-mock">
+                    <thead>
+                        <tr>
+                            <th><input type="checkbox"></th>
+                            <th>ID</th>
+                            <th>Заголовок</th>
+                            <th>Тип</th>
+                            <th>Пациент</th>
+                            <th>Статус</th>
+                            <th>Врач</th>
+                            <th>Дата</th>
+                            <th>Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><input type="checkbox"></td>
+                            <td>#156</td>
+                            <td><strong>Задача #156</strong></td>
+                            <td><span class="research-type-badge ct">Импорт CT</span></td>
+                            <td>12345678</td>
+                            <td><span class="status-badge-mock" style="background: #fff3cd; color: #856404;">Ожидает</span></td>
+                            <td>Иванов И.И.</td>
+                            <td>12.03.2026</td>
+                            <td>
+                                <button class="admin-action-btn edit"><i class="fas fa-edit"></i></button>
+                                <button class="admin-action-btn" style="background: #11998e; color: white;"><i class="fas fa-comments"></i></button>
+                                <button class="admin-action-btn delete"><i class="fas fa-trash"></i></button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><input type="checkbox"></td>
+                            <td>#155</td>
+                            <td><strong>Задача #155</strong></td>
+                            <td><span class="research-type-badge pet">Импорт PET</span></td>
+                            <td>32120</td>
+                            <td><span class="status-badge-mock" style="background: #d1ecf1; color: #0c5460;">В работе</span></td>
+                            <td>Петров В.К.</td>
+                            <td>11.03.2026</td>
+                            <td>
+                                <button class="admin-action-btn edit"><i class="fas fa-edit"></i></button>
+                                <button class="admin-action-btn" style="background: #11998e; color: white;"><i class="fas fa-comments"></i></button>
+                                <button class="admin-action-btn delete"><i class="fas fa-trash"></i></button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><input type="checkbox"></td>
+                            <td>#154</td>
+                            <td><strong>Задача #154</strong></td>
+                            <td><span class="research-type-badge mr">Импорт MR</span></td>
+                            <td>32115</td>
+                            <td><span class="status-badge-mock" style="background: #d4edda; color: #155724;">Выполнена</span></td>
+                            <td>Сидорова Е.М.</td>
+                            <td>10.03.2026</td>
+                            <td>
+                                <button class="admin-action-btn edit"><i class="fas fa-edit"></i></button>
+                                <button class="admin-action-btn" style="background: #11998e; color: white;"><i class="fas fa-comments"></i></button>
+                                <button class="admin-action-btn delete"><i class="fas fa-trash"></i></button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <!-- Массовые действия -->
+                <div class="card" style="background: #fff3cd; border: 2px solid #ffc107; margin-top: 20px;">
+                    <h4 style="color: #856404; margin-bottom: 15px;"><i class="fas fa-bolt"></i> Массовые действия</h4>
+                    <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                        <button class="btn-primary-mock" style="padding: 10px 16px; border-radius: 6px; border: none; background: #f39c12; color: white; cursor: pointer;">
+                            <i class="fas fa-exchange-alt"></i> Изменить статус
+                        </button>
+                        <button class="btn-primary-mock" style="padding: 10px 16px; border-radius: 6px; border: none; background: #3498db; color: white; cursor: pointer;">
+                            <i class="fas fa-user-md"></i> Изменить врача
+                        </button>
+                        <button class="btn-primary-mock" style="padding: 10px 16px; border-radius: 6px; border: none; background: #e74c3c; color: white; cursor: pointer;">
+                            <i class="fas fa-trash"></i> Удалить задачи
+                        </button>
                     </div>
-                    <div class="benefit-item">
-                        <i class="fas fa-user-plus"></i>
-                        <div>
-                            <h4>Быстрое добавление</h4>
-                            <p>Создание пользователей с мобильного</p>
-                        </div>
-                    </div>
-                    <div class="benefit-item">
-                        <i class="fas fa-chart-bar"></i>
-                        <div>
-                            <h4>Мониторинг</h4>
-                            <p>Статистика и метрики в реальном времени</p>
-                        </div>
-                    </div>
+                    <p style="color: #856404; font-size: 13px; margin-top: 12px; margin-bottom: 0;">
+                        <i class="fas fa-info-circle"></i> Выберите задачи чекбоксами для выполнения массового действия
+                    </p>
                 </div>
             </div>
         </div>
 
-        <!-- Slide 5: Управление пользователями -->
+        <!-- Slide 5: Логи и аудит -->
         <div class="slide">
             <div class="card">
-                <h2><i class="fas fa-users-cog"></i> Управление пользователями</h2>
-                
-                <div class="management-grid">
-                    <div class="manage-card">
-                        <h4><i class="fas fa-user-plus"></i> Создание</h4>
-                        <ul>
-                            <li><i class="fas fa-check"></i> Быстрая регистрация</li>
-                            <li><i class="fas fa-check"></i> Выбор роли (Врач/Физик/Админ)</li>
-                            <li><i class="fas fa-check"></i> Назначение отделения</li>
-                            <li><i class="fas fa-check"></i> Генерация пароля</li>
-                        </ul>
-                    </div>
-
-                    <div class="manage-card">
-                        <h4><i class="fas fa-user-edit"></i> Редактирование</h4>
-                        <ul>
-                            <li><i class="fas fa-check"></i> Изменение данных</li>
-                            <li><i class="fas fa-check"></i> Смена роли</li>
-                            <li><i class="fas fa-check"></i> Перевод в отделение</li>
-                            <li><i class="fas fa-check"></i> Сброс пароля</li>
-                        </ul>
-                    </div>
-
-                    <div class="manage-card">
-                        <h4><i class="fas fa-user-shield"></i> Безопасность</h4>
-                        <ul>
-                            <li><i class="fas fa-check"></i> Блокировка пользователя</li>
-                            <li><i class="fas fa-check"></i> Принудительный выход</li>
-                            <li><i class="fas fa-check"></i> Аудит действий</li>
-                            <li><i class="fas fa-check"></i> История входов</li>
-                        </ul>
-                    </div>
-                </div>
-
-                <div class="card" style="background: #e3f2fd; border: 2px solid #2196f3; margin-top: 30px;">
-                    <h4 style="color: #1976d2;"><i class="fas fa-info-circle"></i> Роли в системе</h4>
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 15px;">
-                        <div style="padding: 15px; background: white; border-radius: 10px;">
-                            <strong style="color: #c62828;">Администратор</strong>
-                            <p style="font-size: 0.9rem; margin-top: 5px;">Полный доступ ко всем функциям</p>
-                        </div>
-                        <div style="padding: 15px; background: white; border-radius: 10px;">
-                            <strong style="color: #1976d2;">Врач</strong>
-                            <p style="font-size: 0.9rem; margin-top: 5px;">Создание задач, импорт пациентов</p>
-                        </div>
-                        <div style="padding: 15px; background: white; border-radius: 10px;">
-                            <strong style="color: #2e7d32;">Физик</strong>
-                            <p style="font-size: 0.9rem; margin-top: 5px;">Просмотр задач, планирование</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Slide 6: Мониторинг импорта -->
-        <div class="slide">
-            <div class="card">
-                <h2><i class="fas fa-chart-line"></i> Мониторинг импорта пациентов</h2>
+                <h2><i class="fas fa-file-alt"></i> Логи и аудит действий</h2>
                 <p style="text-align: center; margin-bottom: 30px;">
-                    Отслеживание всех импортированных пациентов в реальном времени
+                    <strong>Полный аудит всех действий</strong> — отслеживание активности пользователей
                 </p>
 
-                <div class="stats-grid">
-                    <div class="stat-card" style="background: linear-gradient(135deg, #4e54c8, #8f94fb);">
-                        <span class="stat-number" data-animate-number="156">0</span>
-                        <span class="stat-label">Всего пациентов</span>
-                    </div>
-                    <div class="stat-card" style="background: linear-gradient(135deg, #11998e, #38ef7d);">
-                        <span class="stat-number" data-animate-number="24">0</span>
-                        <span class="stat-label">За неделю</span>
-                    </div>
-                    <div class="stat-card" style="background: linear-gradient(135deg, #f093fb, #f5576c);">
-                        <span class="stat-number" data-animate-number="8">0</span>
-                        <span class="stat-label">За сегодня</span>
-                    </div>
-                    <div class="stat-card" style="background: linear-gradient(135deg, #00d2ff, #3a7bd5);">
-                        <span class="stat-number" data-animate-number="98">0</span>
-                        <span class="stat-label">% учтено</span>
-                    </div>
-                </div>
-
-                <div style="max-width: 700px; margin: 40px auto;">
-                    <canvas id="importChart"></canvas>
-                </div>
-            </div>
-        </div>
-
-        <!-- Slide 7: Логи и аудит -->
-        <div class="slide">
-            <div class="card">
-                <h2><i class="fas fa-clipboard-list"></i> Логи и аудит действий</h2>
-                <p style="text-align: center; margin-bottom: 30px;">
-                    Полная история всех действий в системе
-                </p>
-
-                <div class="logs-list">
+                <div class="logs-mock">
                     <div class="log-entry">
-                        <span class="timestamp">2026-03-08 23:45:12</span>
+                        <span class="timestamp">2026-03-12 14:30:15</span>
                         <span class="level level-info">INFO</span>
-                        <span>User admin logged in from 192.168.1.100</span>
+                        <span class="message">User admin logged in (auth)</span>
                     </div>
                     <div class="log-entry">
-                        <span class="timestamp">2026-03-08 23:42:05</span>
+                        <span class="timestamp">2026-03-12 14:28:42</span>
                         <span class="level level-info">INFO</span>
-                        <span>Task #156 created by ivanov_as</span>
+                        <span class="message">Task #156 created by ivanov_as (tasks)</span>
                     </div>
                     <div class="log-entry">
-                        <span class="timestamp">2026-03-08 23:38:22</span>
+                        <span class="timestamp">2026-03-12 14:25:30</span>
+                        <span class="level level-info">INFO</span>
+                        <span class="message">User ivanov_as logged in (auth)</span>
+                    </div>
+                    <div class="log-entry">
+                        <span class="timestamp">2026-03-12 14:20:18</span>
+                        <span class="level level-info">INFO</span>
+                        <span class="message">Message sent in task #155 by sidorov_ap (chat)</span>
+                    </div>
+                    <div class="log-entry">
+                        <span class="timestamp">2026-03-12 14:15:05</span>
                         <span class="level level-warn">WARN</span>
-                        <span>Failed login attempt for user petrov_vk</span>
+                        <span class="message">Failed login attempt for user petrov_vk (auth)</span>
                     </div>
                     <div class="log-entry">
-                        <span class="timestamp">2026-03-08 23:35:18</span>
+                        <span class="timestamp">2026-03-12 14:10:22</span>
                         <span class="level level-info">INFO</span>
-                        <span>Patient #32123 imported by ivanov_as</span>
+                        <span class="message">File uploaded: ct_scan.png to task #154 (files)</span>
                     </div>
                     <div class="log-entry">
-                        <span class="timestamp">2026-03-08 23:30:45</span>
+                        <span class="timestamp">2026-03-12 14:05:11</span>
                         <span class="level level-info">INFO</span>
-                        <span>User sidorova_em registered by admin</span>
+                        <span class="message">Task #154 status changed to completed by sidorov_ap (tasks)</span>
                     </div>
                     <div class="log-entry">
-                        <span class="timestamp">2026-03-08 23:25:10</span>
-                        <span class="level level-error">ERROR</span>
-                        <span>File upload failed: size exceeds limit</span>
-                    </div>
-                    <div class="log-entry">
-                        <span class="timestamp">2026-03-08 23:20:33</span>
+                        <span class="timestamp">2026-03-12 13:58:45</span>
                         <span class="level level-info">INFO</span>
-                        <span>Task #155 status changed to completed</span>
+                        <span class="message">User petrov_vk logged in (auth)</span>
+                    </div>
+                    <div class="log-entry">
+                        <span class="timestamp">2026-03-12 13:45:30</span>
+                        <span class="level level-info">INFO</span>
+                        <span class="message">New user registered: smirnova_em (admin)</span>
                     </div>
                 </div>
 
-                <div class="card" style="background: #fff3cd; border: 2px solid #ffc107;">
-                    <h4 style="color: #856404;"><i class="fas fa-shield-alt"></i> Аудит безопасности</h4>
-                    <ul style="margin-top: 15px; line-height: 2;">
-                        <li><i class="fas fa-check" style="color: #856404;"></i> Все входы в систему логируются</li>
-                        <li><i class="fas fa-check" style="color: #856404;"></i> История действий пользователей</li>
-                        <li><i class="fas fa-check" style="color: #856404;"></i> Отслеживание импорта пациентов</li>
-                        <li><i class="fas fa-check" style="color: #856404;"></i> Журнал ошибок системы</li>
-                    </ul>
+                <div class="card" style="background: #e8f5e9; border: 2px solid #11998e; margin-top: 20px;">
+                    <h4 style="color: #11998e;"><i class="fas fa-check"></i> Категории логов</h4>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-top: 15px;">
+                        <div style="padding: 12px; background: rgba(0, 210, 255, 0.1); border-radius: 8px;">
+                            <strong style="color: #00d2ff;"><i class="fas fa-sign-in-alt"></i> auth</strong>
+                            <p style="margin: 4px 0 0 0; font-size: 12px; color: #aaa;">Вход, выход, регистрация</p>
+                        </div>
+                        <div style="padding: 12px; background: rgba(0, 210, 255, 0.1); border-radius: 8px;">
+                            <strong style="color: #00d2ff;"><i class="fas fa-tasks"></i> tasks</strong>
+                            <p style="margin: 4px 0 0 0; font-size: 12px; color: #aaa;">Создание, обновление задач</p>
+                        </div>
+                        <div style="padding: 12px; background: rgba(0, 210, 255, 0.1); border-radius: 8px;">
+                            <strong style="color: #00d2ff;"><i class="fas fa-comments"></i> chat</strong>
+                            <p style="margin: 4px 0 0 0; font-size: 12px; color: #aaa;">Отправка сообщений</p>
+                        </div>
+                        <div style="padding: 12px; background: rgba(0, 210, 255, 0.1); border-radius: 8px;">
+                            <strong style="color: #00d2ff;"><i class="fas fa-paperclip"></i> files</strong>
+                            <p style="margin: 4px 0 0 0; font-size: 12px; color: #aaa;">Загрузка файлов</p>
+                        </div>
+                        <div style="padding: 12px; background: rgba(0, 210, 255, 0.1); border-radius: 8px;">
+                            <strong style="color: #00d2ff;"><i class="fas fa-user-cog"></i> admin</strong>
+                            <p style="margin: 4px 0 0 0; font-size: 12px; color: #aaa;">Действия администратора</p>
+                        </div>
+                        <div style="padding: 12px; background: rgba(0, 210, 255, 0.1); border-radius: 8px;">
+                            <strong style="color: #00d2ff;"><i class="fas fa-cog"></i> system</strong>
+                            <p style="margin: 4px 0 0 0; font-size: 12px; color: #aaa;">Системные события</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Slide 8: Преимущества -->
+        <!-- Slide 6: Преимущества -->
         <div class="slide">
             <div class="card">
                 <h2><i class="fas fa-star"></i> Преимущества для администратора</h2>
-                
+
                 <div class="benefits-list">
                     <div class="benefit-item">
                         <i class="fas fa-users-cog"></i>
                         <div>
                             <h4>Управление пользователями</h4>
-                            <p>Быстрое создание, редактирование, блокировка</p>
+                            <p>Регистрация, редактирование, удаление, смена паролей</p>
+                        </div>
+                    </div>
+                    <div class="benefit-item">
+                        <i class="fas fa-tasks"></i>
+                        <div>
+                            <h4>Управление задачами</h4>
+                            <p>Редактирование любых задач, массовые операции</p>
                         </div>
                     </div>
                     <div class="benefit-item">
                         <i class="fas fa-chart-bar"></i>
                         <div>
-                            <h4>Мониторинг</h4>
-                            <p>Статистика по пациентам, задачам, пользователям</p>
+                            <h4>Мониторинг системы</h4>
+                            <p>Полная статистика в реальном времени</p>
                         </div>
                     </div>
                     <div class="benefit-item">
-                        <i class="fas fa-clipboard-list"></i>
+                        <i class="fas fa-file-alt"></i>
                         <div>
-                            <h4>Аудит</h4>
-                            <p>Полная история всех действий</p>
-                        </div>
-                    </div>
-                    <div class="benefit-item">
-                        <i class="fas fa-mobile-alt"></i>
-                        <div>
-                            <h4>Мобильность</h4>
-                            <p>Администрирование с любого устройства</p>
-                        </div>
-                    </div>
-                    <div class="benefit-item">
-                        <i class="fas fa-database"></i>
-                        <div>
-                            <h4>Резервное копирование</h4>
-                            <p>Все данные в папке data/ — легко бэкапить</p>
+                            <h4>Аудит действий</h4>
+                            <p>Детальные логи всех действий пользователей</p>
                         </div>
                     </div>
                     <div class="benefit-item">
                         <i class="fas fa-shield-alt"></i>
                         <div>
                             <h4>Безопасность</h4>
-                            <p>Локальная система, нет доступа извне</p>
+                            <p>Контроль доступа, отслеживание активности</p>
+                        </div>
+                    </div>
+                    <div class="benefit-item">
+                        <i class="fas fa-mobile-alt"></i>
+                        <div>
+                            <h4>Мобильный доступ</h4>
+                            <p>Администрирование с любого устройства</p>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Slide 9: Как начать -->
-        <div class="slide">
-            <div class="card">
-                <h2><i class="fas fa-rocket"></i> Начало работы администратора</h2>
-
-                <div class="flow-steps">
-                    <div class="flow-step-card">
-                        <span class="step-number">1</span>
-                        <h4>Установка</h4>
-                        <p>Запустите Task-Chat-Server.exe или run_server.sh</p>
-                    </div>
-                    <div class="flow-step-card">
-                        <span class="step-number">2</span>
-                        <h4>Первый вход</h4>
-                        <p>admin / admin123 (смените пароль!)</p>
-                    </div>
-                    <div class="flow-step-card">
-                        <span class="step-number">3</span>
-                        <h4>Создание пользователей</h4>
-                        <p>Добавьте врачей и физиков по отделениям</p>
-                    </div>
-                    <div class="flow-step-card">
-                        <span class="step-number">4</span>
-                        <h4>Инструктаж</h4>
-                        <p>Обучите персонал работе с системой</p>
-                    </div>
-                    <div class="flow-step-card">
-                        <span class="step-number">5</span>
-                        <h4>Мониторинг</h4>
-                        <p>Отслеживайте использование и статистику</p>
-                    </div>
-                </div>
-
-                <div class="gradient-info-box" style="background: linear-gradient(135deg, #eb3349, #f5576c);">
-                    <i class="fas fa-book" style="font-size: 3rem; margin-bottom: 15px;"></i>
-                    <h3 style="margin-bottom: 10px;">Документация</h3>
-                    <p>DEPLOYMENT.md — подробное руководство по развёртыванию</p>
-                </div>
-            </div>
-        </div>
-
         <!-- Navigation -->
-        <div class="navigation">
-            <button class="nav-btn prev" onclick="presentation.prevSlide()">← Назад</button>
-            <button class="nav-btn next" onclick="presentation.nextSlide()">Далее →</button>
+        <div class="navigation" style="display: flex; justify-content: center; align-items: center; gap: 30px; margin-top: 40px; padding: 20px;">
+            <button class="nav-btn prev" onclick="presentation.prevSlide()" style="background: linear-gradient(135deg, #4e54c8, #8f94fb); color: white; border: none; padding: 14px 28px; border-radius: 10px; cursor: pointer; font-size: 15px; font-weight: 600; display: flex; align-items: center; gap: 10px; transition: all 0.3s;">
+                <i class="fas fa-arrow-left"></i> Назад
+            </button>
+            <div class="slide-counter" style="color: #666; font-size: 14px; min-width: 120px; text-align: center;">
+                Слайд <span id="currentSlideNum">1</span> / <span id="totalSlidesNum">6</span>
+            </div>
+            <button class="nav-btn next" onclick="presentation.nextSlide()" style="background: linear-gradient(135deg, #11998e, #38ef7d); color: white; border: none; padding: 14px 28px; border-radius: 10px; cursor: pointer; font-size: 15px; font-weight: 600; display: flex; align-items: center; gap: 10px; transition: all 0.3s;">
+                Далее <i class="fas fa-arrow-right"></i>
+            </button>
         </div>
 
-        <div class="slide-indicators" id="indicators"></div>
+        <div class="slide-indicators" id="indicators" style="display: flex; justify-content: center; gap: 10px; margin-top: 20px;"></div>
     </div>
 
     <script src="js/presentations.js"></script>
     <script>
-        const presentation = new Presentation(9);
-        
+        const presentation = new Presentation(6);
+
+        // Инициализация индикаторов
         const indicators = document.getElementById('indicators');
-        for (let i = 0; i < 9; i++) {
+        for (let i = 0; i < 6; i++) {
             const indicator = document.createElement('div');
             indicator.className = 'indicator';
+            indicator.style.cssText = 'width: 12px; height: 12px; border-radius: 50%; background: #ddd; cursor: pointer; transition: all 0.3s;';
             indicator.onclick = () => presentation.goToSlide(i);
             indicators.appendChild(indicator);
         }
 
+        // Инициализация
         document.addEventListener('DOMContentLoaded', () => {
             presentation.initNumberAnimations();
-            
-            const ctx = document.getElementById('importChart');
-            if (ctx) {
-                new Chart(ctx, {
-                    type: 'line',
-                    data: {
-                        labels: ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'],
-                        datasets: [{
-                            label: 'Импорт пациентов',
-                            data: [12, 18, 15, 22, 28, 14, 10],
-                            borderColor: '#4e54c8',
-                            backgroundColor: 'rgba(78, 84, 200, 0.1)',
-                            fill: true,
-                            tension: 0.4,
-                            borderRadius: 10
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        plugins: {
-                            legend: { display: false },
-                            title: {
-                                display: true,
-                                text: 'Импорт пациентов по дням недели',
-                                font: { size: 16 }
-                            }
-                        },
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                title: { display: true, text: 'Количество' }
-                            }
-                        }
-                    }
-                });
-            }
         });
     </script>
 </body>

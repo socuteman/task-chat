@@ -29,9 +29,17 @@ class Presentation {
         this.updateNavigation();
         this.updateProgress();
         this.updateIndicators();
-        
+        this.updateSlideCounter();
+
         // Анимация элементов на слайде
         this.animateSlideElements(index);
+    }
+
+    updateSlideCounter() {
+        const currentEl = document.getElementById('currentSlideNum');
+        const totalEl = document.getElementById('totalSlidesNum');
+        if (currentEl) currentEl.textContent = this.currentSlide + 1;
+        if (totalEl) totalEl.textContent = this.totalSlides;
     }
 
     nextSlide() {
