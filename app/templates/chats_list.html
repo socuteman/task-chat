@@ -1,0 +1,910 @@
+{% extends "base.html" %}
+
+{% block title %}Личные чаты - Task-Chat{% endblock %}
+
+{% block extra_css %}
+<style>
+    .chats-page {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 20px 0;
+    }
+
+    .chats-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 32px;
+        padding: 24px;
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    }
+
+    .chats-header h1 {
+        font-size: 24px;
+        font-weight: 700;
+        color: var(--dark);
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .chats-header h1 i {
+        color: var(--primary);
+        font-size: 26px;
+    }
+
+    .chats-list {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .chat-item {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 20px;
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        cursor: pointer;
+        text-decoration: none;
+        color: inherit;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .chat-item::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: var(--gradient-primary);
+        opacity: 0;
+        transition: opacity 0.25s;
+    }
+
+    .chat-item:hover {
+        box-shadow: 0 8px 24px rgba(79, 70, 229, 0.15);
+        transform: translateY(-3px);
+    }
+
+    .chat-item:hover::before {
+        opacity: 1;
+    }
+
+    .chat-item.has-unread {
+        background: linear-gradient(135deg, #f8faff 0%, #f0f4ff 100%);
+        border: 1px solid rgba(79, 70, 229, 0.15);
+    }
+
+    .chat-item.has-unread::before {
+        opacity: 1;
+    }
+
+    .chat-avatar-wrapper {
+        position: relative;
+        flex-shrink: 0;
+    }
+
+    .chat-avatar {
+        width: 56px;
+        height: 56px;
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 22px;
+        transition: transform 0.25s;
+    }
+
+    .chat-item:hover .chat-avatar {
+        transform: scale(1.05);
+    }
+
+    .chat-avatar.doctor {
+        background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+        color: #1976d2;
+    }
+
+    .chat-avatar.physicist {
+        background: linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%);
+        color: #7b1fa2;
+    }
+
+    .chat-avatar.admin {
+        background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
+        color: #c62828;
+    }
+
+    .online-indicator {
+        position: absolute;
+        bottom: -3px;
+        right: -3px;
+        width: 15px;
+        height: 15px;
+        border-radius: 50%;
+        background: var(--success);
+        border: 2px solid white;
+        box-shadow: 0 2px 6px rgba(16, 185, 129, 0.4);
+    }
+
+    .chat-avatar-wrapper.offline .online-indicator {
+        background: var(--gray);
+        box-shadow: none;
+    }
+
+    .chat-content {
+        flex: 1;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .chat-top-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .chat-partner-name {
+        font-weight: 600;
+        font-size: 16px;
+        color: var(--dark);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .chat-partner-name.mobile-name {
+        display: none;
+    }
+
+    .chat-partner-name.desktop-name {
+        display: block;
+    }
+
+    .chat-role-badge {
+        padding: 3px 10px;
+        border-radius: 6px;
+        font-size: 11px;
+        font-weight: 600;
+        flex-shrink: 0;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+    }
+
+    .chat-role-badge.doctor {
+        background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+        color: #1565c0;
+    }
+
+    .chat-role-badge.physicist {
+        background: linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%);
+        color: #6a1b9a;
+    }
+
+    .chat-role-badge.admin {
+        background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
+        color: #c62828;
+    }
+
+    .chat-bottom-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .chat-department {
+        font-size: 13px;
+        color: var(--gray);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        flex-shrink: 0;
+    }
+
+    .chat-department i {
+        font-size: 12px;
+    }
+
+    .chat-divider {
+        width: 4px;
+        height: 4px;
+        border-radius: 50%;
+        background: var(--gray-light);
+        flex-shrink: 0;
+    }
+
+    .chat-last-message {
+        font-size: 14px;
+        color: var(--gray);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        flex: 1;
+        min-width: 0;
+    }
+
+    .chat-last-message i {
+        font-size: 12px;
+        margin-right: 4px;
+        flex-shrink: 0;
+    }
+
+    .chat-meta {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 4px;
+        flex-shrink: 0;
+        min-width: 70px;
+    }
+
+    .chat-date {
+        font-size: 10px;
+        color: var(--gray);
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .chat-time {
+        font-size: 12px;
+        color: var(--gray);
+        font-weight: 500;
+    }
+
+    .unread-badge {
+        background: var(--gradient-primary);
+        color: white;
+        padding: 5px 12px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 700;
+        min-width: 24px;
+        text-align: center;
+        box-shadow: 0 4px 12px rgba(79, 70, 229, 0.35);
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.08); }
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: var(--gray);
+    }
+
+    .empty-state i {
+        font-size: 64px;
+        margin-bottom: 16px;
+        opacity: 0.5;
+    }
+
+    .empty-state p {
+        font-size: 16px;
+        margin-bottom: 20px;
+    }
+
+    .start-chat-btn {
+        background: var(--primary);
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+
+    .start-chat-btn:hover {
+        background: var(--primary-dark);
+    }
+
+    /* Модальное окно выбора пользователя */
+    .modal-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0,0,0,0.5);
+        backdrop-filter: blur(4px);
+        z-index: 1000;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+    }
+
+    .modal-overlay.show {
+        display: flex;
+    }
+
+    .modal-content {
+        background: white;
+        border-radius: 24px;
+        padding: 0;
+        max-width: 560px;
+        width: 90%;
+        max-height: 80vh;
+        overflow: hidden;
+        box-shadow: 0 25px 80px rgba(0,0,0,0.35);
+    }
+
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 28px 32px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        position: relative;
+    }
+
+    .modal-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        opacity: 0.5;
+    }
+
+    .modal-header h3 {
+        margin: 0;
+        font-size: 22px;
+        font-weight: 700;
+        color: white;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        position: relative;
+        z-index: 1;
+        text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    }
+
+    .modal-header h3 i {
+        color: white;
+        font-size: 26px;
+        filter: drop-shadow(0 2px 6px rgba(0,0,0,0.3));
+    }
+
+    .modal-close {
+        background: rgba(255,255,255,0.2);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255,255,255,0.3);
+        font-size: 24px;
+        cursor: pointer;
+        color: white;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        width: 44px;
+        height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        position: relative;
+        z-index: 1;
+    }
+
+    .modal-close:hover {
+        background: white;
+        color: #667eea;
+        transform: rotate(90deg) scale(1.1);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+    }
+
+    .modal-body {
+        padding: 24px 32px;
+        background: white;
+        max-height: calc(80vh - 100px);
+        overflow-y: auto;
+    }
+
+    .modal-body::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .modal-body::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 3px;
+    }
+
+    .modal-body::-webkit-scrollbar-thumb {
+        background: #667eea;
+        border-radius: 3px;
+    }
+
+    .modal-body::-webkit-scrollbar-thumb:hover {
+        background: #764ba2;
+    }
+
+    .user-select-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .user-select-item {
+        display: grid;
+        grid-template-columns: 52px 1fr;
+        gap: 16px;
+        padding: 16px;
+        border-radius: 14px;
+        cursor: pointer;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        border: 2px solid transparent;
+        background: linear-gradient(135deg, #f8faff 0%, #f0f4ff 100%);
+    }
+
+    .user-select-item:hover {
+        background: linear-gradient(135deg, #e8efff 0%, #e0e7ff 100%);
+        border-color: rgba(102, 126, 234, 0.3);
+        transform: translateX(4px);
+        box-shadow: 0 4px 16px rgba(102, 126, 234, 0.15);
+    }
+
+    .user-select-item:active {
+        transform: translateX(2px) scale(0.98);
+    }
+
+    .user-select-avatar {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        flex-shrink: 0;
+    }
+
+    .user-select-avatar.doctor {
+        background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+        color: #1976d2;
+    }
+
+    .user-select-avatar.physicist {
+        background: linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%);
+        color: #7b1fa2;
+    }
+
+    .user-select-avatar.admin {
+        background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
+        color: #c62828;
+    }
+
+    .user-select-info {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        min-width: 0;
+    }
+
+    .user-select-name {
+        font-weight: 600;
+        font-size: 15px;
+        color: var(--dark);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .user-select-username {
+        font-size: 13px;
+        color: var(--gray);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    @media (max-width: 768px) {
+        .chats-header {
+            flex-direction: column;
+            gap: 16px;
+            align-items: flex-start;
+        }
+
+        .chats-header h1 {
+            font-size: 22px;
+        }
+
+        .chat-item {
+            padding: 16px;
+            gap: 12px;
+        }
+
+        .chat-avatar {
+            width: 48px;
+            height: 48px;
+            font-size: 18px;
+        }
+
+        .chat-avatar-wrapper .online-indicator {
+            width: 12px;
+            height: 12px;
+            bottom: -2px;
+            right: -2px;
+        }
+
+        .chat-partner-name.desktop-name {
+            display: none;
+        }
+
+        .chat-partner-name.mobile-name {
+            display: block;
+            font-size: 14px;
+        }
+
+        .chat-role-badge {
+            display: none;
+        }
+
+        .chat-department {
+            display: none;
+        }
+
+        .chat-divider {
+            display: none;
+        }
+
+        .chat-meta {
+            min-width: 50px;
+            gap: 4px;
+        }
+
+        .chat-time {
+            font-size: 11px;
+        }
+
+        .chat-last-message {
+            font-size: 13px;
+        }
+
+        .start-chat-btn {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .modal-content {
+            padding: 0;
+            margin: 10px;
+            max-height: calc(100vh - 20px);
+        }
+
+        .modal-header {
+            padding: 20px 24px;
+        }
+
+        .modal-header h3 {
+            font-size: 18px;
+        }
+
+        .modal-close {
+            width: 38px;
+            height: 38px;
+            font-size: 20px;
+        }
+
+        .modal-body {
+            padding: 20px 24px;
+            max-height: calc(100vh - 140px);
+        }
+
+        .user-select-item {
+            grid-template-columns: 44px 1fr;
+            gap: 12px;
+            padding: 12px;
+        }
+
+        .user-select-avatar {
+            width: 44px;
+            height: 44px;
+            font-size: 16px;
+        }
+    }
+
+    @media (max-width: 375px) {
+        .chat-partner-name {
+            font-size: 14px;
+        }
+
+        .chat-department {
+            font-size: 12px;
+        }
+
+        .chat-last-message {
+            font-size: 13px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="chats-page">
+    <div class="chats-header">
+        <h1><i class="fas fa-comments"></i> Личные чаты</h1>
+        <button class="start-chat-btn" onclick="openNewChatModal()">
+            <i class="fas fa-plus"></i> Новый чат
+        </button>
+    </div>
+
+    {% if chats %}
+    <div class="chats-list" id="chatsList">
+        {% for chat in chats %}
+        <a href="{{ url_for('personal_chat', chat_id=chat.chat_id) }}" class="chat-item {{ 'has-unread' if chat.unread_count > 0 else '' }}" data-chat-id="{{ chat.chat_id }}" data-partner-id="{{ chat.partner_id }}">
+            <div class="chat-avatar-wrapper {{ 'offline' if not chat.partner_is_online else '' }}">
+                <div class="chat-avatar {{ chat.partner_role|lower }}">
+                    <i class="fas fa-{{ 'user-md' if chat.partner_role == 'Врач' else 'atom' if chat.partner_role == 'Физик' else 'user-shield' }}"></i>
+                </div>
+                <div class="online-indicator"></div>
+            </div>
+
+            <div class="chat-content">
+                <div class="chat-top-row">
+                    <span class="chat-partner-name desktop-name">{{ chat.partner_full_name }}</span>
+                    <span class="chat-partner-name mobile-name">{{ chat.partner_full_name_short }}</span>
+                </div>
+                <div class="chat-bottom-row">
+                    <span class="chat-department">
+                        <i class="fas fa-building"></i>
+                        {{ chat.partner_department }}
+                    </span>
+                    <span class="chat-divider"></span>
+                    {% if chat.last_message_content %}
+                    <span class="chat-last-message">
+                        <i class="fas fa-{{ 'comment-dots' if not chat.last_message_is_file else 'file' if chat.last_message_file_type == 'other' else 'file-image' if chat.last_message_file_type == 'image' else 'file-pdf' if chat.last_message_file_type == 'pdf' else 'file-archive' }}"></i>
+                        {% if chat.last_message_is_file %}
+                        📎 Файл: {{ chat.last_message_content }}
+                        {% else %}
+                        {{ chat.last_message_content[:60] }}{% if chat.last_message_content|length > 60 %}...{% endif %}
+                        {% endif %}
+                    </span>
+                    {% else %}
+                    <span class="chat-last-message" style="font-style: italic;">
+                        <i class="fas fa-inbox"></i>
+                        Нет сообщений
+                    </span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="chat-meta">
+                <span class="chat-date">{{ chat.last_message_date or '' }}</span>
+                <span class="chat-time">{{ chat.last_message_time or '' }}</span>
+                {% if chat.unread_count > 0 %}
+                <span class="unread-badge">{{ chat.unread_count }}</span>
+                {% endif %}
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <i class="fas fa-comments"></i>
+        <p>У вас пока нет чатов</p>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Модальное окно выбора пользователя -->
+<div class="modal-overlay" id="newChatModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3><i class="fas fa-user-plus"></i> Выберите пользователя</h3>
+            <button class="modal-close" onclick="closeNewChatModal()" title="Закрыть">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <div class="user-select-list" id="userSelectList">
+                <div style="text-align: center; padding: 40px 20px; color: var(--gray);">
+                    <i class="fas fa-circle-notch fa-spin" style="font-size: 32px; margin-bottom: 16px;"></i>
+                    <div>Загрузка...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    let allUsers = [];
+
+    function openNewChatModal() {
+        document.getElementById('newChatModal').classList.add('show');
+        loadUsers();
+    }
+
+    function closeNewChatModal() {
+        document.getElementById('newChatModal').classList.remove('show');
+    }
+
+    function loadUsers() {
+        fetch('/api/users/all')
+            .then(r => r.json())
+            .then(users => {
+                allUsers = users;
+                renderUserList();
+            })
+            .catch(error => {
+                console.error('Error loading users:', error);
+            });
+    }
+
+    function renderUserList() {
+        const container = document.getElementById('userSelectList');
+        const currentUserId = {{ current_user.id }};
+        
+        const otherUsers = allUsers.filter(u => u.id !== currentUserId);
+        
+        if (otherUsers.length === 0) {
+            container.innerHTML = '<div style="text-align: center; padding: 20px; color: var(--gray);">Нет других пользователей</div>';
+            return;
+        }
+
+        container.innerHTML = otherUsers.map(user => `
+            <div class="user-select-item" onclick="startChatWith(${user.id})">
+                <div class="user-select-avatar ${getRoleClass(user.role)}">
+                    <i class="fas fa-${getRoleIcon(user.role)}"></i>
+                </div>
+                <div class="user-select-info">
+                    <div class="user-select-name">${escapeHtml(user.full_name)}</div>
+                    <div class="user-select-username">@${escapeHtml(user.username)} • ${escapeHtml(user.department)}</div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function getRoleClass(role) {
+        if (role === 'Врач') return 'doctor';
+        if (role === 'Физик') return 'physicist';
+        return 'admin';
+    }
+
+    function getRoleIcon(role) {
+        if (role === 'Врач') return 'user-md';
+        if (role === 'Физик') return 'atom';
+        return 'user-shield';
+    }
+
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    function startChatWith(userId) {
+        fetch(`/chat/start/${userId}`, { method: 'POST' })
+            .then(r => r.json())
+            .then(data => {
+                if (data.chat_id) {
+                    window.location.href = `/chat/${data.chat_id}`;
+                } else {
+                    alert('Ошибка создания чата');
+                }
+            })
+            .catch(error => {
+                console.error('Error starting chat:', error);
+                alert('Ошибка создания чата');
+            });
+    }
+
+    // Закрытие по клику вне модального окна
+    document.getElementById('newChatModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeNewChatModal();
+        }
+    });
+
+    // ========================================
+    // Real-time обновление чатов
+    // ========================================
+    function updateChatsRealtime() {
+        fetch('/api/chats/list')
+            .then(r => r.json())
+            .then(chats => {
+                chats.forEach(chat => {
+                    updateChatCard(chat);
+                });
+            })
+            .catch(error => {
+                console.error('Error updating chats:', error);
+            });
+    }
+
+    function updateChatCard(chat) {
+        const chatEl = document.querySelector(`[data-chat-id="${chat.chat_id}"]`);
+        if (!chatEl) return;
+
+        // Обновляем индикатор онлайн
+        const avatarWrapper = chatEl.querySelector('.chat-avatar-wrapper');
+        if (avatarWrapper) {
+            if (chat.partner_is_online) {
+                avatarWrapper.classList.remove('offline');
+            } else {
+                avatarWrapper.classList.add('offline');
+            }
+        }
+
+        // Обновляем дату и время последнего сообщения
+        const dateEl = chatEl.querySelector('.chat-date');
+        const timeEl = chatEl.querySelector('.chat-time');
+        if (dateEl && chat.last_message_date) {
+            dateEl.textContent = chat.last_message_date;
+        }
+        if (timeEl && chat.last_message_time) {
+            timeEl.textContent = chat.last_message_time;
+        }
+
+        // Обновляем последнее сообщение
+        const messageEl = chatEl.querySelector('.chat-last-message');
+        if (messageEl) {
+            if (chat.last_message_content) {
+                let icon = 'comment-dots';
+                let text = chat.last_message_content;
+                
+                if (chat.last_message_is_file) {
+                    icon = 'file';
+                    if (chat.last_message_file_type === 'image') icon = 'file-image';
+                    else if (chat.last_message_file_type === 'pdf') icon = 'file-pdf';
+                    else if (chat.last_message_file_type === 'archive') icon = 'file-archive';
+                    
+                    text = '📎 Файл: ' + chat.last_message_content;
+                } else {
+                    text = chat.last_message_content.length > 60 
+                        ? chat.last_message_content.substring(0, 60) + '...' 
+                        : chat.last_message_content;
+                }
+                
+                messageEl.innerHTML = `<i class="fas fa-${icon}"></i> ${text}`;
+            } else {
+                messageEl.innerHTML = `<i class="fas fa-inbox"></i> Нет сообщений`;
+            }
+        }
+
+        // Обновляем бейдж непрочитанных
+        const unreadBadge = chatEl.querySelector('.unread-badge');
+        const chatItem = chatEl;
+        
+        if (chat.unread_count > 0) {
+            if (!unreadBadge) {
+                const metaEl = chatEl.querySelector('.chat-meta');
+                if (metaEl) {
+                    const badge = document.createElement('span');
+                    badge.className = 'unread-badge';
+                    badge.textContent = chat.unread_count;
+                    metaEl.appendChild(badge);
+                }
+            } else {
+                unreadBadge.textContent = chat.unread_count;
+                unreadBadge.style.display = 'inline-block';
+            }
+            chatItem.classList.add('has-unread');
+        } else {
+            if (unreadBadge) {
+                unreadBadge.style.display = 'none';
+            }
+            chatItem.classList.remove('has-unread');
+        }
+    }
+
+    // Запускаем обновление каждые 5 секунд
+    setInterval(updateChatsRealtime, 5000);
+</script>
+{% endblock %}

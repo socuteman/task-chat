@@ -1,0 +1,624 @@
+{% extends "base.html" %}
+
+{% block title %}Редактирование задачи #{{ task.id }} - Админ-панель{% endblock %}
+
+{% block extra_css %}
+<style>
+    .task-edit-container {
+        display: grid;
+        grid-template-columns: 1fr 350px;
+        gap: 24px;
+    }
+
+    .task-edit-main {
+        background: var(--white);
+        border-radius: var(--radius-lg);
+        padding: 32px;
+        box-shadow: var(--shadow);
+    }
+
+    .task-edit-sidebar {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .task-info-card {
+        background: var(--white);
+        border-radius: var(--radius-lg);
+        padding: 24px;
+        box-shadow: var(--shadow);
+    }
+
+    .task-info-card h3 {
+        font-size: 1rem;
+        color: var(--dark);
+        margin: 0 0 16px 0;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .info-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .info-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 0;
+        border-bottom: 1px solid var(--gray-light);
+    }
+
+    .info-item:last-child {
+        border-bottom: none;
+    }
+
+    .info-label {
+        font-size: 13px;
+        color: var(--gray);
+        font-weight: 500;
+    }
+
+    .info-value {
+        font-size: 13px;
+        color: var(--dark);
+        font-weight: 600;
+        text-align: right;
+    }
+
+    .form-section {
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        padding: 24px;
+        border-radius: var(--radius);
+        margin: 24px 0;
+        border: 1px solid var(--gray-light);
+    }
+
+    .form-section h3 {
+        font-size: 1.1rem;
+        color: var(--dark);
+        margin: 0 0 20px 0;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .form-section h3 i {
+        color: var(--primary);
+    }
+
+    .form-actions-fixed {
+        position: sticky;
+        bottom: 0;
+        background: var(--white);
+        padding: 20px 32px;
+        margin: 0 -32px -32px -32px;
+        border-top: 1px solid var(--gray-light);
+        display: flex;
+        gap: 12px;
+        justify-content: flex-end;
+    }
+
+    .danger-zone {
+        background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+        border: 2px solid #ef4444;
+        border-radius: var(--radius-lg);
+        padding: 24px;
+        margin-top: 24px;
+    }
+
+    .danger-zone h3 {
+        color: #991b1b;
+        margin: 0 0 12px 0;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .danger-zone p {
+        color: #991b1b;
+        margin: 0 0 16px 0;
+        font-size: 14px;
+    }
+
+    @media (max-width: 1024px) {
+        .task-edit-container {
+            grid-template-columns: 1fr;
+        }
+
+        .task-edit-sidebar {
+            order: -1;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .task-edit-main {
+            padding: 16px;
+        }
+
+        .form-actions-fixed {
+            padding: 16px;
+            flex-direction: column;
+        }
+
+        .form-actions-fixed .btn {
+            width: 100%;
+        }
+        
+        .form-section {
+            padding: 16px;
+        }
+        
+        .form-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .danger-zone {
+            padding: 16px;
+        }
+        
+        .task-info-card {
+            padding: 16px;
+        }
+        
+        /* Фикс для полей ввода */
+        .form-control,
+        input[type="text"],
+        input[type="password"],
+        select,
+        textarea {
+            max-width: 100%;
+            font-size: 14px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="admin-dashboard">
+    <div class="admin-header" style="margin-bottom: 24px;">
+        <div>
+            <h1><i class="fas fa-edit"></i> Редактирование задачи #{{ task.id }}</h1>
+            <p class="admin-subtitle">Изменение параметров задачи и информации</p>
+        </div>
+        <a href="{{ url_for('admin_tasks') }}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Назад к задачам
+        </a>
+    </div>
+
+    <div class="task-edit-container">
+        <!-- Основная форма -->
+        <div class="task-edit-main">
+            <form method="POST" action="{{ url_for('admin_update_task', id=task.id) }}" id="editTaskForm"
+              data-ct-diagnostic="{{ task.ct_diagnostic or '' }}"
+              data-treatment="{{ task.treatment or '' }}"
+              data-breath-control="{{ task.breath_control or '' }}">
+                <!-- Основная информация -->
+                <div class="form-section" style="background: var(--white);">
+                    <h3><i class="fas fa-info-circle"></i> Основная информация</h3>
+                    
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="title"><i class="fas fa-heading"></i> Заголовок задачи</label>
+                            <input type="text" id="title" name="title" class="form-control" value="{{ task.title }}" required placeholder="Введите заголовок">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="status"><i class="fas fa-flag"></i> Статус</label>
+                            <select id="status" name="status" class="form-control" required>
+                                <option value="pending" {{ 'selected' if task.status == 'pending' else '' }}>⏳ Ожидает</option>
+                                <option value="in_progress" {{ 'selected' if task.status == 'in_progress' else '' }}>🔄 В работе</option>
+                                <option value="completed" {{ 'selected' if task.status == 'completed' else '' }}>✅ Выполнена</option>
+                                <option value="cancelled" {{ 'selected' if task.status == 'cancelled' else '' }}>❌ Отменена</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="description"><i class="fas fa-align-left"></i> Описание</label>
+                        <textarea id="description" name="description" class="form-control" rows="5" placeholder="Подробное описание задачи">{{ task.description or '' }}</textarea>
+                    </div>
+                </div>
+
+                <!-- Параметры исследования -->
+                <div class="form-section">
+                    <h3><i class="fas fa-file-medical"></i> Параметры исследования</h3>
+                    
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="research_type"><i class="fas fa-microscope"></i> Тип исследования</label>
+                            <select id="research_type" name="research_type" class="form-control" required onchange="toggleResearchFields()">
+                                <option value="import_ct" {{ 'selected' if task.research_type == 'import_ct' else '' }}>Импорт CT</option>
+                                <option value="import_ct_diag" {{ 'selected' if task.research_type == 'import_ct_diag' else '' }}>Импорт CT-диагностики</option>
+                                <option value="mr" {{ 'selected' if task.research_type == 'mr' else '' }}>Импорт MR</option>
+                                <option value="pet" {{ 'selected' if task.research_type == 'pet' else '' }}>Импорт PET</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group" id="expertGroupField" style="display: {{ 'block' if task.research_type == 'import_ct' else 'none' }};">
+                            <label for="expert_group"><i class="fas fa-user-md"></i> Экспертная группа</label>
+                            <select id="expert_group" name="expert_group" class="form-control">
+                                <option value="">Выберите экспертную группу</option>
+                                <option value="ПГШ" {{ 'selected' if task.expert_group == 'ПГШ' else '' }}>ПГШ</option>
+                                <option value="Молочная железа" {{ 'selected' if task.expert_group == 'Молочная железа' else '' }}>Молочная железа</option>
+                                <option value="Предстательная железа / мочевой пузырь" {{ 'selected' if task.expert_group == 'Предстательная железа / мочевой пузырь' else '' }}>Предстательная железа / мочевой пузырь</option>
+                                <option value="Прямая кишка" {{ 'selected' if task.expert_group == 'Прямая кишка' else '' }}>Прямая кишка</option>
+                                <option value="Лёгкое" {{ 'selected' if task.expert_group == 'Лёгкое' else '' }}>Лёгкое</option>
+                                <option value="Матка / вульва" {{ 'selected' if task.expert_group == 'Матка / вульва' else '' }}>Матка / вульва</option>
+                                <option value="Шейка матки" {{ 'selected' if task.expert_group == 'Шейка матки' else '' }}>Шейка матки</option>
+                                <option value="Головной мозг" {{ 'selected' if task.expert_group == 'Головной мозг' else '' }}>Головной мозг</option>
+                                <option value="Печень / поджелудочная железа" {{ 'selected' if task.expert_group == 'Печень / поджелудочная железа' else '' }}>Печень / поджелудочная железа</option>
+                                <option value="Лимфома" {{ 'selected' if task.expert_group == 'Лимфома' else '' }}>Лимфома</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="patient_card"><i class="fas fa-id-card"></i> Карта пациента</label>
+                            <input type="text" id="patient_card" name="patient_card" class="form-control" value="{{ task.patient_card or '' }}" placeholder="Например: 12345678">
+                        </div>
+                    </div>
+
+                    <!-- Поля для CT -->
+                    <div id="ctFields" style="display: {{ 'block' if task.research_type in ['import_ct', 'import_ct_diag'] else 'none' }};">
+                        <div class="form-grid" style="margin-top: 16px;">
+                            <div class="form-group">
+                                <label for="ct_building"><i class="fas fa-building"></i> Корпус для CT</label>
+                                <select id="ct_building" name="ct_building" class="form-control" onchange="updateCTEquipment()">
+                                    <option value="">Выберите корпус</option>
+                                    <option value="Электросигнальная" {{ 'selected' if task.ct_diagnostic and 'Электросигнальная' in task.ct_diagnostic else '' }}>Электросигнальная</option>
+                                    <option value="Челюскинцев" {{ 'selected' if task.ct_diagnostic and 'Челюскинцев' in task.ct_diagnostic else '' }}>Челюскинцев</option>
+                                    <option value="Вайцеховского" {{ 'selected' if task.ct_diagnostic and 'Вайцеховского' in task.ct_diagnostic else '' }}>Вайцеховского</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="ct_equipment"><i class="fas fa-microscope"></i> Аппарат CT</label>
+                                <select id="ct_equipment" name="ct_equipment" class="form-control" disabled>
+                                    <option value="">Сначала выберите корпус</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-grid" style="margin-top: 16px;">
+                            <div class="form-group">
+                                <label for="treatment_building"><i class="fas fa-clinic-medical"></i> Корпус для лечения</label>
+                                <select id="treatment_building" name="treatment_building" class="form-control" onchange="updateTreatmentDevices()">
+                                    <option value="">Выберите корпус</option>
+                                    <option value="Электросигнальная" {{ 'selected' if task.treatment and 'Электросигнальная' in task.treatment else '' }}>Электросигнальная</option>
+                                    <option value="Челюскинцев" {{ 'selected' if task.treatment and 'Челюскинцев' in task.treatment else '' }}>Челюскинцев</option>
+                                    <option value="Вайцеховского" {{ 'selected' if task.treatment and 'Вайцеховского' in task.treatment else '' }}>Вайцеховского</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="treatment_device"><i class="fas fa-radiation"></i> Аппарат для лечения</label>
+                                <select id="treatment_device" name="treatment_device" class="form-control" disabled onchange="toggleBreathControl()">
+                                    <option value="">Сначала выберите корпус</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group" id="breathControlField" style="display: none;">
+                                <label for="breath_control"><i class="fas fa-lungs"></i> Контроль по дыханию</label>
+                                <select id="breath_control" name="breath_control" class="form-control">
+                                    <option value="no" {{ 'selected' if task.breath_control == 'no' else '' }}>Нет</option>
+                                    <option value="breath_hold" {{ 'selected' if task.breath_control == 'breath_hold' else '' }}>На задержке</option>
+                                    <option value="free" {{ 'selected' if task.breath_control == 'free' else '' }}>Свободное дыхание</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Поля для MR/PET -->
+                    <div id="mrPetFields" style="display: {{ 'block' if task.research_type in ['mr', 'pet'] else 'none' }};">
+                        <div class="form-grid" style="margin-top: 16px;">
+                            <div class="form-group">
+                                <label for="data_source"><i class="fas fa-database"></i> Источник данных</label>
+                                <select id="data_source" name="data_source" class="form-control" onchange="toggleMRPETBuilding()">
+                                    <option value="">Выберите источник</option>
+                                    <option value="disc" {{ 'selected' if task.mr_diagnostic == 'disc' else '' }}>Диск</option>
+                                    <option value="server" {{ 'selected' if task.mr_diagnostic == 'server' else '' }}>Сервер</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="server_location"><i class="fas fa-server"></i> Корпус</label>
+                                <select id="server_location" name="server_location" class="form-control" disabled>
+                                    <option value="">Сначала выберите источник</option>
+                                    <option value="Электросигнальная" {{ 'selected' if task.pet_diagnostic == 'Электросигнальная' else '' }}>Электросигнальная</option>
+                                    <option value="Челюскинцев" {{ 'selected' if task.pet_diagnostic == 'Челюскинцев' else '' }}>Челюскинцев</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Назначения -->
+                <div class="form-section" style="background: var(--white);">
+                    <h3><i class="fas fa-user-md"></i> Назначения</h3>
+                    
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="doctor_id"><i class="fas fa-user-md"></i> Врач</label>
+                            <select id="doctor_id" name="doctor_id" class="form-control" required>
+                                {% for doctor in doctors %}
+                                <option value="{{ doctor.id }}" {{ 'selected' if doctor.id == task.doctor_id else '' }}>{{ doctor.get_full_name() }} ({{ doctor.department }})</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-actions-fixed">
+                    <a href="{{ url_for('admin_tasks') }}" class="btn btn-secondary">
+                        <i class="fas fa-times"></i> Отмена
+                    </a>
+                    <a href="{{ url_for('chat', id=task.id) }}" class="btn btn-chat" target="_blank">
+                        <i class="fas fa-comments"></i> Чат
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Сохранить изменения
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Боковая панель -->
+        <div class="task-edit-sidebar">
+            <!-- Информация о задаче -->
+            <div class="task-info-card">
+                <h3><i class="fas fa-clock"></i> Информация</h3>
+                <div class="info-list">
+                    <div class="info-item">
+                        <span class="info-label">Создана:</span>
+                        <span class="info-value" id="infoCreatedAt">{{ moscow_time(task.created_at).strftime('%H:%M %d.%m.%Y') }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Обновлена:</span>
+                        <span class="info-value" id="infoUpdatedAt">{{ moscow_time(task.updated_at).strftime('%H:%M %d.%m.%Y') if task.updated_at else 'Никогда' }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Завершена:</span>
+                        <span class="info-value" id="infoCompletedAt">{{ moscow_time(task.completed_at).strftime('%H:%M %d.%m.%Y') if task.completed_at else 'Нет' }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Сообщений:</span>
+                        <span class="info-value" id="infoMessages">{{ task.chat_messages|length }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Файлов:</span>
+                        <span class="info-value" id="infoFiles">{{ task.files|length }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Врач -->
+            <div class="task-info-card">
+                <h3><i class="fas fa-user-md"></i> Врач</h3>
+                <div class="info-list">
+                    <div class="info-item" style="flex-direction: column; align-items: flex-start; gap: 4px;">
+                        <span class="info-label">ФИО:</span>
+                        <span class="info-value" style="text-align: left;" title="{{ task.doctor.get_full_name_with_dept() }}">{{ task.doctor.get_full_name() }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Отделение:</span>
+                        <span class="info-value">{{ task.doctor.department }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Опасная зона -->
+            <div class="danger-zone">
+                <h3><i class="fas fa-exclamation-triangle"></i> Опасная зона</h3>
+                <p>Удаление задачи необратимо. Все сообщения и файлы будут удалены.</p>
+                <form method="POST" action="{{ url_for('admin_delete_task', id=task.id) }}" onsubmit="return confirm('Удалить задачу #{{ task.id }}? Это действие нельзя отменить.')">
+                    <button type="submit" class="btn btn-danger" style="width: 100%;">
+                        <i class="fas fa-trash"></i> Удалить задачу
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const TASK_ID = {{ task.id }};
+
+// Переключение полей в зависимости от типа исследования
+function toggleResearchFields() {
+    const researchType = document.getElementById('research_type').value;
+    const ctFields = document.getElementById('ctFields');
+    const mrPetFields = document.getElementById('mrPetFields');
+    const expertGroupField = document.getElementById('expertGroupField');
+
+    // Показываем экспертную группу только для Импорт CT
+    if (researchType === 'import_ct') {
+        expertGroupField.style.display = 'block';
+    } else {
+        expertGroupField.style.display = 'none';
+        document.getElementById('expert_group').value = '';
+    }
+
+    if (researchType === 'import_ct' || researchType === 'import_ct_diag') {
+        ctFields.style.display = 'block';
+        mrPetFields.style.display = 'none';
+    } else if (researchType === 'mr' || researchType === 'pet') {
+        ctFields.style.display = 'none';
+        mrPetFields.style.display = 'block';
+    } else {
+        ctFields.style.display = 'none';
+        mrPetFields.style.display = 'none';
+    }
+}
+
+// Обновление оборудования CT
+function updateCTEquipment() {
+    const building = document.getElementById('ct_building').value;
+    const equipment = document.getElementById('ct_equipment');
+    
+    equipment.innerHTML = '<option value="">Выберите аппарат</option>';
+    equipment.disabled = !building;
+    
+    if (building === 'Электросигнальная') {
+        equipment.innerHTML += '<option value="Siemens">Siemens</option><option value="Philips">Philips</option>';
+    } else if (building === 'Челюскинцев' || building === 'Вайцеховского') {
+        equipment.innerHTML += '<option value="Philips">Philips</option>';
+    }
+}
+
+// Обновление оборудования для лечения
+function updateTreatmentDevices() {
+    const building = document.getElementById('treatment_building').value;
+    const device = document.getElementById('treatment_device');
+    
+    device.innerHTML = '<option value="">Выберите аппарат</option>';
+    device.disabled = !building;
+    
+    if (building === 'Электросигнальная') {
+        device.innerHTML += '<option value="TrueBeam">TrueBeam</option><option value="Halcyon">Halcyon</option>';
+    } else if (building === 'Челюскинцев') {
+        device.innerHTML += '<option value="TrueBeam">TrueBeam</option><option value="Halcyon">Halcyon</option>';
+    } else if (building === 'Вайцеховского') {
+        device.innerHTML += '<option value="Halcyon">Halcyon</option>';
+    }
+    
+    // Скрываем контроль по дыханию при смене корпуса
+    toggleBreathControl();
+}
+
+// Переключение контроля по дыханию
+function toggleBreathControl() {
+    const device = document.getElementById('treatment_device').value;
+    const breathControlField = document.getElementById('breathControlField');
+    
+    if (device === 'TrueBeam') {
+        breathControlField.style.display = 'block';
+    } else {
+        breathControlField.style.display = 'none';
+        document.getElementById('breath_control').value = 'no';
+    }
+}
+
+// Переключение корпуса для MR/PET
+function toggleMRPETBuilding() {
+    const source = document.getElementById('data_source').value;
+    const location = document.getElementById('server_location');
+    
+    location.disabled = source !== 'server';
+}
+
+// Real-time обновление информации о задаче
+function updateTaskInfo() {
+    fetch(`/admin/api/task/${TASK_ID}`)
+        .then(r => r.json())
+        .then(data => {
+            // Обновляем даты
+            const updatedAt = document.getElementById('infoUpdatedAt');
+            const completedAt = document.getElementById('infoCompletedAt');
+            const messages = document.getElementById('infoMessages');
+            
+            if (updatedAt && data.updated_at) {
+                updatedAt.textContent = data.updated_at;
+            }
+            if (completedAt) {
+                completedAt.textContent = data.completed_at || 'Нет';
+            }
+            if (messages) {
+                messages.textContent = data.messages_count || 0;
+            }
+        })
+        .catch(error => console.error('Error updating task info:', error));
+}
+
+// Предотвращение случайного закрытия при редактировании
+let formChanged = false;
+document.getElementById('editTaskForm').addEventListener('input', function() {
+    formChanged = true;
+});
+
+window.addEventListener('beforeunload', function(e) {
+    if (formChanged) {
+        e.preventDefault();
+        e.returnValue = '';
+    }
+});
+
+// Отправка формы
+document.getElementById('editTaskForm').addEventListener('submit', function() {
+    formChanged = false;
+});
+
+// Запускаем real-time обновление каждые 10 секунд
+setInterval(updateTaskInfo, 10000);
+
+// Инициализация оборудования при загрузке
+document.addEventListener('DOMContentLoaded', function() {
+    // Получаем значения из data-атрибутов
+    const ctDiagnostic = document.getElementById('editTaskForm').dataset.ctDiagnostic || '';
+    const treatment = document.getElementById('editTaskForm').dataset.treatment || '';
+    const breathControl = document.getElementById('editTaskForm').dataset.breathControl || '';
+    
+    console.log('ctDiagnostic:', ctDiagnostic);
+    console.log('treatment:', treatment);
+    console.log('breathControl:', breathControl);
+    
+    // Заполняем поля CT из существующего ct_diagnostic
+    if (ctDiagnostic) {
+        // Парсим "Siemens (Электросигнальная)"
+        const match = ctDiagnostic.match(/(.*) \((.*)\)/);
+        if (match) {
+            const equipment = match[1].trim();
+            const building = match[2].trim();
+            
+            // Заполняем корпус
+            const ctBuilding = document.getElementById('ct_building');
+            if (ctBuilding) ctBuilding.value = building;
+            
+            // Заполняем аппарат и включаем его
+            updateCTEquipment();
+            const ctEquipment = document.getElementById('ct_equipment');
+            if (ctEquipment) {
+                ctEquipment.value = equipment;
+                ctEquipment.disabled = false;  // Включаем поле для отправки
+            }
+        }
+    }
+    
+    // Заполняем поля лечения из существующего treatment
+    if (treatment) {
+        // Парсим "TrueBeam (Электросигнальная) - на задержке"
+        const match = treatment.match(/(.*) \((.*)\)(?: - (.*))?/);
+        if (match) {
+            const device = match[1].trim();
+            const building = match[2].trim();
+            const breath = match[3] ? match[3].trim() : '';
+            
+            // Заполняем корпус
+            const treatmentBuilding = document.getElementById('treatment_building');
+            if (treatmentBuilding) treatmentBuilding.value = building;
+            
+            // Заполняем аппарат и включаем его
+            updateTreatmentDevices();
+            const treatmentDevice = document.getElementById('treatment_device');
+            if (treatmentDevice) {
+                treatmentDevice.value = device;
+                treatmentDevice.disabled = false;  // Включаем поле для отправки
+            }
+            
+            // Заполняем контроль по дыханию
+            toggleBreathControl();
+            const breathControlSelect = document.getElementById('breath_control');
+            if (breathControlSelect) {
+                if (breath.includes('задержке')) breathControlSelect.value = 'breath_hold';
+                else if (breath.includes('свободное') || breathControl === 'free') breathControlSelect.value = 'free';
+                else breathControlSelect.value = 'no';
+            }
+        }
+    }
+});
+</script>
+{% endblock %}

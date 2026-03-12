@@ -1,0 +1,50 @@
+        });
+    }
+    
+    // Обработчик отправки формы
+    const form = document.getElementById('createTaskForm');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            // Создаем FormData для отправки файлов
+            const formData = new FormData();
+            
+            // Копируем все поля формы
+            const formDataObj = new FormData(form);
+            for (let [key, value] of formDataObj.entries()) {
+                if (key !== 'filesData') {
+                    formData.append(key, value);
+                }
+            }
+            
+            // Добавляем файлы если есть
+            for (let i = 0; i < selectedFiles.length; i++) {
+                formData.append('files', selectedFiles[i]);
+            }
+            
+            // Отправляем форму с файлами
+            e.preventDefault();
+            fetch(form.action, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (response.ok) {
+                    window.location.href = '/';
+                } else {
+                    alert('Ошибка при создании задачи');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Ошибка при создании задачи');
+            });
+        });
+    }
+});
+
+function getFileIcon(filename) {
+    const ext = filename.split('.').pop().toLowerCase();
+    if (['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'].includes(ext)) return 'fa-file-image';
+    if (ext === 'pdf') return 'fa-file-pdf';
+    if (ext === 'dcm' || ext === 'dicom') return 'fa-file-medical';
+    if (['zip', 'rar', '7z'].includes(ext)) return 'fa-file-archive';

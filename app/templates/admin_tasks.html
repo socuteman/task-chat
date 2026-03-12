@@ -1,0 +1,449 @@
+{% extends "base.html" %}
+
+{% block title %}Задачи - Админ-панель{% endblock %}
+
+{% block content %}
+<div class="admin-dashboard">
+    <div class="admin-header">
+        <div>
+            <h1><i class="fas fa-tasks"></i> Управление задачами</h1>
+            <p class="admin-subtitle">Редактирование, удаление и массовые операции с задачами</p>
+        </div>
+    </div>
+
+    <!-- Поиск и фильтры -->
+    <div class="admin-filters">
+        <div class="search-box">
+            <i class="fas fa-search"></i>
+            <input type="text" id="searchTasks" placeholder="Поиск задач..." onkeyup="searchTasks()">
+        </div>
+        <div class="filter-group">
+            <select id="filterStatus" onchange="filterTasks()" class="form-control">
+                <option value="">Все статусы</option>
+                <option value="pending">Ожидает</option>
+                <option value="in_progress">В работе</option>
+                <option value="completed">Выполнена</option>
+                <option value="cancelled">Отменена</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Массовые действия -->
+    <div class="admin-mass-actions">
+        <div class="mass-actions-header">
+            <h3><i class="fas fa-bolt"></i> Массовые действия</h3>
+            <span class="selected-count" id="selectedCount">0 выбрано</span>
+        </div>
+        <div class="mass-actions-grid">
+            <div class="mass-action-card" onclick="showMassActionModal('change_status')">
+                <i class="fas fa-exchange-alt"></i>
+                <h4>Изменить статус</h4>
+                <p>Установить выбранный статус для всех отмеченных задач</p>
+            </div>
+            <div class="mass-action-card" onclick="showMassActionModal('change_doctor')">
+                <i class="fas fa-user-md"></i>
+                <h4>Изменить врача</h4>
+                <p>Назначить одного врача на все отмеченные задачи</p>
+            </div>
+            <div class="mass-action-card danger" onclick="showMassActionModal('delete')">
+                <i class="fas fa-trash"></i>
+                <h4>Удалить задачи</h4>
+                <p>Безвозвратно удалить все отмеченные задачи</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Таблица задач -->
+    <div class="admin-table-container">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th><input type="checkbox" id="selectAll" onchange="toggleSelectAll()"></th>
+                    <th>ID</th>
+                    <th>Заголовок</th>
+                    <th>Тип исследования</th>
+                    <th>Карта пациента</th>
+                    <th>Статус</th>
+                    <th>Врач</th>
+                    <th>Дата создания</th>
+                    <th>Действия</th>
+                </tr>
+            </thead>
+            <tbody id="tasksTableBody">
+                {% for task in tasks %}
+                <tr data-task-id="{{ task.id }}" data-status="{{ task.status }}">
+                    <td><input type="checkbox" class="task-checkbox" value="{{ task.id }}" onchange="updateSelectedCount()"></td>
+                    <td>#{{ task.id }}</td>
+                    <td>
+                        <strong>{{ task.title }}</strong>
+                    </td>
+                    <td>
+                        <span class="research-type">
+                            {% if task.research_type == 'import_ct' %}Импорт CT
+                            {% elif task.research_type == 'import_ct_diag' %}CT-диагностика
+                            {% elif task.research_type == 'mr' %}MR
+                            {% elif task.research_type == 'pet' %}PET
+                            {% else %}{{ task.research_type }}
+                            {% endif %}
+                        </span>
+                    </td>
+                    <td>{{ task.patient_card or '—' }}</td>
+                    <td>
+                        <span class="status-badge status-{{ task.status }}">
+                            {{ task.get_status_display() }}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="doctor-name" title="{{ task.doctor.get_full_name_with_dept() }}">
+                            {{ task.doctor.get_full_name() }}
+                        </span>
+                    </td>
+                    <td class="task-created-at">{{ moscow_time(task.created_at).strftime('%d.%m.%Y %H:%M') }}</td>
+                    <td class="admin-actions">
+                        <a href="{{ url_for('admin_edit_task', id=task.id) }}" class="btn btn-small btn-warning" title="Редактировать">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <a href="{{ url_for('chat', id=task.id) }}" class="btn btn-small btn-chat" title="Чат">
+                            <i class="fas fa-comments"></i>
+                        </a>
+                        <form method="POST" action="{{ url_for('admin_delete_task', id=task.id) }}" style="display:inline;" onsubmit="return confirm('Удалить задачу #{{ task.id }}?')">
+                            <button type="submit" class="btn btn-small btn-danger" title="Удалить">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Модальное окно массовых действий -->
+<div id="massActionModal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="massActionTitle"><i class="fas fa-bolt"></i> Массовое действие</h3>
+            <span class="close-modal" onclick="closeMassActionModal()">&times;</span>
+        </div>
+        <div class="modal-body">
+            <form id="massActionForm" onsubmit="performMassAction(event)">
+                <input type="hidden" id="massActionType" name="action">
+                
+                <div id="massActionContent">
+                    <!-- Динамически заполняется -->
+                </div>
+
+                <div class="form-actions" style="margin-top: 24px; display: flex; gap: 12px;">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-check"></i> Выполнить
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="closeMassActionModal()">
+                        <i class="fas fa-times"></i> Отмена
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/admin.js') }}"></script>
+<script>
+// Подсчет выбранных задач
+function updateSelectedCount() {
+    const count = document.querySelectorAll('.task-checkbox:checked').length;
+    document.getElementById('selectedCount').textContent = `${count} выбрано`;
+}
+
+// Выбрать все
+function toggleSelectAll() {
+    const selectAll = document.getElementById('selectAll');
+    document.querySelectorAll('.task-checkbox').forEach(cb => {
+        cb.checked = selectAll.checked;
+    });
+    updateSelectedCount();
+}
+
+// Поиск задач
+function searchTasks() {
+    const search = document.getElementById('searchTasks').value.toLowerCase();
+    document.querySelectorAll('#tasksTableBody tr').forEach(row => {
+        const text = row.textContent.toLowerCase();
+        row.style.display = text.includes(search) ? '' : 'none';
+    });
+}
+
+// Фильтр по статусу
+function filterTasks() {
+    const status = document.getElementById('filterStatus').value;
+    document.querySelectorAll('#tasksTableBody tr').forEach(row => {
+        if (!status || row.dataset.status === status) {
+            row.style.display = '';
+        } else {
+            row.style.display = 'none';
+        }
+    });
+}
+
+// Показать модальное окно массового действия
+function showMassActionModal(actionType) {
+    const count = document.querySelectorAll('.task-checkbox:checked').length;
+    if (count === 0) {
+        alert('Выберите хотя бы одну задачу');
+        return;
+    }
+
+    document.getElementById('massActionType').value = actionType;
+    const modal = document.getElementById('massActionModal');
+    const content = document.getElementById('massActionContent');
+    const title = document.getElementById('massActionTitle');
+
+    let html = `<p style="margin-bottom: 20px; color: var(--gray);">Будут обработаны <strong>${count} задач(и)</strong>. Выберите параметры:</p>`;
+
+    if (actionType === 'change_status') {
+        title.innerHTML = '<i class="fas fa-exchange-alt"></i> Изменить статус';
+        html += `
+            <div class="form-group">
+                <label><i class="fas fa-flag"></i> Новый статус</label>
+                <select name="new_status" class="form-control" required>
+                    <option value="pending">Ожидает</option>
+                    <option value="in_progress">В работе</option>
+                    <option value="completed">Выполнена</option>
+                    <option value="cancelled">Отменена</option>
+                </select>
+            </div>
+        `;
+    } else if (actionType === 'change_doctor') {
+        title.innerHTML = '<i class="fas fa-user-md"></i> Изменить врача';
+        html += `
+            <div class="form-group">
+                <label><i class="fas fa-user"></i> Врач</label>
+                <select name="new_doctor" class="form-control" required id="doctorSelect">
+                    <option value="">Загрузка...</option>
+                </select>
+            </div>
+        `;
+        // Загружаем список врачей
+        fetch('/admin/api/doctors')
+            .then(r => r.json())
+            .then(doctors => {
+                const select = document.getElementById('doctorSelect');
+                select.innerHTML = doctors.map(d => `<option value="${d.id}">${d.username}</option>`).join('');
+            });
+    } else if (actionType === 'delete') {
+        title.innerHTML = '<i class="fas fa-trash"></i> Удалить задачи';
+        html += `
+            <div class="form-group">
+                <div style="padding: 20px; background: #fee2e2; border-radius: 8px; border-left: 4px solid #ef4444;">
+                    <p style="color: #991b1b; margin: 0;"><i class="fas fa-exclamation-triangle"></i> <strong>Внимание!</strong></p>
+                    <p style="color: #991b1b; margin: 10px 0 0 0;">Это действие необратимо. Все сообщения и файлы будут удалены.</p>
+                </div>
+            </div>
+        `;
+    }
+
+    content.innerHTML = html;
+    modal.style.display = 'block';
+}
+
+// Закрыть модальное окно
+function closeMassActionModal() {
+    document.getElementById('massActionModal').style.display = 'none';
+}
+
+// Выполнить массовое действие
+function performMassAction(event) {
+    event.preventDefault();
+
+    const actionType = document.getElementById('massActionType').value;
+    const selectedIds = Array.from(document.querySelectorAll('.task-checkbox:checked')).map(cb => parseInt(cb.value));
+
+    if (selectedIds.length === 0) {
+        alert('Выберите хотя бы одну задачу');
+        return;
+    }
+
+    const formData = new FormData(event.target);
+    const data = {
+        action: actionType,
+        task_ids: selectedIds
+    };
+
+    // Добавляем дополнительные данные из формы
+    for (let [key, value] of formData.entries()) {
+        if (key !== 'action') {
+            data[key] = value;
+        }
+    }
+
+    const confirmMsg = actionType === 'delete'
+        ? `Удалить ${selectedIds.length} задач(и)? Это действие нельзя отменить.`
+        : `Выполнить действие над ${selectedIds.length} задач(и)?`;
+
+    if (!confirm(confirmMsg)) return;
+
+    fetch('/admin/tasks/mass_update', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            alert(`Успешно обработано ${data.updated_count || data.deleted_count} задач`);
+            closeMassActionModal();
+            loadAllAdminTasks(); // Обновляем таблицу без перезагрузки
+        } else {
+            alert('Ошибка: ' + data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Ошибка при выполнении действия');
+    });
+}
+
+// Закрытие по клику вне модального окна
+window.onclick = function(event) {
+    const modal = document.getElementById('massActionModal');
+    if (event.target == modal) {
+        closeMassActionModal();
+    }
+}
+
+// Real-time обновление таблицы задач
+function loadAllAdminTasks() {
+    fetch('/admin/api/tasks')
+        .then(r => r.json())
+        .then(tasks => {
+            const tbody = document.getElementById('tasksTableBody');
+            if (!tbody) return;
+            
+            const existingIds = new Set();
+            
+            tasks.forEach(task => {
+                existingIds.add(task.id);
+                let row = tbody.querySelector(`tr[data-task-id="${task.id}"]`);
+                
+                if (!row) {
+                    // Создаем новую строку
+                    createAdminTaskRow(task, tbody);
+                } else {
+                    // Обновляем существующую
+                    updateAdminTaskRow(row, task);
+                }
+            });
+            
+            // Удаляем удаленные задачи
+            tbody.querySelectorAll('tr[data-task-id]').forEach(row => {
+                const taskId = parseInt(row.dataset.taskId);
+                if (!existingIds.has(taskId)) {
+                    row.remove();
+                }
+            });
+        })
+        .catch(error => console.error('Error loading admin tasks:', error));
+}
+
+function createAdminTaskRow(task, tbody) {
+    const row = document.createElement('tr');
+    row.dataset.taskId = task.id;
+    row.dataset.status = task.status;
+    
+    const researchTypeDisplay = getResearchTypeDisplay(task.research_type);
+    
+    row.innerHTML = `
+        <td><input type="checkbox" class="task-checkbox" value="${task.id}" onchange="updateSelectedCount()"></td>
+        <td>#${task.id}</td>
+        <td><strong>${escapeHtml(task.title)}</strong></td>
+        <td><span class="research-type">${escapeHtml(researchTypeDisplay)}</span></td>
+        <td>${task.patient_card ? escapeHtml(task.patient_card) : '—'}</td>
+        <td>
+            <span class="status-badge status-${task.status}">
+                ${task.status_display}
+            </span>
+        </td>
+        <td>
+            <span class="doctor-name" title="${escapeHtml(task.doctor_full_name)}">
+                ${escapeHtml(task.doctor)}
+            </span>
+        </td>
+        <td class="task-created-at">${task.created_at}</td>
+        <td class="admin-actions">
+            <a href="/admin/tasks/${task.id}/edit" class="btn btn-small btn-warning" title="Редактировать">
+                <i class="fas fa-edit"></i>
+            </a>
+            <a href="/chat/${task.id}" class="btn btn-small btn-chat" title="Чат">
+                <i class="fas fa-comments"></i>
+            </a>
+            <button type="button" class="btn btn-small btn-danger" onclick="deleteTask(${task.id})" title="Удалить">
+                <i class="fas fa-trash"></i>
+            </button>
+        </td>
+    `;
+    
+    tbody.prepend(row);
+}
+
+function updateAdminTaskRow(row, task) {
+    // Обновляем статус
+    row.dataset.status = task.status;
+    const statusBadge = row.querySelector('.status-badge');
+    if (statusBadge) {
+        statusBadge.className = `status-badge status-${task.status}`;
+        statusBadge.textContent = task.status_display;
+    }
+    
+    // Обновляем врача
+    const doctorEl = row.querySelector('.doctor-name');
+    if (doctorEl) {
+        doctorEl.textContent = task.doctor;
+        doctorEl.title = task.doctor_full_name;
+    }
+}
+
+function getResearchTypeDisplay(type) {
+    const types = {
+        'import_ct': 'Импорт CT',
+        'import_ct_diag': 'CT-диагностика',
+        'mr': 'MR',
+        'pet': 'PET'
+    };
+    return types[type] || type || '—';
+}
+
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+function deleteTask(taskId) {
+    if (!confirm(`Удалить задачу #${taskId}?`)) return;
+    
+    fetch(`/admin/tasks/${taskId}/delete`, {
+        method: 'POST'
+    })
+    .then(r => {
+        if (r.ok) {
+            loadAllAdminTasks();
+        } else {
+            alert('Ошибка при удалении задачи');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Ошибка при удалении задачи');
+    });
+}
+
+// Обновляем задачи каждые 5 секунд
+setInterval(loadAllAdminTasks, 5000);
+
+// Загружаем при старте
+document.addEventListener('DOMContentLoaded', loadAllAdminTasks);
+</script>
+{% endblock %}

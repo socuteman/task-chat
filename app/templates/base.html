@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Task-Chat{% endblock %}</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='images/favicon.svg') }}">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='images/favicon.svg') }}">
+    
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <!-- Font Awesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <i class="fas fa-comments-medical"></i>
+                <h1>Task-Chat</h1>
+            </div>
+            <div class="nav-links">
+                {% if current_user.is_authenticated %}
+                    <div class="user-info-mobile">
+                        <span class="user-role role-{{ current_user.role }}" title="{{ current_user.username }}">
+                            <i class="fas fa-{{ 'user-shield' if current_user.role == 'admin' else 'user-md' if current_user.role == 'doctor' else 'atom' }}"></i>
+                            <span>{{ current_user.get_role_short() }}</span>
+                        </span>
+                    </div>
+
+                    <a href="{{ url_for('index') }}" class="nav-link {{ 'active' if request.endpoint == 'index' else '' }}" title="Главная">
+                        <i class="fas fa-home"></i>
+                        <span class="link-text">Главная</span>
+                    </a>
+
+                    <div class="chat-indicator">
+                        <a href="{{ url_for('chats_list') }}" class="nav-link {{ 'active' if request.endpoint == 'chats_list' else '' }}" title="Личные чаты">
+                            <i class="fas fa-comments"></i>
+                            <span class="link-text">Чаты</span>
+                        </a>
+                        <span id="personalUnreadCount" class="chat-badge" style="display: none;">0</span>
+                    </div>
+
+                    <a href="{{ url_for('online_users') }}" class="nav-link {{ 'active' if request.endpoint == 'online_users' else '' }}" title="Пользователи онлайн">
+                        <i class="fas fa-users"></i>
+                        <span class="link-text">Онлайн</span>
+                    </a>
+
+                    <div class="chat-indicator">
+                        <a href="javascript:void(0)" onclick="showUnreadTasks()" class="nav-link" title="Сообщения задач">
+                            <i class="fas fa-tasks"></i>
+                            <span class="link-text">Задачи</span>
+                        </a>
+                        <span id="unreadCount" class="chat-badge" style="display: none;">0</span>
+                    </div>
+
+                    {% if current_user.role == 'admin' %}
+                    <a href="{{ url_for('admin') }}" class="nav-link {{ 'active' if 'admin' in request.endpoint else '' }}" title="Админ-панель">
+                        <i class="fas fa-cog"></i>
+                        <span class="link-text">Админ</span>
+                    </a>
+                    {% endif %}
+
+                    <a href="{{ url_for('logout') }}" class="nav-link logout-btn" title="Выход">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span class="link-text">Выход</span>
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <main class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for category, message in messages %}
+                        <div class="flash flash-{{ category }}">
+                            <i class="fas fa-{{ 'check-circle' if category == 'success' else 'exclamation-circle' if category == 'danger' else 'info-circle' }}"></i>
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Модальное окно для непрочитанных сообщений -->
+    <div id="unreadModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-envelope"></i> Непрочитанные сообщения</h3>
+                <span class="close-modal" onclick="closeUnreadModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div id="unreadTasksList" class="unread-tasks-list">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        window.currentUserId = {{ current_user.id if current_user.is_authenticated else 0 }};
+        window.currentUserRole = "{{ current_user.role if current_user.is_authenticated else '' }}";
+        window.CURRENT_USERNAME = "{{ current_user.username if current_user.is_authenticated else '' }}";
+
+        // Подсчёт непрочитанных личных сообщений
+        function updatePersonalUnreadCount() {
+            fetch('/api/personal_chats/unread_count')
+                .then(r => r.json())
+                .then(data => {
+                    const badge = document.getElementById('personalUnreadCount');
+                    if (badge && data.total_unread > 0) {
+                        badge.textContent = data.total_unread;
+                        badge.style.display = 'inline-block';
+                    } else if (badge) {
+                        badge.style.display = 'none';
+                    }
+                })
+                .catch(error => console.error('Error updating personal unread count:', error));
+        }
+
+        // Обновляем каждые 5 секунд
+        updatePersonalUnreadCount();
+        setInterval(updatePersonalUnreadCount, 5000);
+        
+        // Также обновляем бейдж задач
+        if (typeof updateUnreadCount === 'function') {
+            updateUnreadCount();
+            setInterval(updateUnreadCount, 5000);
+        }
+    </script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

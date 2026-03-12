@@ -1,0 +1,409 @@
+{% extends "base.html" %}
+
+{% block title %}Пользователи - Админ-панель{% endblock %}
+
+{% block content %}
+<div class="admin-dashboard">
+    <div class="admin-header">
+        <div>
+            <h1><i class="fas fa-users"></i> Пользователи</h1>
+            <p class="admin-subtitle">Управление учетными записями врачей и физиков</p>
+        </div>
+        <button class="btn btn-primary" onclick="showAddUserModal()">
+            <i class="fas fa-user-plus"></i> Добавить пользователя
+        </button>
+    </div>
+
+    <!-- Поиск и фильтры -->
+    <div class="admin-filters">
+        <div class="search-box">
+            <i class="fas fa-search"></i>
+            <input type="text" id="searchUsers" placeholder="Поиск пользователей..." onkeyup="searchUsers()">
+        </div>
+        <div class="filter-group">
+            <select id="filterRole" onchange="filterUsers()" class="form-control">
+                <option value="">Все роли</option>
+                <option value="admin">Администраторы</option>
+                <option value="doctor">Врачи</option>
+                <option value="physicist">Физики</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Таблица пользователей -->
+    <div class="admin-table-container">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>ФИО</th>
+                    <th>Логин</th>
+                    <th>Роль</th>
+                    <th>Отделение</th>
+                    <th>Дата регистрации</th>
+                    <th>Был в сети</th>
+                    <th>Статус</th>
+                    <th>Действия</th>
+                </tr>
+            </thead>
+            <tbody id="usersTableBody">
+                {% for user in users %}
+                <tr data-user-id="{{ user.id }}" data-role="{{ user.role }}">
+                    <td>{{ user.id }}</td>
+                    <td>
+                        <strong title="{{ user.get_full_name_with_dept() }}">{{ user.get_full_name() }}</strong>
+                    </td>
+                    <td>{{ user.username }}</td>
+                    <td>
+                        <span class="role-badge role-{{ user.role }}">
+                            {{ user.get_role_display() }}
+                        </span>
+                    </td>
+                    <td><span class="department-badge">{{ user.department }}</span></td>
+                    <td>{{ moscow_time(user.created_at).strftime('%d.%m.%Y %H:%M') }}</td>
+                    <td class="last-seen">{{ moscow_time(user.last_seen).strftime('%d.%m.%Y %H:%M') if user.last_seen else 'Никогда' }}</td>
+                    <td class="user-status-cell">
+                        {% if user.is_online() %}
+                        <span class="status-online"><i class="fas fa-circle"></i> Онлайн</span>
+                        {% else %}
+                        <span class="status-offline"><i class="fas fa-circle"></i> Офлайн</span>
+                        {% endif %}
+                    </td>
+                    <td class="admin-actions">
+                        <button class="btn btn-small btn-warning" onclick="editUser({{ user.id }}, '{{ user.username }}', '{{ user.role }}', '{{ user.first_name }}', '{{ user.last_name }}', '{{ user.middle_name or '' }}', '{{ user.department }}')" title="Редактировать">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <a href="{{ url_for('admin_change_password', user_id=user.id) }}" class="btn btn-small btn-info" title="Сменить пароль">
+                            <i class="fas fa-key"></i>
+                        </a>
+                        {% if user.id != current_user.id %}
+                        <form method="POST" action="{{ url_for('admin_delete_user', user_id=user.id) }}" style="display:inline;" onsubmit="return confirm('Удалить пользователя {{ user.get_full_name() }}?')">
+                            <button type="submit" class="btn btn-small btn-danger" title="Удалить">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </form>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Модальное окно добавления/редактирования -->
+<div id="userModal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="modalTitle"><i class="fas fa-user-plus"></i> Добавить пользователя</h3>
+            <span class="close-modal" onclick="closeUserModal()">&times;</span>
+        </div>
+        <div class="modal-body">
+            <form id="userForm" method="POST" action="{{ url_for('register') }}">
+                <input type="hidden" id="editUserId" name="editUserId" value="">
+                
+                <div class="form-group">
+                    <label for="first_name"><i class="fas fa-user"></i> Фамилия</label>
+                    <input type="text" id="first_name" name="first_name" class="form-control" required placeholder="Введите фамилию">
+                </div>
+
+                <div class="form-group">
+                    <label for="last_name"><i class="fas fa-user"></i> Имя</label>
+                    <input type="text" id="last_name" name="last_name" class="form-control" required placeholder="Введите имя">
+                </div>
+
+                <div class="form-group">
+                    <label for="middle_name"><i class="fas fa-user"></i> Отчество (необязательно)</label>
+                    <input type="text" id="middle_name" name="middle_name" class="form-control" placeholder="Введите отчество">
+                </div>
+
+                <div class="form-group">
+                    <label for="password"><i class="fas fa-lock"></i> Пароль (мин. 3 символа)</label>
+                    <input type="password" id="password" name="password" class="form-control" required placeholder="Минимум 3 символа" minlength="3" autocomplete="new-password">
+                </div>
+
+                <div class="form-group">
+                    <label for="confirm_password"><i class="fas fa-lock"></i> Подтверждение пароля</label>
+                    <input type="password" id="confirm_password" name="confirm_password" class="form-control" required placeholder="Повторите пароль" autocomplete="new-password">
+                </div>
+
+                <div class="form-group">
+                    <label for="username"><i class="fas fa-at"></i> Имя пользователя (логин)</label>
+                    <input type="text" id="username" name="username" class="form-control" required placeholder="Введите логин" minlength="2" autocomplete="username">
+                </div>
+
+                <div class="form-group">
+                    <label for="role"><i class="fas fa-user-tag"></i> Роль</label>
+                    <select id="role" name="role" class="form-control" required onchange="updateDepartmentOptions()">
+                        <option value="doctor">Врач</option>
+                        <option value="physicist">Физик</option>
+                        <option value="admin">Администратор</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="department"><i class="fas fa-building"></i> Отделение</label>
+                    <select id="department" name="department" class="form-control" required>
+                        <option value="РО1">РО1</option>
+                        <option value="РО2">РО2</option>
+                        <option value="РО3">РО3</option>
+                        <option value="РО4">РО4</option>
+                        <option value="РО5">РО5</option>
+                    </select>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Сохранить
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="closeUserModal()">
+                        <i class="fas fa-times"></i> Отмена
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/admin.js') }}"></script>
+<script>
+// Обновление списка отделений в зависимости от роли
+function updateDepartmentOptions() {
+    const role = document.getElementById('role').value;
+    const deptSelect = document.getElementById('department');
+    
+    if (role === 'doctor') {
+        deptSelect.innerHTML = `
+            <option value="РО1">РО1</option>
+            <option value="РО2">РО2</option>
+            <option value="РО3">РО3</option>
+            <option value="РО4">РО4</option>
+            <option value="РО5">РО5</option>
+        `;
+    } else if (role === 'physicist') {
+        deptSelect.innerHTML = '<option value="ФРО">ФРО</option>';
+    } else {
+        deptSelect.innerHTML = '<option value="ТП">ТП</option>';
+    }
+}
+
+// Автоматически открываем модальное окно при загрузке если есть параметр
+window.addEventListener('DOMContentLoaded', function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('action') === 'add') {
+        showAddUserModal();
+    }
+    
+    // Обработка отправки формы
+    document.getElementById('userForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(this);
+        const isEdit = document.getElementById('editUserId').value;
+        
+        // Если это редактирование - обычная отправка
+        if (isEdit) {
+            this.action = '{{ url_for("admin_users") }}';
+            this.submit();
+            return;
+        }
+        
+        // Если создание - AJAX запрос
+        fetch('{{ url_for("register") }}', {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: formData
+        })
+        .then(r => {
+            // Проверяем Content-Type
+            const contentType = r.headers.get('content-type');
+            if (contentType && contentType.includes('application/json')) {
+                return r.json();
+            } else {
+                // Если не JSON, значит ошибка сервера
+                throw new Error('Ошибка сервера. Проверьте логи.');
+            }
+        })
+        .then(data => {
+            if (data.success) {
+                alert(data.message);
+                closeUserModal();
+                location.reload();
+            } else {
+                alert('Ошибка: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Ошибка при создании пользователя: ' + error.message);
+        });
+    });
+});
+
+function showAddUserModal() {
+    document.getElementById('modalTitle').innerHTML = '<i class="fas fa-user-plus"></i> Добавить пользователя';
+    document.getElementById('userForm').action = '#';
+    document.getElementById('editUserId').value = '';
+    document.getElementById('first_name').value = '';
+    document.getElementById('last_name').value = '';
+    document.getElementById('middle_name').value = '';
+    document.getElementById('username').value = '';
+    document.getElementById('password').value = '';
+    document.getElementById('confirm_password').value = '';
+    document.getElementById('role').value = 'doctor';
+    updateDepartmentOptions();
+    document.getElementById('userModal').style.display = 'block';
+}
+
+function editUser(id, username, role, firstName, lastName, middleName, department) {
+    document.getElementById('modalTitle').innerHTML = '<i class="fas fa-user-edit"></i> Редактировать пользователя';
+    document.getElementById('editUserId').value = id;
+    document.getElementById('username').value = username;
+    document.getElementById('first_name').value = firstName;
+    document.getElementById('last_name').value = lastName;
+    document.getElementById('middle_name').value = middleName;
+    document.getElementById('role').value = role;
+    updateDepartmentOptions();
+    document.getElementById('department').value = department;
+    document.getElementById('password').value = '';
+    document.getElementById('confirm_password').value = '';
+    document.getElementById('userModal').style.display = 'block';
+}
+
+function closeUserModal() {
+    document.getElementById('userModal').style.display = 'none';
+}
+
+function searchUsers() {
+    const search = document.getElementById('searchUsers').value.toLowerCase();
+    const rows = document.querySelectorAll('#usersTableBody tr');
+    
+    rows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        row.style.display = text.includes(search) ? '' : 'none';
+    });
+}
+
+function filterUsers() {
+    const role = document.getElementById('filterRole').value;
+    const rows = document.querySelectorAll('#usersTableBody tr');
+    
+    rows.forEach(row => {
+        if (!role || row.dataset.role === role) {
+            row.style.display = '';
+        } else {
+            row.style.display = 'none';
+        }
+    });
+}
+
+// Закрытие по клику вне модального окна
+window.onclick = function(event) {
+    const modal = document.getElementById('userModal');
+    if (event.target == modal) {
+        closeUserModal();
+    }
+}
+
+// Real-time обновление пользователей
+function loadAllUsers() {
+    fetch('/admin/api/users')
+        .then(r => r.json())
+        .then(users => {
+            const tbody = document.getElementById('usersTableBody');
+            if (!tbody) return;
+            
+            const existingIds = new Set();
+            
+            users.forEach(user => {
+                existingIds.add(user.id);
+                let row = tbody.querySelector(`tr[data-user-id="${user.id}"]`);
+                
+                if (!row) {
+                    createAdminUserRow(user, tbody);
+                } else {
+                    updateAdminUserRow(row, user);
+                }
+            });
+            
+            // Удаляем удаленных пользователей
+            tbody.querySelectorAll('tr[data-user-id]').forEach(row => {
+                const userId = parseInt(row.dataset.userId);
+                if (!existingIds.has(userId)) {
+                    row.remove();
+                }
+            });
+        })
+        .catch(error => console.error('Error loading users:', error));
+}
+
+function createAdminUserRow(user, tbody) {
+    const row = document.createElement('tr');
+    row.dataset.userId = user.id;
+    row.dataset.role = user.role;
+    
+    row.innerHTML = `
+        <td>#${user.id}</td>
+        <td>
+            <strong>${escapeHtml(user.username)}</strong>
+            <div class="user-full-name">${escapeHtml(user.full_name)}</div>
+        </td>
+        <td>${escapeHtml(user.role_display)}</td>
+        <td>${escapeHtml(user.department || '—')}</td>
+        <td>
+            <span class="status-badge ${user.is_online ? 'status-online' : 'status-offline'}">
+                ${user.is_online ? 'Онлайн' : 'Оффлайн'}
+            </span>
+        </td>
+        <td>
+            <button class="btn btn-small btn-warning" onclick="editUser(${user.id}, '${escapeJs(user.username)}', '${user.role}', '${escapeJs(user.first_name)}', '${escapeJs(user.last_name)}', '${escapeJs(user.middle_name)}', '${user.department || ''}')">
+                <i class="fas fa-edit"></i>
+            </button>
+            <button class="btn btn-small btn-info" onclick="window.location.href='/admin/change_password/${user.id}'">
+                <i class="fas fa-key"></i>
+            </button>
+            ${user.id !== {{ current_user.id }} ? `
+            <form method="POST" action="/admin/delete_user/${user.id}" style="display:inline;" onsubmit="return confirm('Удалить пользователя?')">
+                <button type="submit" class="btn btn-small btn-danger">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </form>
+            ` : ''}
+        </td>
+    `;
+    
+    tbody.prepend(row);
+}
+
+function updateAdminUserRow(row, user) {
+    // Обновляем статус онлайн/оффлайн
+    const statusBadge = row.querySelector('.status-badge');
+    if (statusBadge) {
+        statusBadge.className = `status-badge ${user.is_online ? 'status-online' : 'status-offline'}`;
+        statusBadge.textContent = user.is_online ? 'Онлайн' : 'Оффлайн';
+    }
+}
+
+function escapeJs(text) {
+    if (!text) return '';
+    return String(text).replace(/'/g, "\\'").replace(/"/g, '\\"');
+}
+
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+// Обновляем пользователей каждые 10 секунд
+setInterval(loadAllUsers, 10000);
+
+// Загружаем при старте
+document.addEventListener('DOMContentLoaded', loadAllUsers);
+</script>
+{% endblock %}

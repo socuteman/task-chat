@@ -1,0 +1,996 @@
+{% extends "base.html" %}
+
+{% block title %}Список задач - Task-Chat{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Стили для формы создания задачи из оригинала */
+    .btn-create-task {
+        background: #3498db;
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        transition: background 0.3s;
+    }
+
+    .btn-create-task:hover {
+        background: #2980b9;
+    }
+
+    .task-form {
+        background: #f8f9fa;
+        padding: 25px;
+        border-radius: 8px;
+        margin-bottom: 30px;
+        border: 1px solid #e9ecef;
+    }
+
+    .form-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #e9ecef;
+    }
+
+    .form-header h3 {
+        margin: 0;
+        color: #2c3e50;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .btn-close {
+        background: none;
+        border: none;
+        color: #7f8c8d;
+        font-size: 20px;
+        cursor: pointer;
+        padding: 5px 10px;
+        border-radius: 4px;
+        transition: all 0.3s;
+    }
+
+    .btn-close:hover {
+        background: #e9ecef;
+        color: #e74c3c;
+    }
+
+    .form-section {
+        background: white;
+        padding: 20px;
+        border-radius: 6px;
+        margin: 15px 0;
+        border: 1px solid #e0e0e0;
+    }
+
+    .form-section h4 {
+        margin: 0 0 15px 0;
+        color: #2c3e50;
+        font-size: 16px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .form-hint {
+        font-size: 12px;
+        color: #7f8c8d;
+        margin-top: 5px;
+        font-style: italic;
+    }
+
+    .user-status {
+        font-size: 12px;
+        margin-top: 5px;
+    }
+
+    .user-status.online {
+        color: #27ae60;
+    }
+
+    .user-status.offline {
+        color: #95a5a6;
+    }
+
+    /* Фикс для file upload на мобильных - центрирование текста */
+    @media (max-width: 768px) {
+        .file-upload-label {
+            text-align: center;
+            justify-content: center;
+        }
+        
+        .file-upload-label span {
+            text-align: center;
+        }
+        
+        /* Для длинных опций в select - перенос */
+        .task-form select option {
+            white-space: normal;
+            word-wrap: break-word;
+            max-width: 100%;
+        }
+    }
+
+    .badge {
+        display: inline-block;
+        padding: 3px 8px;
+        border-radius: 12px;
+        font-size: 11px;
+        font-weight: 600;
+        margin-left: 8px;
+    }
+
+    .badge-info {
+        background: #3498db;
+        color: white;
+    }
+
+    .badge-primary {
+        background: #4f46e5;
+        color: white;
+    }
+
+    .badge-success {
+        background: #10b981;
+        color: white;
+    }
+
+    .meta-item {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .meta-label {
+        font-size: 12px;
+        color: #7f8c8d;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .meta-value {
+        color: #2c3e50;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard">
+    <div class="dashboard-header">
+        <div class="welcome-message">
+            <h2><i class="fas fa-heartbeat"></i> Добро пожаловать, {{ current_user.username }}!</h2>
+            <p class="user-role-badge">
+                <span class="role-badge role-{{ current_user.role }}">
+                    <i class="fas fa-{{ 'user-shield' if current_user.role == 'admin' else 'user-md' if current_user.role == 'doctor' else 'atom' }}"></i>
+                    {{ current_user.get_role_display() }}
+                </span>
+            </p>
+        </div>
+
+        {% if current_user.role == 'doctor' %}
+        <button class="btn btn-primary btn-create-task" onclick="showTaskForm()">
+            <i class="fas fa-plus-circle"></i> <span class="btn-text">Создать задачу</span>
+        </button>
+        {% endif %}
+    </div>
+
+    <!-- Форма создания задачи (только для врачей) -->
+    {% if current_user.role == 'doctor' %}
+    <div id="taskForm" class="task-form" style="display: none;">
+        <div class="form-header">
+            <div>
+                <h3><i class="fas fa-plus-circle" style="color: var(--primary);"></i> Новая задача</h3>
+                <p style="margin: 8px 0 0 0; color: var(--gray); font-size: 14px;">Заполните все необходимые поля для создания задачи</p>
+            </div>
+            <button class="btn-close" onclick="hideTaskForm()" type="button" title="Закрыть">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <form method="POST" action="{{ url_for('create_task') }}" id="createTaskForm" enctype="multipart/form-data">
+            {{ form.hidden_tag() }}
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="patient_card"><i class="fas fa-id-card"></i> Номер карты пациента <span class="required">*</span></label>
+                    <input type="text" id="patient_card" name="patient_card" required placeholder="Например: 12345678">
+                    <div class="form-hint" id="patientCardHint"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="study_type"><i class="fas fa-file-medical"></i> Тип исследования <span class="required">*</span></label>
+                    <select id="study_type" name="study_type" required onchange="toggleFields()">
+                        <option value="">Выберите тип исследования</option>
+                        <option value="import_ct">Импорт CT</option>
+                        <option value="import_ct_diag">Импорт CT-диагностики</option>
+                        <option value="mr">Импорт MR</option>
+                        <option value="pet">Импорт PET</option>
+                    </select>
+                </div>
+                
+                <div class="form-group" id="expertGroupField" style="display: none;">
+                    <label for="expert_group"><i class="fas fa-user-md"></i> Экспертная группа <span class="required">*</span></label>
+                    <select id="expert_group" name="expert_group" class="form-control">
+                        <option value="">Выберите экспертную группу</option>
+                        <option value="ПГШ">ПГШ</option>
+                        <option value="Молочная железа">Молочная железа</option>
+                        <option value="Предстательная железа / мочевой пузырь">Предстательная железа / мочевой пузырь</option>
+                        <option value="Прямая кишка">Прямая кишка</option>
+                        <option value="Лёгкое">Лёгкое</option>
+                        <option value="Матка / вульва">Матка / вульва</option>
+                        <option value="Шейка матки">Шейка матки</option>
+                        <option value="Головной мозг">Головной мозг</option>
+                        <option value="Печень / поджелудочная железа">Печень / поджелудочная железа</option>
+                        <option value="Лимфома">Лимфома</option>
+                    </select>
+                </div>
+
+                <div class="form-group" id="patientTypeField" style="display: none;">
+                    <label for="patient_type"><i class="fas fa-user-injured"></i> Тип пациента</label>
+                    <select id="patient_type" name="patient_type">
+                        <option value="new">Новый пациент</option>
+                        <option value="existing">Существующий пациент в базе</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="aria_availability"><i class="fas fa-server"></i> Доступность в Aria</label>
+                    <select id="aria_availability" name="aria_availability">
+                        <option value="">Не указано</option>
+                        <option value="new">Новый</option>
+                        <option value="existing">Уже есть</option>
+                    </select>
+                    <div class="form-hint">Необязательное поле</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="title"><i class="fas fa-heading"></i> Заголовок задачи</label>
+                    <input type="text" id="title" name="title" placeholder="Оставьте пустым для автоматического названия">
+                </div>
+            </div>
+
+            <!-- Поля для файлов -->
+            <div class="form-group">
+                <label for="files"><i class="fas fa-paperclip"></i> Прикрепить файлы</label>
+                <div class="file-upload-wrapper">
+                    <input type="file" id="files" multiple accept=".jpg,.jpeg,.png,.gif,.bmp,.webp,.pdf,.dcm,.zip,.rar">
+                    <label for="files" class="file-upload-label">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <span>Выберите файлы или перетащите их сюда</span>
+                    </label>
+                </div>
+                <div class="form-hint">Можно выбрать несколько файлов. Максимальный размер: 100MB</div>
+                
+                <!-- Список выбранных файлов -->
+                <div id="selectedFilesList" class="selected-files-list" style="display: none;"></div>
+                
+                <!-- Скрытый input для отправки файлов -->
+                <input type="hidden" id="filesData" name="filesData">
+            </div>
+
+            <!-- Поля для CT -->
+            <div id="ctFields" style="display: none;">
+                <div class="form-section">
+                    <h4><i class="fas fa-microscope"></i> Параметры CT (диагностика)</h4>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="ct_building"><i class="fas fa-building"></i> Корпус для CT</label>
+                            <select id="ct_building" name="ct_building" onchange="updateCTEquipment()">
+                                <option value="">Выберите корпус</option>
+                                <option value="Электросигнальная">Электросигнальная</option>
+                                <option value="Челюскинцев">Челюскинцев</option>
+                                <option value="Вайцеховского">Вайцеховского</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="ct_equipment"><i class="fas fa-microscope"></i> Аппарат CT</label>
+                            <select id="ct_equipment" name="ct_equipment" disabled>
+                                <option value="">Сначала выберите корпус</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h4><i class="fas fa-radiation-alt"></i> Параметры лечения (терапия)</h4>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="treatment_building"><i class="fas fa-clinic-medical"></i> Корпус для лечения</label>
+                            <select id="treatment_building" name="treatment_building" onchange="updateTreatmentDevices()">
+                                <option value="">Выберите корпус</option>
+                                <option value="Электросигнальная">Электросигнальная</option>
+                                <option value="Челюскинцев">Челюскинцев</option>
+                                <option value="Вайцеховского">Вайцеховского</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="treatment_device"><i class="fas fa-radiation"></i> Аппарат для лечения</label>
+                            <select id="treatment_device" name="treatment_device" disabled onchange="toggleBreathControl()">
+                                <option value="">Сначала выберите корпус</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group" id="breathControlField" style="display: none;">
+                            <label for="breath_control"><i class="fas fa-lungs"></i> Контроль по дыханию</label>
+                            <select id="breath_control" name="breath_control">
+                                <option value="no">Нет</option>
+                                <option value="breath_hold">На задержке</option>
+                                <option value="free">Свободное дыхание</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Поля для MR, PET и CT-диагностики -->
+            <div id="mrPetFields" style="display: none;">
+                <div class="form-section">
+                    <h4 id="mrPetTitle"><i class="fas fa-database"></i> Параметры</h4>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="data_source"><i class="fas fa-database"></i> Источник данных</label>
+                            <select id="data_source" name="data_source" onchange="toggleMRPETBuilding()">
+                                <option value="">Выберите источник</option>
+                                <option value="disc">Диск</option>
+                                <option value="server">Сервер</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="server_location"><i class="fas fa-server"></i> Корпус</label>
+                            <select id="server_location" name="server_location" disabled>
+                                <option value="">Сначала выберите источник</option>
+                                <option value="Электросигнальная">Электросигнальная</option>
+                                <option value="Челюскинцев">Челюскинцев</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group description-group">
+                <label for="description"><i class="fas fa-align-left"></i> Описание</label>
+                <textarea id="description" name="description" rows="5" placeholder="Подробное описание задачи, требования, сроки..."></textarea>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary btn-lg">
+                    <i class="fas fa-paper-plane"></i> <span class="btn-text">Создать задачу</span>
+                </button>
+                <button type="button" class="btn btn-secondary btn-lg" onclick="hideTaskForm()">
+                    <i class="fas fa-times"></i> <span class="btn-text">Отмена</span>
+                </button>
+            </div>
+        </form>
+    </div>
+    {% endif %}
+
+    <!-- Статистика -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon"><i class="fas fa-tasks"></i></div>
+            <div class="stat-info">
+                <h3>Всего задач</h3>
+                <span class="stat-number">{{ tasks|length }}</span>
+            </div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon"><i class="fas fa-clock"></i></div>
+            <div class="stat-info">
+                <h3>Ожидают</h3>
+                <span class="stat-number">{{ tasks|selectattr('status', 'equalto', 'pending')|list|length }}</span>
+            </div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon"><i class="fas fa-spinner"></i></div>
+            <div class="stat-info">
+                <h3>В работе</h3>
+                <span class="stat-number">{{ tasks|selectattr('status', 'equalto', 'in_progress')|list|length }}</span>
+            </div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon"><i class="fas fa-comments"></i></div>
+            <div class="stat-info">
+                <h3>Активные чаты</h3>
+                <span class="stat-number" id="activeChatsCount">{{ tasks|selectattr('chat_messages', 'defined')|list|length }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Фильтры задач -->
+    <div class="filters">
+        <div class="filter-group">
+            <label>Фильтр по статусу:</label>
+            <div class="filter-buttons">
+                <button class="filter-btn active" data-filter="all">
+                    <i class="fas fa-list"></i><span class="btn-text">Все</span>
+                </button>
+                <button class="filter-btn" data-filter="pending">
+                    <i class="fas fa-clock"></i><span class="btn-text">Ожидают</span>
+                </button>
+                <button class="filter-btn" data-filter="in_progress">
+                    <i class="fas fa-spinner"></i><span class="btn-text">В работе</span>
+                </button>
+                <button class="filter-btn" data-filter="completed">
+                    <i class="fas fa-check"></i><span class="btn-text">Выполнены</span>
+                </button>
+                <button class="filter-btn" data-filter="cancelled">
+                    <i class="fas fa-ban"></i><span class="btn-text">Отменены</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Список задач -->
+    <div class="tasks-container">
+        <div class="tasks-header">
+            <h3><i class="fas fa-list"></i> Задачи</h3>
+            <button class="btn-refresh" onclick="refreshTasks()" title="Обновить">
+                <i class="fas fa-sync-alt"></i>
+            </button>
+        </div>
+
+        <div id="tasksList" class="tasks-grid">
+            {% for task in tasks %}
+            <div class="task-card filter-{{ task.status }} status-{{ task.status }}" 
+                 data-task-id="{{ task.id }}" 
+                 data-status="{{ task.status }}">
+                <div class="task-header">
+                    <div class="task-title-section">
+                        <h4>
+                            {{ task.title }}
+                        </h4>
+                        <div class="task-meta">
+                            <span class="task-id">#{{ task.id }}</span>
+                            <span class="task-date">
+                                <i class="far fa-calendar"></i> {{ moscow_time(task.created_at).strftime('%d.%m.%Y') }}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="task-status-badge">
+                        <span class="task-status status-{{ task.status }}">
+                            <i class="fas fa-{{ 'clock' if task.status == 'pending' else 'spinner' if task.status == 'in_progress' else 'check' if task.status == 'completed' else 'ban' }}"></i>
+                            <span class="status-text">{{ task.get_status_display() }}</span>
+                        </span>
+                    </div>
+                </div>
+
+                <div class="task-body">
+                    <p class="task-description">{{ task.description or 'Нет описания' }}</p>
+
+                    <!-- Превью изображений -->
+                    {% if task.files %}
+                    <div class="task-images-preview">
+                        {% for file in task.files %}
+                        {% if file.is_image %}
+                        <div class="image-preview-item" onclick="openImageModal('{{ url_for('static', filename='uploads/' + task.id|string + '/' + file.stored_filename) }}', '{{ file.original_filename }}')">
+                            <img src="{{ url_for('static', filename='uploads/' + task.id|string + '/' + file.stored_filename) }}" alt="{{ file.original_filename }}">
+                            <div class="image-overlay">
+                                <i class="fas fa-search-plus"></i>
+                            </div>
+                        </div>
+                        {% endif %}
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    <div class="task-meta-info">
+                        <div class="meta-item">
+                            <span class="meta-label"><i class="fas fa-id-card"></i> Карта пациента:</span>
+                            <span class="meta-value">{{ task.patient_card or 'Нет данных' }}
+                                {% if task.aria_availability %}
+                                <span class="badge {{ 'badge-success' if task.aria_availability == 'existing' else 'badge-primary' }}">
+                                    {{ 'Уже есть' if task.aria_availability == 'existing' else 'Новый' }}
+                                </span>
+                                {% elif task.patient_card %}
+                                <span class="badge badge-info">В базе</span>
+                                {% endif %}
+                            </span>
+                        </div>
+                        <div class="meta-item">
+                            <span class="meta-label"><i class="fas fa-file-medical"></i> Тип исследования:</span>
+                            <span class="meta-value">
+                                {% if task.research_type == 'import_ct' %}Импорт CT
+                                {% elif task.research_type == 'import_ct_diag' %}Импорт CT-диагностики
+                                {% elif task.research_type == 'mr' %}Импорт MR
+                                {% elif task.research_type == 'pet' %}Импорт PET
+                                {% else %}{{ task.research_type }}
+                                {% endif %}
+                            </span>
+                        </div>
+                        {% if task.expert_group %}
+                        <div class="meta-item">
+                            <span class="meta-label"><i class="fas fa-user-md"></i> Экспертная группа:</span>
+                            <span class="meta-value">{{ task.expert_group }}</span>
+                        </div>
+                        {% endif %}
+                        {% if task.ct_diagnostic %}
+                        <div class="meta-item">
+                            <span class="meta-label"><i class="fas fa-microscope"></i> CT диагностика:</span>
+                            <span class="meta-value">{{ task.ct_diagnostic }}</span>
+                        </div>
+                        {% endif %}
+                        {% if task.treatment %}
+                        <div class="meta-item">
+                            <span class="meta-label"><i class="fas fa-radiation"></i> Лечение:</span>
+                            <span class="meta-value">{{ task.treatment }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="task-participants">
+                        <div class="participant">
+                            <span class="participant-role"><i class="fas fa-user-md"></i> Врач:</span>
+                            <span class="participant-name" title="{{ task.doctor.get_full_name_with_dept() }}">{{ task.doctor.get_full_name() }}</span>
+                        </div>
+                    </div>
+
+                    <div class="task-timeline">
+                        <div class="timeline-item">
+                            <i class="far fa-calendar-plus"></i>
+                            <span>Создана: {{ moscow_time(task.created_at).strftime('%H:%M %d.%m.%Y') }}</span>
+                        </div>
+                        {% if task.completed_at %}
+                        <div class="timeline-item">
+                            <i class="far fa-calendar-check"></i>
+                            <span>Завершена: {{ moscow_time(task.completed_at).strftime('%H:%M %d.%m.%Y') if task.completed_at else 'Нет' }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="task-actions">
+                    <a href="{{ url_for('chat', id=task.id) }}" class="btn btn-chat" style="position: relative;">
+                        <i class="fas fa-comments"></i>
+                        <span class="btn-text">Чат</span>
+                        {% set unread_count = namespace(value=0) %}
+                        {% for msg in task.chat_messages %}
+                            {% if msg.receiver_id == current_user.id and not msg.is_read %}
+                                {% set unread_count.value = unread_count.value + 1 %}
+                            {% endif %}
+                        {% endfor %}
+                        {% if unread_count.value > 0 %}
+                        <span class="chat-badge" style="position: absolute; top: -6px; right: -6px; min-width: 20px; height: 20px; font-size: 10px; border-radius: 50%; background: #ef4444; color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; box-shadow: 0 2px 8px rgba(239, 68, 68, 0.5); border: 2px solid white;">{{ unread_count.value }}</span>
+                        {% endif %}
+                    </a>
+
+                    {% if task.files %}
+                    <button class="btn btn-files" onclick="showTaskFiles({{ task.id }})">
+                        <i class="fas fa-paperclip"></i>
+                        <span class="btn-text">Файлы ({{ task.files|length }})</span>
+                    </button>
+                    {% endif %}
+
+                    {% if current_user.role in ['physicist', 'admin'] and task.status != 'completed' and task.status != 'cancelled' %}
+                    <div class="status-update">
+                        <form method="POST" action="{{ url_for('update_task', id=task.id) }}">
+                            <select name="status" class="status-select" onchange="this.nextElementSibling.style.display='inline-block'">
+                                <option value="pending" {{ 'selected' if task.status == 'pending' else '' }}>⏳ Ожидает</option>
+                                <option value="in_progress" {{ 'selected' if task.status == 'in_progress' else '' }}>🔄 В работе</option>
+                                <option value="completed">✅ Завершить</option>
+                                <option value="cancelled">❌ Отменить</option>
+                            </select>
+                            <button type="submit" class="btn btn-small btn-update" style="display:none;">
+                                <i class="fas fa-save"></i>
+                            </button>
+                        </form>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/tasks.js') }}"></script>
+<script>
+// Показ/скрытие формы создания задачи
+function showTaskForm() {
+    document.getElementById('taskForm').style.display = 'block';
+    document.getElementById('taskForm').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function hideTaskForm() {
+    document.getElementById('taskForm').style.display = 'none';
+}
+
+// Переключение полей в зависимости от типа исследования
+function toggleFields() {
+    const studyType = document.getElementById('study_type').value;
+    const ctFields = document.getElementById('ctFields');
+    const mrPetFields = document.getElementById('mrPetFields');
+    const mrPetTitle = document.getElementById('mrPetTitle');
+    const expertGroupField = document.getElementById('expertGroupField');
+    const expertGroup = document.getElementById('expert_group');
+    
+    // Показываем поле экспертной группы только для Импорт CT
+    if (studyType === 'import_ct') {
+        expertGroupField.style.display = 'block';
+        expertGroup.required = true;
+    } else {
+        expertGroupField.style.display = 'none';
+        expertGroup.required = false;
+        expertGroup.value = '';
+    }
+
+    // Импорт CT - показываем поля CT (корпус, аппараты)
+    if (studyType === 'import_ct') {
+        ctFields.style.display = 'block';
+        mrPetFields.style.display = 'none';
+    }
+    // Импорт CT-диагностики, MR, PET - показываем поля MR/PET (источник, корпус)
+    else if (studyType === 'import_ct_diag' || studyType === 'mr' || studyType === 'pet') {
+        ctFields.style.display = 'none';
+        mrPetFields.style.display = 'block';
+
+        // Меняем заголовок в зависимости от типа
+        if (studyType === 'import_ct_diag') {
+            mrPetTitle.innerHTML = '<i class="fas fa-database"></i> Параметры CT-диагностики';
+        } else if (studyType === 'mr') {
+            mrPetTitle.innerHTML = '<i class="fas fa-database"></i> Параметры MR';
+        } else if (studyType === 'pet') {
+            mrPetTitle.innerHTML = '<i class="fas fa-database"></i> Параметры PET';
+        }
+    }
+    else {
+        ctFields.style.display = 'none';
+        mrPetFields.style.display = 'none';
+    }
+}
+
+// Обновление оборудования CT - исправленные данные
+function updateCTEquipment() {
+    const building = document.getElementById('ct_building').value;
+    const equipment = document.getElementById('ct_equipment');
+    
+    equipment.innerHTML = '<option value="">Выберите аппарат</option>';
+    equipment.disabled = !building;
+    
+    if (building === 'Электросигнальная') {
+        equipment.innerHTML += '<option value="Siemens">Siemens</option><option value="Philips">Philips</option>';
+    } else if (building === 'Челюскинцев') {
+        equipment.innerHTML += '<option value="Philips">Philips</option>';
+    } else if (building === 'Вайцеховского') {
+        equipment.innerHTML += '<option value="Philips">Philips</option>';
+    }
+}
+
+// Обновление оборудования для лечения - исправленные данные
+function updateTreatmentDevices() {
+    const building = document.getElementById('treatment_building').value;
+    const device = document.getElementById('treatment_device');
+    const breathControlField = document.getElementById('breathControlField');
+    
+    device.innerHTML = '<option value="">Выберите аппарат</option>';
+    device.disabled = !building;
+    breathControlField.style.display = 'none';
+    
+    if (building === 'Электросигнальная') {
+        device.innerHTML += '<option value="TrueBeam">TrueBeam</option><option value="Halcyon">Halcyon</option>';
+    } else if (building === 'Челюскинцев') {
+        device.innerHTML += '<option value="TrueBeam">TrueBeam</option><option value="Halcyon">Halcyon</option>';
+    } else if (building === 'Вайцеховского') {
+        device.innerHTML += '<option value="Halcyon">Halcyon</option>';
+    }
+}
+
+// Переключение поля контроля по дыханию
+function toggleBreathControl() {
+    const device = document.getElementById('treatment_device').value;
+    const breathControlField = document.getElementById('breathControlField');
+    
+    if (device === 'TrueBeam') {
+        breathControlField.style.display = 'block';
+    } else {
+        breathControlField.style.display = 'none';
+        document.getElementById('breath_control').value = 'no';
+    }
+}
+
+// Переключение корпуса для MR/PET
+function toggleMRPETBuilding() {
+    const source = document.getElementById('data_source').value;
+    const location = document.getElementById('server_location');
+
+    location.disabled = source !== 'server';
+}
+
+// Отображение выбранных файлов
+let selectedFiles = [];  // Храним файлы в массиве
+
+function showSelectedFiles() {
+    const fileList = document.getElementById('selectedFilesList');
+    
+    if (selectedFiles.length === 0) {
+        fileList.style.display = 'none';
+        fileList.innerHTML = '';
+        return;
+    }
+    
+    fileList.style.display = 'block';
+    let html = '<div class="selected-files">';
+    
+    for (let i = 0; i < selectedFiles.length; i++) {
+        const file = selectedFiles[i];
+        const size = (file.size / 1024).toFixed(1); // KB
+        html += `
+            <div class="selected-file-item">
+                <i class="fas fa-${getFileIcon(file.name)}"></i>
+                <div class="selected-file-info">
+                    <span class="selected-file-name">${file.name}</span>
+                    <span class="selected-file-size">${size} KB</span>
+                </div>
+                <div class="selected-file-actions">
+                    <button type="button" class="view-file-btn" onclick="viewSelectedFile(${i})" title="Просмотреть файл">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                    <button type="button" class="remove-file-btn" onclick="removeFile(${i})" title="Удалить файл">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+        `;
+    }
+    
+    html += '</div>';
+    fileList.innerHTML = html;
+}
+
+// Обработчик изменения input file
+document.addEventListener('DOMContentLoaded', function() {
+    const fileInput = document.getElementById('files');
+    if (fileInput) {
+        fileInput.addEventListener('change', function(e) {
+            const newFiles = Array.from(e.target.files);
+            // Добавляем новые файлы к существующим
+            selectedFiles = selectedFiles.concat(newFiles);
+            showSelectedFiles();
+            // Очищаем input чтобы можно было добавить тот же файл снова
+            fileInput.value = '';
+        });
+    }
+    
+    // Обработчик отправки формы
+    const form = document.getElementById('createTaskForm');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            // Создаем FormData для отправки файлов
+            const formData = new FormData();
+            
+            // Копируем все поля формы
+            const formDataObj = new FormData(form);
+            for (let [key, value] of formDataObj.entries()) {
+                if (key !== 'filesData') {
+                    formData.append(key, value);
+                }
+            }
+            
+            // Добавляем файлы если есть
+            for (let i = 0; i < selectedFiles.length; i++) {
+                formData.append('files', selectedFiles[i]);
+            }
+            
+            // Отправляем форму с файлами
+            e.preventDefault();
+            fetch(form.action, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (response.ok) {
+                    window.location.href = '/';
+                } else {
+                    alert('Ошибка при создании задачи');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Ошибка при создании задачи');
+            });
+        });
+    }
+});
+
+function getFileIcon(filename) {
+    const ext = filename.split('.').pop().toLowerCase();
+    if (['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'].includes(ext)) return 'fa-file-image';
+    if (ext === 'pdf') return 'fa-file-pdf';
+    if (ext === 'dcm' || ext === 'dicom') return 'fa-file-medical';
+    if (['zip', 'rar', '7z'].includes(ext)) return 'fa-file-archive';
+    return 'fa-file-alt';
+}
+
+function removeFile(index) {
+    if (index >= 0 && index < selectedFiles.length) {
+        selectedFiles.splice(index, 1);
+        showSelectedFiles();
+    }
+}
+
+// Просмотр выбранного файла
+function viewSelectedFile(index) {
+    if (index >= 0 && index < selectedFiles.length) {
+        const file = selectedFiles[index];
+        const fileUrl = URL.createObjectURL(file);
+        
+        if (file.type.startsWith('image/')) {
+            // Открываем в модальном окне изображений
+            openImageModal(fileUrl, file.name);
+        } else if (file.type === 'application/pdf') {
+            // Открываем PDF в новой вкладке
+            window.open(fileUrl, '_blank');
+        } else {
+            // Для других файлов - скачивание
+            const a = document.createElement('a');
+            a.href = fileUrl;
+            a.download = file.name;
+            a.click();
+            URL.revokeObjectURL(fileUrl);
+        }
+    }
+}
+
+// Модальное окно для просмотра изображений
+window.openImageModal = function(imageUrl, imageName) {
+    const modal = document.getElementById('imageModal');
+    const modalImg = document.getElementById('modalImage');
+    const modalCaption = document.getElementById('modalCaption');
+    
+    if (modal && modalImg && modalCaption) {
+        modal.style.display = 'flex';
+        modalImg.src = imageUrl;
+        modalCaption.textContent = imageName;
+        
+        // Блокируем прокрутку фона
+        document.body.style.overflow = 'hidden';
+    }
+};
+
+window.closeImageModal = function() {
+    const modal = document.getElementById('imageModal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+    // Разблокируем прокрутку фона
+    document.body.style.overflow = '';
+};
+
+// Закрытие по клику на изображение в модальном окне
+window.onModalImageClick = function(event) {
+    if (event.target.id === 'modalImage') {
+        closeImageModal();
+    }
+};
+
+// Закрытие по ESC
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closeImageModal();
+    }
+});
+</script>
+
+<!-- Модальное окно для просмотра изображений -->
+<div id="imageModal" class="image-modal" onclick="closeImageModal()">
+    <span class="image-modal-close" onclick="closeImageModal()">&times;</span>
+    <div class="image-modal-content" onclick="event.stopPropagation()">
+        <img id="modalImage" src="" alt="" onclick="onModalImageClick(event)">
+        <div id="modalCaption" class="image-modal-caption"></div>
+    </div>
+</div>
+
+<!-- Модальное окно для файлов задачи -->
+<div id="filesModal" class="files-modal-overlay" style="display: none;">
+    <div class="files-modal">
+        <div class="files-modal-header">
+            <h3><i class="fas fa-paperclip"></i> Файлы задачи</h3>
+            <button class="files-modal-close" onclick="closeFilesModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="files-modal-body" id="filesModalContent">
+            <!-- Сюда будут динамически загружаться файлы -->
+        </div>
+        <div class="files-modal-footer">
+            <button class="btn btn-secondary" onclick="closeFilesModal()">
+                <i class="fas fa-times"></i> <span class="btn-text">Закрыть</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+// Real-time обновление информации о задачах - использует функции из tasks.js
+function updateTaskCards() {
+    fetch('/api/tasks')
+        .then(r => r.json())
+        .then(tasks => {
+            tasks.forEach(task => {
+                const card = document.querySelector(`.task-card[data-task-id="${task.id}"]`);
+                if (!card) return;
+
+                // Обновляем статус
+                const statusBadge = card.querySelector('.task-status');
+                const statusText = statusBadge?.querySelector('.status-text');
+                if (statusBadge && statusText && statusText.textContent.trim() !== task.status_display) {
+                    statusBadge.className = `task-status status-${task.status}`;
+                    statusText.textContent = task.status_display;
+                    card.dataset.status = task.status;
+                    card.className = `task-card filter-${task.status} status-${task.status}`;
+
+                    const icon = statusBadge.querySelector('i');
+                    if (icon) {
+                        icon.className = getStatusIconClass(task.status);
+                    }
+                }
+
+                // Обновляем бейдж непрочитанных
+                if (task.unread_count > 0) {
+                    const chatBtn = card.querySelector('.btn-chat');
+                    if (chatBtn && !chatBtn.querySelector('.chat-badge')) {
+                        const badge = document.createElement('span');
+                        badge.className = 'chat-badge';
+                        badge.textContent = task.unread_count > 99 ? '99+' : task.unread_count;
+                        badge.style.cssText = 'position: absolute; top: -6px; right: -6px; min-width: 20px; height: 20px; font-size: 10px; border-radius: 50%; background: #ef4444; color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; box-shadow: 0 2px 8px rgba(239, 68, 68, 0.5); border: 2px solid white;';
+                        chatBtn.appendChild(badge);
+                    }
+                } else if (task.unread_count === 0) {
+                    const chatBtn = card.querySelector('.btn-chat');
+                    if (chatBtn) {
+                        const badge = chatBtn.querySelector('.chat-badge');
+                        if (badge) badge.remove();
+                    }
+                }
+
+                // Обновляем поля исследования через функции из tasks.js
+                if (task.patient_card !== undefined) updatePatientCard(card, task.patient_card);
+                if (task.research_type !== undefined) updateResearchType(card, task.research_type);
+                if (task.expert_group !== undefined) updateExpertGroup(card, task.expert_group);
+                if (task.ct_diagnostic !== undefined) updateCTDiagnostic(card, task.ct_diagnostic);
+                if (task.treatment !== undefined) updateTreatment(card, task.treatment);
+            });
+        })
+        .catch(error => console.error('Error updating tasks:', error));
+}
+
+function getStatusIconClass(status) {
+    const icons = {
+        'pending': 'fas fa-clock',
+        'in_progress': 'fas fa-spinner',
+        'completed': 'fas fa-check',
+        'cancelled': 'fas fa-ban'
+    };
+    return icons[status] || '';
+}
+
+// Обновляем карточки задач каждые 5 секунд
+setInterval(updateTaskCards, 5000);
+
+// Первичное обновление при загрузке
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Real-time task updates initialized');
+    updateTaskCards();
+});
+</script>
+{% endblock %}

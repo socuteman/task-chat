@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Градиентный фон -->
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4f46e5;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#7c3aed;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Основной фон -->
+  <rect width="100" height="100" rx="20" fill="url(#bgGradient)"/>
+  
+  <!-- Иконка чата -->
+  <g fill="white">
+    <!-- Первое облачко -->
+    <path d="M30 35 Q30 30 35 30 L65 30 Q70 30 70 35 L70 55 Q70 60 65 60 L40 60 L30 70 L30 35 Z" 
+          fill="white" opacity="0.95"/>
+    
+    <!-- Второе облачко (сзади) -->
+    <path d="M25 40 Q25 35 30 35 L55 35 Q60 35 60 40 L60 65 Q60 70 55 70 L35 70 L25 80 L25 40 Z" 
+          fill="white" opacity="0.7"/>
+    
+    <!-- Точки сообщений -->
+    <circle cx="42" cy="45" r="3" fill="#4f46e5"/>
+    <circle cx="50" cy="45" r="3" fill="#4f46e5"/>
+    <circle cx="58" cy="45" r="3" fill="#4f46e5"/>
+  </g>
+</svg>
