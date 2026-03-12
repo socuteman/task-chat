@@ -157,6 +157,201 @@
             color: white;
         }
 
+        /* Стили для карточки задачи */
+        .task-card-mockup {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            padding: 20px;
+            margin: 20px 0;
+            border-left: 4px solid #f39c12;
+        }
+
+        .task-header-mock {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .task-title-section h4 {
+            color: #2c3e50;
+            margin: 0 0 8px 0;
+            font-size: 18px;
+        }
+
+        .task-meta {
+            display: flex;
+            gap: 15px;
+            font-size: 13px;
+            color: #7f8c8d;
+        }
+
+        .task-id {
+            font-weight: 600;
+            color: #3498db;
+        }
+
+        .task-status-badge {
+            flex-shrink: 0;
+        }
+
+        .task-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .task-status.status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .task-status.status-in_progress {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .task-status.status-completed {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .task-body-mock {
+            margin-top: 15px;
+        }
+
+        .task-description {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+
+        .task-meta-info-mock {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+
+        .meta-item-mock {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .meta-label {
+            font-size: 12px;
+            color: #7f8c8d;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .meta-label i {
+            margin-right: 4px;
+            color: #3498db;
+        }
+
+        .meta-value {
+            color: #2c3e50;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+
+        .badge-success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .badge-primary {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .task-participants-mock {
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            margin-bottom: 12px;
+        }
+
+        .participant {
+            display: flex;
+            gap: 10px;
+            font-size: 14px;
+        }
+
+        .participant-role {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .participant-name {
+            color: #666;
+        }
+
+        .task-timeline-mock {
+            font-size: 13px;
+            color: #7f8c8d;
+        }
+
+        .timeline-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .timeline-item i {
+            color: #3498db;
+        }
+
+        /* Статистика */
+        .stats-grid-mock {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat-card-mock {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .stat-card-mock .stat-icon {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            opacity: 0.9;
+        }
+
+        .stat-card-mock h3 {
+            font-size: 14px;
+            margin: 0 0 8px 0;
+            opacity: 0.9;
+        }
+
+        .stat-card-mock .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            display: block;
+        }
+
         .import-flow {
             display: flex;
             align-items: center;
@@ -577,76 +772,99 @@
             </div>
         </div>
 
-        <!-- Slide 3: Решение -->
+        <!-- Slide 3: Список задач - Реальное отражение -->
         <div class="slide">
             <div class="card">
-                <h2><i class="fas fa-check-circle"></i> Решение Task-Chat</h2>
-                <p style="font-size: 1.2rem; text-align: center; margin-bottom: 30px;">
-                    <strong>Передача информации о пациентах</strong> для планирования лечения
+                <h2><i class="fas fa-list"></i> Список задач - Главная страница</h2>
+                <p style="text-align: center; margin-bottom: 30px;">
+                    Задачи сгруппированы по статусам с полной информацией о пациенте
                 </p>
 
-                <div class="import-flow">
-                    <div class="flow-step">
-                        <i class="fas fa-user-injured"></i>
-                        <h4>Данные пациента</h4>
-                        <p>Номер карты, тип исследования</p>
+                <!-- Точное отражение реальной карточки задачи -->
+                <div class="task-card-mockup">
+                    <div class="task-header-mock">
+                        <div class="task-title-section">
+                            <h4>Задача #156</h4>
+                            <div class="task-meta">
+                                <span class="task-id">#156</span>
+                                <span class="task-date"><i class="far fa-calendar"></i> 12.03.2026</span>
+                            </div>
+                        </div>
+                        <div class="task-status-badge">
+                            <span class="task-status status-pending">
+                                <i class="fas fa-clock"></i>
+                                <span class="status-text">Ожидает</span>
+                            </span>
+                        </div>
                     </div>
-                    <div class="flow-step">
-                        <i class="fas fa-file-medical" style="color: #11998e;"></i>
-                        <h4>Создание задачи</h4>
-                        <p>Заполнение всех полей</p>
-                    </div>
-                    <div class="flow-step">
-                        <i class="fas fa-comments"></i>
-                        <h4>Чат с физиком</h4>
-                        <p>Согласование деталей</p>
-                    </div>
-                    <div class="flow-step">
-                        <i class="fas fa-clipboard-check"></i>
-                        <h4>Планирование</h4>
-                        <p>Физик обрабатывает</p>
+
+                    <div class="task-body-mock">
+                        <p class="task-description">Передача данных для импорта и планирования</p>
+
+                        <div class="task-meta-info-mock">
+                            <div class="meta-item-mock">
+                                <span class="meta-label"><i class="fas fa-id-card"></i> Карта пациента:</span>
+                                <span class="meta-value">12345678 <span class="badge badge-success">Уже есть</span></span>
+                            </div>
+                            <div class="meta-item-mock">
+                                <span class="meta-label"><i class="fas fa-file-medical"></i> Тип исследования:</span>
+                                <span class="meta-value">Импорт CT</span>
+                            </div>
+                            <div class="meta-item-mock">
+                                <span class="meta-label"><i class="fas fa-user-md"></i> Экспертная группа:</span>
+                                <span class="meta-value">ПГШ</span>
+                            </div>
+                            <div class="meta-item-mock">
+                                <span class="meta-label"><i class="fas fa-microscope"></i> CT диагностика:</span>
+                                <span class="meta-value">Siemens (Электросигнальная)</span>
+                            </div>
+                            <div class="meta-item-mock">
+                                <span class="meta-label"><i class="fas fa-radiation"></i> Лечение:</span>
+                                <span class="meta-value">Varian (Челюскинцев)</span>
+                            </div>
+                            <div class="meta-item-mock">
+                                <span class="meta-label"><i class="fas fa-lungs"></i> Контроль по дыханию:</span>
+                                <span class="meta-value">На задержке</span>
+                            </div>
+                        </div>
+
+                        <div class="task-participants-mock">
+                            <div class="participant">
+                                <span class="participant-role"><i class="fas fa-user-md"></i> Врач:</span>
+                                <span class="participant-name">Иванов И.И. (РО1)</span>
+                            </div>
+                        </div>
+
+                        <div class="task-timeline-mock">
+                            <div class="timeline-item">
+                                <i class="far fa-calendar-plus"></i>
+                                <span>Создана: 10:30 12.03.2026</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <div class="patient-fields">
-                    <h4><i class="fas fa-id-card"></i> Поля для создания задачи</h4>
-                    <div class="field-grid">
-                        <div class="field-item">
-                            <label><i class="fas fa-id-card"></i> Карта пациента</label>
-                            <span>Уникальный номер карты (обязательно)</span>
-                        </div>
-                        <div class="field-item">
-                            <label><i class="fas fa-microscope"></i> Тип исследования</label>
-                            <span>Импорт CT, Импорт MR, Импорт PET</span>
-                        </div>
-                        <div class="field-item">
-                            <label><i class="fas fa-users"></i> Экспертная группа</label>
-                            <span>ПГШ, Молочная железа, Лёгкое, Печень и др.</span>
-                        </div>
-                        <div class="field-item">
-                            <label><i class="fas fa-database"></i> ARIA доступность</label>
-                            <span>Новый / Уже есть в базе</span>
-                        </div>
-                        <div class="field-item">
-                            <label><i class="fas fa-building"></i> Корпус для CT</label>
-                            <span>Где проводится исследование</span>
-                        </div>
-                        <div class="field-item">
-                            <label><i class="fas fa-procedures"></i> Аппарат CT</label>
-                            <span>Название оборудования</span>
-                        </div>
-                        <div class="field-item">
-                            <label><i class="fas fa-building"></i> Корпус для лечения</label>
-                            <span>Где планируется лечение</span>
-                        </div>
-                        <div class="field-item">
-                            <label><i class="fas fa-stethoscope"></i> Аппарат для лечения</label>
-                            <span>Оборудование для терапии</span>
-                        </div>
-                        <div class="field-item">
-                            <label><i class="fas fa-lungs"></i> Контроль дыхания</label>
-                            <span>no / breath_hold / free</span>
-                        </div>
+                <!-- Статистика -->
+                <div class="stats-grid-mock">
+                    <div class="stat-card-mock">
+                        <i class="fas fa-tasks stat-icon"></i>
+                        <h3>Всего задач</h3>
+                        <span class="stat-number">42</span>
+                    </div>
+                    <div class="stat-card-mock">
+                        <i class="fas fa-clock stat-icon"></i>
+                        <h3>Ожидают</h3>
+                        <span class="stat-number">15</span>
+                    </div>
+                    <div class="stat-card-mock">
+                        <i class="fas fa-spinner stat-icon"></i>
+                        <h3>В работе</h3>
+                        <span class="stat-number">20</span>
+                    </div>
+                    <div class="stat-card-mock">
+                        <i class="fas fa-comments stat-icon"></i>
+                        <h3>Активные чаты</h3>
+                        <span class="stat-number">8</span>
                     </div>
                 </div>
             </div>
